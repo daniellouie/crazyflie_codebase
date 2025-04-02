@@ -1,0 +1,5 @@
+  File "/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/cf_command_controller.py", line 16
+    link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7', default='radio://0/80/2M/E7E7E7E7E8')
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: keyword argument repeated: default
+

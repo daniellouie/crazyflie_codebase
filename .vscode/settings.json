@@ -1,0 +1,17 @@
+{
+    "ros.distro": "humble",
+    "python.autoComplete.extraPaths": [
+        "/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages",
+        "/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages",
+        "/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages",
+        "/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages",
+        "/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

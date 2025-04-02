@@ -1,0 +1,3 @@
+[console_scripts]
+ctrl_node = controller_core.ctrl_node:main
+

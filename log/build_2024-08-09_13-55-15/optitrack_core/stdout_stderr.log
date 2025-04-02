@@ -1,0 +1,36 @@
+running egg_info
+creating ../../build/optitrack_core/optitrack_core.egg-info
+writing ../../build/optitrack_core/optitrack_core.egg-info/PKG-INFO
+writing dependency_links to ../../build/optitrack_core/optitrack_core.egg-info/dependency_links.txt
+writing entry points to ../../build/optitrack_core/optitrack_core.egg-info/entry_points.txt
+writing requirements to ../../build/optitrack_core/optitrack_core.egg-info/requires.txt
+writing top-level names to ../../build/optitrack_core/optitrack_core.egg-info/top_level.txt
+writing manifest file '../../build/optitrack_core/optitrack_core.egg-info/SOURCES.txt'
+reading manifest file '../../build/optitrack_core/optitrack_core.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/optitrack_core/optitrack_core.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/rsl/crazyfly_ws/build/optitrack_core/build
+creating /home/rsl/crazyfly_ws/build/optitrack_core/build/lib
+creating /home/rsl/crazyfly_ws/build/optitrack_core/build/lib/optitrack_core
+copying optitrack_core/get_data.py -> /home/rsl/crazyfly_ws/build/optitrack_core/build/lib/optitrack_core
+copying optitrack_core/__init__.py -> /home/rsl/crazyfly_ws/build/optitrack_core/build/lib/optitrack_core
+running install
+running install_lib
+creating /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core
+copying /home/rsl/crazyfly_ws/build/optitrack_core/build/lib/optitrack_core/get_data.py -> /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core
+copying /home/rsl/crazyfly_ws/build/optitrack_core/build/lib/optitrack_core/__init__.py -> /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core
+byte-compiling /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core/get_data.py to get_data.cpython-310.pyc
+byte-compiling /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/rsl/crazyfly_ws/install/optitrack_core/share/ament_index
+creating /home/rsl/crazyfly_ws/install/optitrack_core/share/ament_index/resource_index
+creating /home/rsl/crazyfly_ws/install/optitrack_core/share/ament_index/resource_index/packages
+copying resource/optitrack_core -> /home/rsl/crazyfly_ws/install/optitrack_core/share/ament_index/resource_index/packages
+copying package.xml -> /home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core
+running install_egg_info
+Copying ../../build/optitrack_core/optitrack_core.egg-info to /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core-0.0.0-py3.10.egg-info
+running install_scripts
+Installing get_data script to /home/rsl/crazyfly_ws/install/optitrack_core/lib/optitrack_core
+writing list of installed files to '/home/rsl/crazyfly_ws/build/optitrack_core/install.log'
