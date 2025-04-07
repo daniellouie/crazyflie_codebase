@@ -3,8 +3,6 @@ from rclpy.node import Node
 
 from std_msgs.msg import UInt16
 
-#github test
-#github test from lab machine 
 
 class MinimalPublisher(Node):
 
