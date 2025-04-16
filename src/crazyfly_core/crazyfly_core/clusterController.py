@@ -47,8 +47,8 @@ def main(args=None):
         print("Shutting down...")
     finally:
         # Shutdown ROS nodes
-        optitrack_subscriber1.destroy_node()
-        optitrack_subscriber2.destroy_node()
+        optitrack_subscriber_cf1.destroy_node()
+        optitrack_subscriber_cf2.destroy_node()
         rclpy.shutdown()
 
 

@@ -16,6 +16,7 @@ import time
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
 
+# test
 
 logging.basicConfig(level=logging.ERROR)
 

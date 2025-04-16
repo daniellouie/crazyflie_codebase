@@ -174,7 +174,8 @@ class MinimalSubscriber(Node):
             #print(f"Received: Roll = {self.roll}, Pitch = {self.pitch}, Yawrate = {self.yawrate}, Thrust = {self.thrust}")
             #print(f"x: {self.x_position}, y: {self.y_position}, z: {self.z_position}")
 
-
+            #test
+            
             # record data for graphing
             current_time = time.time()
             elapsed_time = current_time - self.start_time

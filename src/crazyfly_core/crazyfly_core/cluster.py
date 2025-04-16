@@ -19,6 +19,46 @@ class Cluster:
         self.cluster_k_p = 0.1 # proportional gain for cluster controller
         self.dt = 6 # constant term to convert velocity to position
 
+
+    def frameOursToAnne(self, our_frame):
+        transformation_matrix = np.array([
+            [0, 1, 0],  # x -> Y
+            [0, 0, 1],  # y -> Z
+            [1, 0, 0]   # z -> X
+        ])
+        
+        our_drone1_pos = our_frame[:3]
+        our_drone2_pos = our_frame[4:7]
+
+        anne_drone1_pos = np.dot(our_drone1_pos, transformation_matrix)
+        print("anne_drone1_pos", anne_drone1_pos)
+        anne_drone2_pos = np.dot(our_drone2_pos, transformation_matrix)
+        print("anne_drone2_pos", anne_drone2_pos)
+
+        anne_frame = np.concatenate((anne_drone1_pos, [our_frame[3]], anne_drone2_pos, [our_frame[7]]))
+        
+        return anne_frame
+    
+
+    def frameAnneToOurs(self, anne_frame):
+        transformation_matrix = np.array([
+            [0, 0, 1],  # X -> z
+            [1, 0, 0],  # Y -> x
+            [0, 1, 0]   # Z -> y
+        ])
+
+        anne_drone1_pos = anne_frame[:3]
+        anne_drone2_pos = anne_frame[4:7]
+
+        our_drone1_pos = np.dot(anne_drone1_pos, transformation_matrix)
+        print("our_drone1_pos", our_drone1_pos)
+        our_drone2_pos = np.dot(anne_drone2_pos, transformation_matrix)
+        print("our_drone2_pos", our_drone2_pos)
+
+        our_frame = np.concatenate((our_drone1_pos, [anne_frame[3]], our_drone2_pos, [anne_frame[7]]))        
+        return our_frame
+    
+
     def update(self):
         # self.getPosition()  #get updated position of drones from Optitrack
         self.forwardKinematics()  #convert drone positions to cluster space variables
@@ -46,9 +86,14 @@ class Cluster:
     # Output: array of cluster space variables [xc yc zc alpha beta phi1 phi2 p]
     # TODO : review and test this function (possibly seperate into external file)
     def forwardKinematics(self):    
+        # TODO : frame transformation Ours to Anne's
+        self.R_cur = self.frameOursToAnne(self.R_cur) # convert to Anne's frame
+
         # decompose positions and orientations
         x1, y1, z1, theta1 = self.R_cur[0:4]
         x2, y2, z2, theta2 = self.R_cur[4:8]
+        print("x1, y1, z1, theta1", x1, y1, z1, theta1)
+        print("x2, y2, z2, theta2", x2, y2, z2, theta2)
 
         # Global frame unit vectors
         xglobal = np.array([1, 0, 0])
@@ -60,31 +105,34 @@ class Cluster:
         yc = (y1 + y2) / 2
         zc = (z1 + z2) / 2
 
-        # Vectors pointing to Drone 1
-        y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
-        x_vec = np.cross(y_vec, zglobal)
-        z_vec = np.cross(x_vec, y_vec)
 
-        # Normalize vectors (using element-wise division, equivalent of ./ in MATLAB)
-        y_vec_norm = y_vec / np.linalg.norm(y_vec)
-        x_vec_norm = x_vec / np.linalg.norm(x_vec)
-        z_vec_norm = z_vec / np.linalg.norm(z_vec)
+        alpha, beta, phi1, phi2 = 0, 0, 0, 0
 
-        # Rotation matrix
-        rot = np.array([
-            [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
-            [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
-            [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
-        ])
+        # # Vectors pointing to Drone 1
+        # y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
+        # x_vec = np.cross(y_vec, zglobal)
+        # z_vec = np.cross(x_vec, y_vec)
 
-        # Rotation matrix angles
-        alpha = np.arctan2(rot[1,0], rot[0,0])
-        beta = np.arctan2(rot[2,1], rot[2,2])
-        gamma = 0 # not used in this implementation
+        # # Normalize vectors (using element-wise division, equivalent of ./ in MATLAB)
+        # y_vec_norm = y_vec / np.linalg.norm(y_vec)
+        # x_vec_norm = x_vec / np.linalg.norm(x_vec)
+        # z_vec_norm = z_vec / np.linalg.norm(z_vec)
 
-        # Yaw corrected for the cluster frame (heading)
-        phi1 = theta1 - alpha
-        phi2 = theta2 - alpha
+        # # Rotation matrix
+        # rot = np.array([
+        #     [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
+        #     [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
+        #     [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
+        # ])
+
+        # # Rotation matrix angles
+        # alpha = np.arctan2(rot[1,0], rot[0,0])
+        # beta = np.arctan2(rot[2,1], rot[2,2])
+        # gamma = 0 # not used in this implementation
+
+        # # Yaw corrected for the cluster frame (heading)
+        # phi1 = theta1 - alpha
+        # phi2 = theta2 - alpha
 
         # Cdistance between drones
         p = np.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)   
@@ -154,6 +202,11 @@ class Cluster:
     # TODO : review and test this function
     def velocityToPos(self):
         self.R_cmd = self.R_cur + (self.R_dot * self.dt)
+
+        # TODO:frame transformation Anne's to Ours
+        self.R_cmd = self.frameAnneToOurs(self.R_cmd) # convert to our frame
+        print("R_cmd_transformed (actual)", self.R_cmd)
+
         return self.R_cmd
     
 
