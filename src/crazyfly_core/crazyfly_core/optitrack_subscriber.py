@@ -114,6 +114,7 @@ class OptiTrackSubscriber(Node):
         self.startTime = time.time()
 
     def listener_callback(self, msg):
+        print(f"Received pose: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
         # need this conditional to avoid QoS error
         if msg.header.frame_id == "world":
             # store the current x,y,x position of the drone (in meters)

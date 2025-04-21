@@ -27,6 +27,7 @@ setup(
             'cf_command_controller = crazyfly_core.cf_command_controller:main',
             'optitrack_subscriber2 = crazyfly_core.optitrack_subscriber2:main',
             'cf_command_controller2 = crazyfly_core.cf_command_controller2:main',
+            'clusterController = crazyfly_core.clusterController:main',
         ],
     },
 )
