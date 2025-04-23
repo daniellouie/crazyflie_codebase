@@ -26,8 +26,8 @@ setup(
             'cf_thrust_controller = crazyfly_core.cf_thrust_controller:main',
             'cf_command_controller = crazyfly_core.cf_command_controller:main',
             'optitrack_subscriber2 = crazyfly_core.optitrack_subscriber2:main',
-            'cf_command_controller2 = crazyfly_core.cf_command_controller2:main',
-            'clusterController = crazyfly_core.clusterController:main',
+            'cf_command_controller2 = crazyfly_core.cf_command_controller2:main', #this one is used for cluster control implementation
+            'clusterController = crazyfly_core.clusterController:main', #this one is used for cluster control implementation
         ],
     },
 )

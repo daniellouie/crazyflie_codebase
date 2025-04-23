@@ -3,6 +3,13 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 import numpy as np
 
+from std_msgs.msg import UInt16
+from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Bool
+
+import matplotlib.pyplot as plt
+import time
+
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
 
@@ -14,7 +21,8 @@ class ClusterOptitrackSubscriber(Node):
 
         :param drone_id: ID of the drone (e.g., 'cf1', 'cf2').
         """
-        super().__init__(f'cluster_optitrack_subscriber_cf1')
+        super().__init__(f'cluster_optitrack_subscriber_{drone_id}')
+
 
         # Customize QoS settings to match the publisher
         qos_profile = QoSProfile(
@@ -24,23 +32,23 @@ class ClusterOptitrackSubscriber(Node):
         )
 
         self.drone_id = drone_id
-        self.position = [0.0, 0.1, 0.0]  # Current position of the drone
-        self.orientation = [0.1, 0.2, 0.3, 0.0]  # Current orientation (quaternion)
+        self.position = [0.0, 0.0, 0.0]  # Current position of the drone
+        self.orientation = [0.0, 0.0, 0.0, 0.0]  # Current orientation (quaternion)
 
         # Subscribe to the drone's pose topic
-        topic_name = '/vrpn_mocap/cf1/pose'
+        topic_name = f'/vrpn_mocap/{drone_id}/pose'
         self.subscription = self.create_subscription(
             PoseStamped,
             topic_name,
             self.listener_callback,
             qos_profile
         )
+        print("created topic")
 
     def listener_callback(self, msg):
         """
         Callback function to update the position and orientation of the drone.
         """
-        print(f"Received pose for {self.drone_id}: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
         if msg.header.frame_id == "world":
             # print(f"Received pose for {self.drone_id}: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
             # with self.lock:
