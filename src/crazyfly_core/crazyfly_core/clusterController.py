@@ -26,7 +26,7 @@ def main(args=None):
     
     # publishers for R_cmd values for each drone for PID control
     pub_cf1_cmd = pubNode.create_publisher(PoseStamped, '/cf1_cmd', 10)
-    pub_cf2_cmd = pubNode.create_publisher(PoseStamped, '/cf2_cmd', 10)\
+    pub_cf2_cmd = pubNode.create_publisher(PoseStamped, '/cf2_cmd', 10)
     
 
     # Create a multi-threaded executor
@@ -42,7 +42,7 @@ def main(args=None):
         while rclpy.ok():
             # Allow ROS to process messages
             # TODO : adjust the timeout as needed (too short and it will miss messages, too long and it will slow down the loop)
-            executor.spin_once(timeout_sec=0.02)
+            executor.spin_once(timeout_sec=0.1)
             # Update cluster with position data from OptiTrack
 
             # needs to be assigned to temp variables to avoid race condition errors
@@ -58,8 +58,8 @@ def main(args=None):
             # Perform cluster calculations
             cluster.update()
 
-            print("cf1 commanded position:", cluster.R_cmd[0:3])
-            print("cf2 commanded position:", cluster.R_cmd[4:7])
+            # print("cf1 commanded position:", cluster.R_cmd[0:3])
+            # print("cf2 commanded position:", cluster.R_cmd[4:7])
 
 
             # Publish messages for visualization on RViz2

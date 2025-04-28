@@ -78,7 +78,7 @@ class MinimalSubscriber(Node):
 
 
         # limit flight time for testing
-        self.flight_duration = 20.0 #in seconds
+        self.flight_duration = 10.0 #in seconds
 
 
         # constant command values for testing
@@ -151,7 +151,7 @@ class MinimalSubscriber(Node):
             # self.y_fp_data.append(y_fp)
             # self.y_fp_data.append(y_fi)
         else:
-            print("Error: incorrect msg length")
+            print("CF2 Error: incorrect msg length")
 
         
 
@@ -160,16 +160,16 @@ class MinimalSubscriber(Node):
         #listener for the first drone, optireack_subscriber 
 
         # ensure commands for all axis are recieved
-        if len(msg.data) >= 7:
+        if len(msg.data) >= 4:
             self.roll1 = msg.data[0]
             self.pitch1 = msg.data[1]
             self.yawrate1 = msg.data[2]
             self.thrust1 = int(msg.data[3]) #thrust needs to be an int
 
 
-            self.x_position1 = msg.data[4]
-            self.y_position1 = msg.data[5]
-            self.z_position1 = msg.data[6]
+            # self.x_position1 = msg.data[4]
+            # self.y_position1 = msg.data[5]
+            # self.z_position1 = msg.data[6]
 
             #print(f"Received: Roll = {self.roll}, Pitch = {self.pitch}, Yawrate = {self.yawrate}, Thrust = {self.thrust}")
             #print(f"x: {self.x_position}, y: {self.y_position}, z: {self.z_position}")
@@ -179,16 +179,16 @@ class MinimalSubscriber(Node):
             current_time = time.time()
             elapsed_time = current_time - self.start_time
             self.timestamp_data.append(elapsed_time)
-            self.cur_x_data.append(self.x_position1)
-            self.cur_y_data.append(self.y_position1)
-            self.cur_z_data.append(self.z_position1)
+            # self.cur_x_data.append(self.x_position1)
+            # self.cur_y_data.append(self.y_position1)
+            # self.cur_z_data.append(self.z_position1)
             self.thrust_data.append(self.thrust1)
             # self.y_fp_data.append(y_fp)
             # self.y_fp_data.append(y_fi)
         else:
-            print("Error: incorrect msg length")
+            print("CF1 Error: incorrect msg length")
 
-        print(f"thrust 1 = {self.thrust1}, thrust 2 = {self.thrust2}")
+        # print(f"thrust 1 = {self.thrust1}, thrust 2 = {self.thrust2}")
         self.run_motors() #call function to send commands to crazyflie
         
         
@@ -303,114 +303,114 @@ def main(args=None):
         # Generate a timestamp for the filenames
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    # Save data for later use
-    with open(f'data/flight_data1_{timestamp}.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['timestamp', 'cur_x', 'cur_y', 'cur_z', 'thrust'])
-        for i in range(len(minimal_subscriber.timestamp_data)):
-            writer.writerow([
-                minimal_subscriber.timestamp_data[i],
-                minimal_subscriber.cur_x_data[i],
-                minimal_subscriber.cur_y_data[i],
-                minimal_subscriber.cur_z_data[i],
-                minimal_subscriber.thrust_data[i]
-            ])
+    # # Save data for later use
+    # with open(f'data/flight_data1_{timestamp}.csv', 'w', newline='') as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(['timestamp', 'cur_x', 'cur_y', 'cur_z', 'thrust'])
+    #     for i in range(len(minimal_subscriber.timestamp_data)):
+    #         writer.writerow([
+    #             minimal_subscriber.timestamp_data[i],
+    #             minimal_subscriber.cur_x_data[i],
+    #             minimal_subscriber.cur_y_data[i],
+    #             minimal_subscriber.cur_z_data[i],
+    #             minimal_subscriber.thrust_data[i]
+    #         ])
 
-    with open(f'data/flight_data2_{timestamp}.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['timestamp', 'cur_x', 'cur_y', 'cur_z', 'thrust'])
-        for i in range(len(minimal_subscriber.timestamp_data2)):
-            writer.writerow([
-                minimal_subscriber.timestamp_data2[i],
-                minimal_subscriber.cur_x_data2[i],
-                minimal_subscriber.cur_y_data2[i],
-                minimal_subscriber.cur_z_data2[i],
-                minimal_subscriber.thrust_data2[i]
-            ])
-    # minimal_subscriber._cf.close_link()  # Disconnect from the Crazyflie
-
-
-    # Plotting Graph one
-    # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
-    plt.figure()
-    # plt.title('cf1 graphs')
-    plt.subplot(2,2,1)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_y_data, 'r-', label='Y Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Y Position (m)')
-    plt.title('Y Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # with open(f'data/flight_data2_{timestamp}.csv', 'w', newline='') as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(['timestamp', 'cur_x', 'cur_y', 'cur_z', 'thrust'])
+    #     for i in range(len(minimal_subscriber.timestamp_data2)):
+    #         writer.writerow([
+    #             minimal_subscriber.timestamp_data2[i],
+    #             minimal_subscriber.cur_x_data2[i],
+    #             minimal_subscriber.cur_y_data2[i],
+    #             minimal_subscriber.cur_z_data2[i],
+    #             minimal_subscriber.thrust_data2[i]
+    #         ])
+    # # minimal_subscriber._cf.close_link()  # Disconnect from the Crazyflie
 
 
-    plt.subplot(2,2,2)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_x_data, 'r-', label='X Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('X Position (m)')
-    plt.title('X Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # # Plotting Graph one
+    # # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
+    # plt.figure()
+    # # plt.title('cf1 graphs')
+    # plt.subplot(2,2,1)
+    # plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_y_data, 'r-', label='Y Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Y Position (m)')
+    # plt.title('Y Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
 
 
-    plt.subplot(2,2,3)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_z_data, 'r-', label='Z Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Z Position (m)')
-    plt.title('Z Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # plt.subplot(2,2,2)
+    # plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_x_data, 'r-', label='X Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('X Position (m)')
+    # plt.title('X Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
 
 
-    # graphing thrust over time
-    plt.subplot(2,2,4)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.thrust_data, 'b-', label='Thrust')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Thrust')
-    plt.title('Thrust Over Time')
-    plt.legend()
-    plt.show()
-    print("Plotted")
-
-    # Plotting Graph two
-    # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
-    plt.figure()
-    # plt.title('cf2 graphs')
-    plt.subplot(2,2,1)
-    plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_y_data2, 'r-', label='Y Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Y Position (m)')
-    plt.title('Y Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # plt.subplot(2,2,3)
+    # plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_z_data, 'r-', label='Z Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Z Position (m)')
+    # plt.title('Z Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
 
 
-    plt.subplot(2,2,2)
-    plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_x_data2, 'r-', label='X Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('X Position (m)')
-    plt.title('X Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # # graphing thrust over time
+    # plt.subplot(2,2,4)
+    # plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.thrust_data, 'b-', label='Thrust')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Thrust')
+    # plt.title('Thrust Over Time')
+    # plt.legend()
+    # plt.show()
+    # print("Plotted")
+
+    # # Plotting Graph two
+    # # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
+    # plt.figure()
+    # # plt.title('cf2 graphs')
+    # plt.subplot(2,2,1)
+    # plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_y_data2, 'r-', label='Y Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Y Position (m)')
+    # plt.title('Y Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
 
 
-    plt.subplot(2,2,3)
-    plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_z_data2, 'r-', label='Z Position')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Z Position (m)')
-    plt.title('Z Position Over Time')
-    plt.ylim(bottom=0)
-    plt.legend()
+    # plt.subplot(2,2,2)
+    # plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_x_data2, 'r-', label='X Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('X Position (m)')
+    # plt.title('X Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
 
 
-    # graphing thrust over time
-    plt.subplot(2,2,4)
-    plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.thrust_data2, 'b-', label='Thrust')
-    plt.xlabel('Time(s)')
-    plt.ylabel('Thrust')
-    plt.title('Thrust Over Time')
-    plt.legend()
-    plt.show()
-    print("Plotted")
+    # plt.subplot(2,2,3)
+    # plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.cur_z_data2, 'r-', label='Z Position')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Z Position (m)')
+    # plt.title('Z Position Over Time')
+    # plt.ylim(bottom=0)
+    # plt.legend()
+
+
+    # # graphing thrust over time
+    # plt.subplot(2,2,4)
+    # plt.plot(minimal_subscriber.timestamp_data2, minimal_subscriber.thrust_data2, 'b-', label='Thrust')
+    # plt.xlabel('Time(s)')
+    # plt.ylabel('Thrust')
+    # plt.title('Thrust Over Time')
+    # plt.legend()
+    # plt.show()
+    # print("Plotted")
 
 
     minimal_subscriber.destroy_node()

@@ -14,6 +14,7 @@ crazyfly_core/cf_command_controller.py
 crazyfly_core/cf_command_controller2.py
 crazyfly_core/cf_distance.py
 crazyfly_core/cf_driver.py
+crazyfly_core/cf_pid_controller.py
 crazyfly_core/cf_thrust_controller.py
 crazyfly_core/cluster.py
 crazyfly_core/clusterController.py
@@ -24,6 +25,7 @@ crazyfly_core/fake_thrust_pub.py
 crazyfly_core/optitrack_subscriber (backup).py
 crazyfly_core/optitrack_subscriber.py
 crazyfly_core/optitrack_subscriber2.py
+crazyfly_core/pid_controller_cf1.py
 resource/crazyfly_core
 test/test_copyright.py
 test/test_flake8.py
