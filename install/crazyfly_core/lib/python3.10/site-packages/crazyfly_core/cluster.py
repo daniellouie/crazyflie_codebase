@@ -60,22 +60,29 @@ class Cluster:
     
 
     def update(self):
-        # self.getPosition()  #get updated position of drones from Optitrack
+        # current positions are called in the clusterController to get optitrack data
         self.forwardKinematics()  #convert drone positions to cluster space variables
         self.getClusterError()  #get cluster position error
+
         self.clusterPController()  #calculate cluster velocity using P controller
-        self.clusterToDrones()  # uses Forward Kinematic function convert cluster velocity to commanded drone velocities
+        # NOTE : not currently using Inverse Kinematic approach
+        # self.clusterPControllerKinematic()  #calculate commanded cluster position using P controller for Inverse Kinematics
+
+        self.clusterToDrones()  # uses Inverse Jacobian function convert cluster velocity to commanded drone velocities
         self.velocityToPos()  #convert commanded drone velocities to commanded drone positions
+
+        # NOTE : not currently using Inverse Kinematic approach
+        # self.calculateInverseKinematics()  #calculate commanded drone positions from desired cluster position
 
     # This function takes in current positions of drones from Optitrack mo-cap
     # Input: none
     # Output: updates R_cur 
-    # TODO : implement this function, connect to Optitrack
+    # NOTE : this function is not currently used (data comes from optitrack in clusterController)
     def getPosition(self):
-        # self.R_cur = [1, 1, 1, 0, 2, 2, 2, 0] # this is a placeholder for testing
         return self.R_cur
     
     # this function gets the positions from optitrack through the clusterController
+    # Function is called in the clusterController
     def updatePositions(self, cur_position_cf1, cur_position_cf2):
         self.R_cur[0:3] = cur_position_cf1  # Update Drone 1 position
         self.R_cur[4:7] = cur_position_cf2  # Update Drone 2 position
@@ -86,7 +93,6 @@ class Cluster:
     # Output: array of cluster space variables [xc yc zc alpha beta phi1 phi2 p]
     # TODO : review and test this function (possibly seperate into external file)
     def forwardKinematics(self):    
-        # TODO : frame transformation Ours to Anne's
         self.R_cur = self.frameOursToAnne(self.R_cur) # convert to Anne's frame
 
         # decompose positions and orientations
@@ -108,6 +114,8 @@ class Cluster:
 
         alpha, beta, phi1, phi2 = 0, 0, 0, 0
 
+
+        # NOTE : Imported from Anne's work, not currently in use for our implementation
         # # Vectors pointing to Drone 1
         # y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
         # x_vec = np.cross(y_vec, zglobal)
@@ -144,22 +152,25 @@ class Cluster:
     # This function gets the position error of cluster
     # Input: C_des, C_cur
     # Output: C_err
-    # TODO : implement this function
-    # NOTE : should this calculate the error in all 8 dimensions or just the first 3? (needs to be 8 for Jinv part)
+    # NOTE : needs to use all 8 variables for inverseJacobian
     def getClusterError(self):
-        # self.C_err = np.array(self.C_des[:3]) - np.array(self.C_cur[:3])
         self.C_err = np.array(self.C_des) - np.array(self.C_cur)
-
         return self.C_err
 
     # This function calculates Cluster velocity (C_dot) using a P Controller
     # Input: C_err, cluster_k_p
     # Output: C_dot
-    # TODO : implement this function, do we need a seperate P term for each axis?
+    # TODO : needs tuning for p value, possibly use different gains for each axis?
     def clusterPController(self):
         # Calculate cluster velocity
         self.C_dot = self.cluster_k_p * self.C_err
         return self.C_dot
+    
+    # this function calculates the commanded cluster position (C_cmd) using a P controller
+    # NOTE : used for inverse kinematic approach, NOT currently used
+    def clusterPControllerKinematic(self):
+        self.C_cmd = self.cluster_k_p * self.C_err + self.C_cur
+        return self.C_cmd
 
     # This function calculates the inverse Jacobian for two drones
     # # Input: C_cur
@@ -184,29 +195,75 @@ class Cluster:
         J_inv = np.array([x1dot, y1dot, z1dot, theta1dot, x2dot, y2dot, z2dot, theta2dot])
 
         return J_inv
+
+    # this function calucates the desired positions of the drones from the desired cluster position
+    # takes in C_des and splits into the two drone positions
+    # NOTE : NOT currently used in our implementation, needs more verification before use
+    def calculateInverseKinematics(self):
+  
+        # Decompose the desired cluster position
+        xc, yc, zc, alpha, beta, phi1, phi2, p = self.C_cmd
+
+        # Calculate the relative positions of the drones in the cluster frame
+        x1_rel = -0.5 * p * np.cos(alpha) * np.cos(beta)
+        y1_rel = -0.5 * p * np.cos(beta) * np.sin(alpha)
+        z1_rel = -0.5 * p * np.sin(beta)
+
+        x2_rel = 0.5 * p * np.cos(alpha) * np.cos(beta)
+        y2_rel = 0.5 * p * np.cos(beta) * np.sin(alpha)
+        z2_rel = 0.5 * p * np.sin(beta)
+
+        # Convert the relative positions to the global frame
+        x1 = xc + x1_rel
+        y1 = yc + y1_rel
+        z1 = zc + z1_rel
+
+        x2 = xc + x2_rel
+        y2 = yc + y2_rel
+        z2 = zc + z2_rel
+
+        # placeholder values for yaw angles (currently not used)
+        # TODO : implement yaw angles
+        yaw1 = phi1
+        yaw2 = phi2
+
+        # Combine the positions into the desired positions array
+        self.R_cmd = np.array([x1, y1, z1, yaw1, x2, y2, z2, yaw2])
+        self.R_cmd = self.frameAnneToOurs(self.R_cmd) # convert to our frame
+
+        return self.R_cmd
     
     # This function uses the resulting Inverse Jacobian (J_inv) to convert cluster velocity (C_dot) to commanded drone velocities (R_dot)
     # Input: C_dot, C_cur
     # Output: R_dot
     # TODO : review and test this function
-    # NOTE : function wants C_dot to be 8x1, does that make sense?
     def clusterToDrones(self):
         # Calculate the commanded velocities for each drone
         J_inv = self.calculateInverseJacobian()
         self.R_dot = np.dot(J_inv, self.C_dot)
         return self.R_dot
     
+    # This function converts from the global cluster frame to the local drone frame
+    # to account for difference in cluster orientation and drone orientation
+    # TODO : need to take in theta1 and theta2, currently not processed bc they are in quaternion form (putting on the backburner for now)
+    # def droneRotation(self):
+    #     Rz = np.array([
+    #         [np.cos(theta), np.sin(theta), 0],
+    #         [np.sin(theta), -np.cos(theta), 0],
+    #         [0, 0, 1]
+    #     ])
+    #     global_velocity_vector = np.array(global_velocity_vector[]
+
+    
     # This function converts commanded drone velocities (R_dot) to commanded drone positions (R_cmd) using a dt constant
     # Input: R_dot, dt
     # Output: R_cmd
-    # TODO : review and test this function
+    # TODO : need to tune the dt contant for better performance
     def velocityToPos(self):
         self.R_cmd = self.R_cur + (self.R_dot * self.dt)
 
-        # TODO:frame transformation Anne's to Ours
+        # NOTE: frame transformation Anne's to Ours
         self.R_cmd = self.frameAnneToOurs(self.R_cmd) # convert to our frame
-        # print("R_cmd_transformed (actual)", self.R_cmd)
-
         return self.R_cmd
     
 

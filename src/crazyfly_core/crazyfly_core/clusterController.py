@@ -3,6 +3,8 @@ from rclpy.executors import MultiThreadedExecutor #two diff approaches for spinn
 from rclpy.executors import SingleThreadedExecutor
 from .cluster import Cluster
 from .clusterOptitrackSubscriber import ClusterOptitrackSubscriber
+from rclpy.node import Node
+from geometry_msgs.msg import PoseStamped
 
 def main(args=None):
     rclpy.init(args=args)
@@ -14,8 +16,18 @@ def main(args=None):
     # Initialize the Cluster class
     cluster = Cluster()
 
-    # set desired cluster position
-    cluster.C_des = cluster.frameOursToAnne([1.5, 1, 1, 0, 0, 0, 0, 1]) # convert to Anne's frame
+    # set desired cluster position in our frame(x, y, z, alpha, beta, phi1, phi2, p)
+    cluster.C_des = cluster.frameOursToAnne([1.5, 1, 1, 0, 0, 0, 0, 1]) # convert to Anne's frame 
+
+    # publish current cluster Pose for visualization
+    pubNode = rclpy.create_node('viz_pub_node')
+    pub_cur_cluster = pubNode.create_publisher(PoseStamped, '/cluster_state', 10)
+    pub_des_cluster = pubNode.create_publisher(PoseStamped, '/cluster_desired', 10)
+    
+    # publishers for R_cmd values for each drone for PID control
+    pub_cf1_cmd = pubNode.create_publisher(PoseStamped, '/cf1_cmd', 10)
+    pub_cf2_cmd = pubNode.create_publisher(PoseStamped, '/cf2_cmd', 10)\
+    
 
     # Create a multi-threaded executor
     executor = MultiThreadedExecutor()
@@ -24,18 +36,19 @@ def main(args=None):
     # allows both subscribers to run concurrently
     executor.add_node(optitrack_subscriber_cf1)
     executor.add_node(optitrack_subscriber_cf2)
+    executor.add_node(pubNode)
 
     try:
         while rclpy.ok():
             # Allow ROS to process messages
             # TODO : adjust the timeout as needed (too short and it will miss messages, too long and it will slow down the loop)
-            executor.spin_once(timeout_sec=0.01)
+            executor.spin_once(timeout_sec=0.02)
             # Update cluster with position data from OptiTrack
 
             # needs to be assigned to temp variables to avoid race condition errors
             cur_position_cf1 = optitrack_subscriber_cf1.get_position()  # Drone 1 position
             cur_position_cf2 = optitrack_subscriber_cf2.get_position()  # Drone 2 position
-
+            
             # print("cf1 position:", cur_position_cf1)
             # print("cf2 position:", cur_position_cf2)
 
@@ -48,8 +61,48 @@ def main(args=None):
             print("cf1 commanded position:", cluster.R_cmd[0:3])
             print("cf2 commanded position:", cluster.R_cmd[4:7])
 
-            # # Print cluster state for debugging
-            # print("Cluster C_cur:", cluster.C_cur)
+
+            # Publish messages for visualization on RViz2
+            cur_cluster_msg = PoseStamped()
+            cur_cluster_msg.header.stamp = pubNode.get_clock().now().to_msg()
+            cur_cluster_msg.header.frame_id = "world"
+            #need to convert to Anne's frame for visualization
+            # NOTE : transformations are weird to show up correctly in Rviz
+            cur_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_cur)
+            cur_cluster_msg.pose.position.x = cur_cluster_our_frame[0]
+            cur_cluster_msg.pose.position.y = cur_cluster_our_frame[1]
+            cur_cluster_msg.pose.position.z = cur_cluster_our_frame[2]
+            pub_cur_cluster.publish(cur_cluster_msg)
+
+            des_cluster_msg = PoseStamped()
+            des_cluster_msg.header.stamp = pubNode.get_clock().now().to_msg()
+            des_cluster_msg.header.frame_id = "world"
+            #need to convert to Anne's frame for visualization
+            des_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_des)
+            des_cluster_msg.pose.position.x = des_cluster_our_frame[0]
+            des_cluster_msg.pose.position.y = des_cluster_our_frame[1]
+            des_cluster_msg.pose.position.z = des_cluster_our_frame[2]
+            pub_des_cluster.publish(des_cluster_msg)
+
+            # publish R_cmd values for each drone for PID control
+            des_cf1_msg = PoseStamped()
+            des_cf1_msg.header.stamp = pubNode.get_clock().now().to_msg()
+            des_cf1_msg.header.frame_id = "world"
+            #R_cmd is already in our frame
+            des_cf1_msg.pose.position.x = cluster.R_cmd[0]
+            des_cf1_msg.pose.position.y = cluster.R_cmd[1]
+            des_cf1_msg.pose.position.z = cluster.R_cmd[2]
+            pub_cf1_cmd.publish(des_cf1_msg)
+
+            des_cf2_msg = PoseStamped()
+            des_cf2_msg.header.stamp = pubNode.get_clock().now().to_msg()
+            des_cf2_msg.header.frame_id = "world"
+            #R_cmd is already in our frame
+            des_cf2_msg.pose.position.x = cluster.R_cmd[4]
+            des_cf2_msg.pose.position.y = cluster.R_cmd[5]
+            des_cf2_msg.pose.position.z = cluster.R_cmd[6]
+            pub_cf2_cmd.publish(des_cf2_msg)
+
 
 
     except KeyboardInterrupt:

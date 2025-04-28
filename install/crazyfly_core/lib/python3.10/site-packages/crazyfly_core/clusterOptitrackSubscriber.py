@@ -2,27 +2,27 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-
 from std_msgs.msg import UInt16
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
-
 import matplotlib.pyplot as plt
 import time
-
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+
+from tf2_ros import TransformBroadcaster # used for Rviz 
+
 
 
 
 class ClusterOptitrackSubscriber(Node):
     def __init__(self, drone_id):
+
         """
         Initialize the OptiTrackSubscriber for a specific drone.
 
         :param drone_id: ID of the drone (e.g., 'cf1', 'cf2').
         """
         super().__init__(f'cluster_optitrack_subscriber_{drone_id}')
-
 
         # Customize QoS settings to match the publisher
         qos_profile = QoSProfile(
@@ -43,20 +43,16 @@ class ClusterOptitrackSubscriber(Node):
             self.listener_callback,
             qos_profile
         )
-        print("created topic")
 
     def listener_callback(self, msg):
         """
         Callback function to update the position and orientation of the drone.
         """
         if msg.header.frame_id == "world":
-            # print(f"Received pose for {self.drone_id}: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
-            # with self.lock:
             # Update position
             self.position[0] = msg.pose.position.x
             self.position[1] = msg.pose.position.y
             self.position[2] = msg.pose.position.z
-
             # Update orientation (quaternion)
             self.orientation[0] = msg.pose.orientation.x
             self.orientation[1] = msg.pose.orientation.y
@@ -69,8 +65,7 @@ class ClusterOptitrackSubscriber(Node):
         :return: List of [x, y, z] position.
         """
         return self.position.copy()
-        # with self.lock:
-        #     return self.position.copy()
+
 
     def get_orientation(self):
         """
@@ -78,5 +73,3 @@ class ClusterOptitrackSubscriber(Node):
         :return: List of [x, y, z, w] quaternion orientation.
         """
         return self.orientation.copy()
-        # with self.lock:
-        #     return self.orientation.copy()
