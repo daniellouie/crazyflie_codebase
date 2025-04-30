@@ -26,6 +26,7 @@ crazyfly_core/optitrack_subscriber (backup).py
 crazyfly_core/optitrack_subscriber.py
 crazyfly_core/optitrack_subscriber2.py
 crazyfly_core/pid_controller_cf1.py
+crazyfly_core/pid_controller_cf2.py
 resource/crazyfly_core
 test/test_copyright.py
 test/test_flake8.py

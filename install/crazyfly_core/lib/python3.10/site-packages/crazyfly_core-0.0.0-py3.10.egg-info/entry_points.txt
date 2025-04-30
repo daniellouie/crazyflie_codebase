@@ -8,4 +8,5 @@ fake_thrust_pub = crazyfly_core.fake_thrust_pub:main
 optitrack_subscriber = crazyfly_core.optitrack_subscriber:main
 optitrack_subscriber2 = crazyfly_core.optitrack_subscriber2:main
 pid_controller_cf1 = crazyfly_core.pid_controller_cf1:main
+pid_controller_cf2 = crazyfly_core.pid_controller_cf2:main
 

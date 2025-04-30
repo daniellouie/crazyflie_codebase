@@ -128,30 +128,33 @@ class MinimalSubscriber(Node):
        #listener for the second drone to optitrack_2
 
         # ensure commands for all axis are recieved
-        if len(msg.data) >= 7:
+        if len(msg.data) >= 4:
             self.roll2 = msg.data[0]
             self.pitch2 = msg.data[1]
             self.yawrate2 = msg.data[2]
             self.thrust2 = int(msg.data[3]) #thrust needs to be an int
 
 
-            self.x_position2 = msg.data[4]
-            self.y_position2 = msg.data[5]
-            self.z_position2 = msg.data[6]
+            # self.x_position2 = msg.data[4]
+            # self.y_position2 = msg.data[5]
+            # self.z_position2 = msg.data[6]
 
 
             # record data for graphing
             current_time = time.time()
             elapsed_time = current_time - self.start_time
             self.timestamp_data2.append(elapsed_time)
-            self.cur_x_data2.append(self.x_position2)
-            self.cur_y_data2.append(self.y_position2)
-            self.cur_z_data2.append(self.z_position2)
+            # self.cur_x_data2.append(self.x_position2)
+            # self.cur_y_data2.append(self.y_position2)
+            # self.cur_z_data2.append(self.z_position2)
             self.thrust_data2.append(self.thrust2)
             # self.y_fp_data.append(y_fp)
             # self.y_fp_data.append(y_fi)
         else:
             print("CF2 Error: incorrect msg length")
+
+        self.run_motors() #call function to send commands to crazyflie
+
 
         
 
@@ -202,10 +205,11 @@ class MinimalSubscriber(Node):
 
 
         # Send commands to drone 1
-        self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
-        print(f"Drone 1: Roll = {self.roll1}, Pitch = {self.pitch1}, Yawrate = {self.yawrate1}, Thrust = {self.thrust1}")
+        # self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
+        # print(f"Drone 1: Roll = {self.roll1}, Pitch = {self.pitch1}, Yawrate = {self.yawrate1}, Thrust = {self.thrust1}")
 
         # Send commands to drone 2
+        # temporarily commented out flight command for testing
         self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
         print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
 
@@ -227,7 +231,7 @@ class MinimalSubscriber(Node):
     def _connected(self, link_uri):
         """ This callback is called from the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
-
+        print('Connected to %s' % link_uri)
 
         # Start a separate thread to continuously send thrust commands.
         #temporatily commented out for debugging (not working)
@@ -245,13 +249,12 @@ class MinimalSubscriber(Node):
         rampdown_thrust2 = self.thrust2
         rclpy.shutdown()  # Shutdown ROS 2 before ramping down to prevent override
 
-
         # ramp down thrust until reaching threshold to cut power, ideally on the ground
-        while rampdown_thrust1 > 42500 and rampdown_thrust2 > 42500:
+        while rampdown_thrust1 > 42500 or rampdown_thrust2 > 42500:
             if rampdown_thrust1 > 42500:
-                rampdown_thrust1 -= 150
-            if rampdown_thrust2 > 45000:
-                rampdown_thrust2 -= 150
+                rampdown_thrust1 -= 250
+            if rampdown_thrust2 > 42500:
+                rampdown_thrust2 -= 250
 
             print(f"running ramp down: {rampdown_thrust1}")
             print(f"running ramp down: {rampdown_thrust2}")
@@ -414,7 +417,7 @@ def main(args=None):
 
 
     minimal_subscriber.destroy_node()
-    rclpy.shutdown()
+    # rclpy.shutdown()
 
 
 
