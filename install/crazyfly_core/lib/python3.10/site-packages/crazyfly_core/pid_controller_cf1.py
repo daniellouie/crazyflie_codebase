@@ -134,8 +134,8 @@ class PIDControllerCF1(Node):
         if msg.header.frame_id == "world":
             # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
             self.commanded_position[0] = self.constant_position[0] # use constant value for testing
-            # self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
-            self.commanded_position[1] = self.constant_position[1] # use constant value for testing
+            self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
+            # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
             # self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
             self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 
@@ -161,7 +161,7 @@ class PIDControllerCF1(Node):
 
         # create message of type Float Array (all values need to be floats)
         msg = Float32MultiArray()
-        msg.data = [float(roll), float(pitch), float(yawrate), float(thrust)]
+        msg.data = [float(roll), float(pitch), float(yawrate), float(thrust), float(self.current_position[0]), float(self.current_position[1]), float(self.current_position[2])]
         # print(f"roll: {roll}, \n pitch: {pitch}, \n yawrate: {yawrate}, \n thrust: {thrust}")
         self.pub_commands.publish(msg) #publish commands for drone controller
             

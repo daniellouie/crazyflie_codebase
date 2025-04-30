@@ -6,6 +6,14 @@ from .clusterOptitrackSubscriber import ClusterOptitrackSubscriber
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 
+from datetime import datetime
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import csv
+
+
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -38,11 +46,20 @@ def main(args=None):
     executor.add_node(optitrack_subscriber_cf2)
     executor.add_node(pubNode)
 
+    # Data storage for recording positions
+    timestamps = []
+    cur_cf1_positions = []
+    cur_cf2_positions = []
+    cur_cluster_positions = []
+    des_cluster_positions = []
+    des_cf1_positions = []
+    des_cf2_positions = []
+
     try:
         while rclpy.ok():
             # Allow ROS to process messages
             # TODO : adjust the timeout as needed (too short and it will miss messages, too long and it will slow down the loop)
-            executor.spin_once(timeout_sec=0.1)
+            executor.spin_once(timeout_sec=0.01)
             # Update cluster with position data from OptiTrack
 
             # needs to be assigned to temp variables to avoid race condition errors
@@ -103,15 +120,78 @@ def main(args=None):
             des_cf2_msg.pose.position.z = cluster.R_cmd[6]
             pub_cf2_cmd.publish(des_cf2_msg)
 
+            # Record timestamp and positions
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+            timestamps.append(current_time)
+            cur_cf1_positions.append(cur_position_cf1)
+            cur_cf2_positions.append(cur_position_cf2)
+            cur_cluster_positions.append(cur_cluster_our_frame[:3])
+            des_cluster_positions.append(des_cluster_our_frame[:3])
+            des_cf1_positions.append(cluster.R_cmd[:3])
+            des_cf2_positions.append(cluster.R_cmd[4:7])
+
 
 
     except KeyboardInterrupt:
         print("Shutting down...")
-    finally:
-        # Shutdown ROS nodes
+        #Shutdown ROS nodes
         optitrack_subscriber_cf1.destroy_node()
         optitrack_subscriber_cf2.destroy_node()
         rclpy.shutdown()
+        #save flight data
+        # Save data to CSV
+        with open(f'cluster_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Timestamp', 'Cur_CF1_X', 'Cur_CF1_Y', 'Cur_CF1_Z',
+                            'Cur_CF2_X', 'Cur_CF2_Y', 'Cur_CF2_Z',
+                            'Cur_Cluster_X', 'Cur_Cluster_Y', 'Cur_Cluster_Z',
+                            'Des_Cluster_X', 'Des_Cluster_Y', 'Des_Cluster_Z',
+                            'Des_CF1_X', 'Des_CF1_Y', 'Des_CF1_Z',
+                            'Des_CF2_X', 'Des_CF2_Y', 'Des_CF2_Z'])
+            for i in range(len(timestamps)):
+                writer.writerow([
+                    timestamps[i],
+                    *cur_cf1_positions[i],
+                    *cur_cf2_positions[i],
+                    *cur_cluster_positions[i],
+                    *des_cluster_positions[i],
+                    *des_cf1_positions[i],
+                    *des_cf2_positions[i]
+                ])
+
+        # Plot data
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Convert lists to numpy arrays for easier slicing
+        cur_cf1_positions = np.array(cur_cf1_positions)
+        cur_cf2_positions = np.array(cur_cf2_positions)
+        cur_cluster_positions = np.array(cur_cluster_positions)
+        des_cluster_positions = np.array(des_cluster_positions)
+        des_cf1_positions = np.array(des_cf1_positions)
+        des_cf2_positions = np.array(des_cf2_positions)
+
+        # Plot each dataset
+        ax.scatter(cur_cf1_positions[:, 0], cur_cf1_positions[:, 1], cur_cf1_positions[:, 2], label='Cur_CF1', c='r')
+        ax.scatter(cur_cf2_positions[:, 0], cur_cf2_positions[:, 1], cur_cf2_positions[:, 2], label='Cur_CF2', c='g')
+        ax.scatter(cur_cluster_positions[:, 0], cur_cluster_positions[:, 1], cur_cluster_positions[:, 2], label='Cur_Cluster', c='b')
+        ax.scatter(des_cluster_positions[:, 0], des_cluster_positions[:, 1], des_cluster_positions[:, 2], label='Des_Cluster', c='y')
+        ax.scatter(des_cf1_positions[:, 0], des_cf1_positions[:, 1], des_cf1_positions[:, 2], label='Des_CF1', c='m')
+        ax.scatter(des_cf2_positions[:, 0], des_cf2_positions[:, 1], des_cf2_positions[:, 2], label='Des_CF2', c='c')
+
+        # Label axes
+        ax.set_xlabel('X Position')
+        ax.set_ylabel('Y Position')
+        ax.set_zlabel('Z Position')
+        ax.legend()
+        plt.title('3D Position Data')
+        plt.show()
+        print("plotting 3D data")
+    finally:
+        #
+        print("Shutting down in finally...")
+
+        
 
 
 if __name__ == '__main__':

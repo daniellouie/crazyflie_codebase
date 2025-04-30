@@ -28,8 +28,8 @@ setup(
             'optitrack_subscriber2 = crazyfly_core.optitrack_subscriber2:main',
             'cf_command_controller2 = crazyfly_core.cf_command_controller2:main', #this one is used for cluster control implementation
             'clusterController = crazyfly_core.clusterController:main', #this one is used for cluster control implementation
-            'pid_controller_cf1 = crazyfly_core.pid_controller_cf1:main',
-            'pid_controller_cf2 = crazyfly_core.pid_controller_cf2:main',
+            'pid_controller_cf1 = crazyfly_core.pid_controller_cf1:main',   #pid controller for cf1 in cluster control
+            'pid_controller_cf2 = crazyfly_core.pid_controller_cf2:main',   #pid controller for cf2 in cluster control
         ],
     },
 )
