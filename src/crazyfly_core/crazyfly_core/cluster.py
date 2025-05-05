@@ -17,7 +17,7 @@ class Cluster:
         self.C_dot = np.zeros(8) # array for cluster velocity (xc_dot, yc_dot, zc_dot, alpha_dot, beta_dot, phi1_dot, phi2_dot, p_dot)
 
         self.cluster_k_p = 0.1 # proportional gain for cluster controller
-        self.dt = 6 # constant term to convert velocity to position
+        self.dt = 4 # constant term to convert velocity to position
 
 
     def frameOursToAnne(self, our_frame):

@@ -44,6 +44,10 @@ class MinimalSubscriber(Node):
             self.listener_callback2,
             10)
         
+        # safety variable to prevent motors from running when testing
+        # set to true to run motors
+        self.run_motors_bool = True
+        
         
         self.subscription  # prevent unused variable warning
 
@@ -78,7 +82,7 @@ class MinimalSubscriber(Node):
 
 
         # limit flight time for testing
-        self.flight_duration = 10.0 #in seconds
+        self.flight_duration = 40.0 #in seconds
 
 
         # constant command values for testing
@@ -203,18 +207,17 @@ class MinimalSubscriber(Node):
         # self.yawrate = self.const_yawrate
         # self.thrust = self.const_thrust
 
-        # commands temporarily commented out flight command for testing
-        runMotors = False
+        # if safety variable is set to true, run motors
+        if self.run_motors_bool:
+            # Send commands to drone 1
+            self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
+            # print(f"Drone 1: Roll = {self.roll1}, Pitch = {self.pitch1}, Yawrate = {self.yawrate1}, Thrust = {self.thrust1}")
 
-        # Send commands to drone 1
-        self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
-        # print(f"Drone 1: Roll = {self.roll1}, Pitch = {self.pitch1}, Yawrate = {self.yawrate1}, Thrust = {self.thrust1}")
+            # Send commands to drone 2
 
-        # Send commands to drone 2
-
-        # temporarily commented out flight command for testing
-        self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
-        # print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
+            # temporarily commented out flight command for testing
+            self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
+            # print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
 
 
     # Unused function that uses Threading
@@ -239,26 +242,29 @@ class MinimalSubscriber(Node):
     # add a ramp down for safety
     def _stop_program(self):
         """Stops the Crazyflie and exits the program."""
-        print("Timeout reached, stopping the Crazyflie.")
+        if self.run_motors_bool:
+            print("Timeout reached, stopping the Crazyflie.")
 
+            # set to the current thrust value
+            rampdown_thrust1 = self.thrust1
+            rampdown_thrust2 = self.thrust2
+            rclpy.shutdown()  # Shutdown ROS 2 before ramping down to prevent override
 
-        # set to the current thrust value
-        rampdown_thrust1 = self.thrust1
-        rampdown_thrust2 = self.thrust2
-        rclpy.shutdown()  # Shutdown ROS 2 before ramping down to prevent override
+            # ramp down thrust until reaching threshold to cut power, ideally on the ground
+            while rampdown_thrust1 > 42500 or rampdown_thrust2 > 42500:
+                if rampdown_thrust1 > 42500:
+                    rampdown_thrust1 -= 250
+                if rampdown_thrust2 > 42500:
+                    rampdown_thrust2 -= 250
 
-        # ramp down thrust until reaching threshold to cut power, ideally on the ground
-        while rampdown_thrust1 > 42500 or rampdown_thrust2 > 42500:
-            if rampdown_thrust1 > 42500:
-                rampdown_thrust1 -= 250
-            if rampdown_thrust2 > 42500:
-                rampdown_thrust2 -= 250
-
-            print(f"running ramp down: {rampdown_thrust1}")
-            print(f"running ramp down: {rampdown_thrust2}")
-            self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, rampdown_thrust1)
-            self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, rampdown_thrust2)
-            time.sleep(0.1)
+                print(f"running ramp down: {rampdown_thrust1}")
+                print(f"running ramp down: {rampdown_thrust2}")
+                self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, rampdown_thrust1)
+                self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, rampdown_thrust2)
+                time.sleep(0.1)
+        else:
+            print("Timeout reached, motors not running, shutting down.") 
+               
         self._cf1.commander.send_setpoint(0, 0, 0, 0)  # Stop the motors
         self._cf2.commander.send_setpoint(0, 0, 0, 0)  # Stop the motors
         self._cf1.close_link()  # Disconnect from the Crazyflie

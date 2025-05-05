@@ -22,6 +22,7 @@ crazyfly_core/clusterOptitrackSubscriber.py
 crazyfly_core/clusterTesting.py
 crazyfly_core/crazyflie_control.py
 crazyfly_core/fake_thrust_pub.py
+crazyfly_core/flightplots.py
 crazyfly_core/optitrack_subscriber (backup).py
 crazyfly_core/optitrack_subscriber.py
 crazyfly_core/optitrack_subscriber2.py

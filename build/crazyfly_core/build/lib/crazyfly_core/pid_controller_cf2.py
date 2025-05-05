@@ -68,11 +68,11 @@ class PIDControllerCF2(Node):
 
         # values for vertical Y (thrust) PID
         self.hover = 44000 #originally 46500     
-        self.max_thrust = 55000 #origionall 50000
+        self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
         self.k_p_y = 19000 #previously 15000 on jan 22
         self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
-        self.k_d_y = 10000
+        self.k_d_y = 10500 #previously 10000
         self.threshold_met = False
 
         self.cur_y_error = 0.0
@@ -218,10 +218,10 @@ class PIDControllerCF2(Node):
         self.cur_y_error = self.commanded_position[1]- self.current_position[1]
 
         # I term:
-        if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
-            self.cur_y_error = 0
+        #if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
+        #    self.cur_y_error = 0
 
-        y_fp = self.k_p_y * self.cur_y_error
+        y_fp = self.k_p_y * self.cur_y_error*2.0
         #print(f"y_fp: {y_fp}")
 
         #calculate what k_i would be

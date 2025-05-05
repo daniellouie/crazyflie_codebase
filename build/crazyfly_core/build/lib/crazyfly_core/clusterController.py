@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import csv
+import os
 
 
 
@@ -28,8 +29,12 @@ def main(args=None):
     cluster.C_des = cluster.frameOursToAnne([1.5, 1, 1, 0, 0, 0, 0, 1]) # convert to Anne's frame 
 
     # publish current cluster Pose for visualization
-    pubNode = rclpy.create_node('viz_pub_node')
+    # NOTE : try removing the creation of this node, dont need it accroding to demi!
+    pubNode = rclpy.create_node('cluster_control_pub_node')
+    print("creating cluster control pub node")
     pub_cur_cluster = pubNode.create_publisher(PoseStamped, '/cluster_state', 10)
+    # self.cur_cluster_pub = self.create_publisher(PoseStamped, '/cluster_state', 10) #this approach doesnt work unless we turn this into a class with a Node
+
     pub_des_cluster = pubNode.create_publisher(PoseStamped, '/cluster_desired', 10)
     
     # publishers for R_cmd values for each drone for PID control
@@ -54,6 +59,10 @@ def main(args=None):
     des_cluster_positions = []
     des_cf1_positions = []
     des_cf2_positions = []
+
+    # Frame capture interval (how often data should be collected for graphing)
+    FRAME_CAPTURE_INTERVAL = 0.1 # frequency in seconds
+    last_capture_time = datetime.now()
 
     try:
         while rclpy.ok():
@@ -120,27 +129,31 @@ def main(args=None):
             des_cf2_msg.pose.position.z = cluster.R_cmd[6]
             pub_cf2_cmd.publish(des_cf2_msg)
 
-            # Record timestamp and positions
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-            timestamps.append(current_time)
-            cur_cf1_positions.append(cur_position_cf1)
-            cur_cf2_positions.append(cur_position_cf2)
-            cur_cluster_positions.append(cur_cluster_our_frame[:3])
-            des_cluster_positions.append(des_cluster_our_frame[:3])
-            des_cf1_positions.append(cluster.R_cmd[:3])
-            des_cf2_positions.append(cluster.R_cmd[4:7])
+            # check if enough time has passed to capture a frame
+            # if so, record the current positions and timestamp
+            current_time = datetime.now()
+            if (current_time - last_capture_time).total_seconds() >= FRAME_CAPTURE_INTERVAL:
+                # Record timestamp and positions
+                timestamps.append(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+                cur_cf1_positions.append(cur_position_cf1)
+                cur_cf2_positions.append(cur_position_cf2)
+                cur_cluster_positions.append(cur_cluster_our_frame[:3])
+                des_cluster_positions.append(des_cluster_our_frame[:3])
+                des_cf1_positions.append(cluster.R_cmd[:3])
+                des_cf2_positions.append(cluster.R_cmd[4:7])
 
+                #update last capture time
+                last_capture_time = current_time
 
 
     except KeyboardInterrupt:
         print("Shutting down...")
-        #Shutdown ROS nodes
-        optitrack_subscriber_cf1.destroy_node()
-        optitrack_subscriber_cf2.destroy_node()
-        rclpy.shutdown()
         #save flight data
+
+        #ensure directory exists
+        os.makedirs('cluster_data', exist_ok=True)
         # Save data to CSV
-        with open(f'cluster_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv', 'w', newline='') as csvfile:
+        with open(f'cluster_data/cluster_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Timestamp', 'Cur_CF1_X', 'Cur_CF1_Y', 'Cur_CF1_Z',
                             'Cur_CF2_X', 'Cur_CF2_Y', 'Cur_CF2_Z',
@@ -158,6 +171,12 @@ def main(args=None):
                     *des_cf1_positions[i],
                     *des_cf2_positions[i]
                 ])
+
+    finally:
+        # Shutdown ROS nodes
+        optitrack_subscriber_cf1.destroy_node()
+        optitrack_subscriber_cf2.destroy_node()
+        rclpy.shutdown()
 
         # Plot data
         fig = plt.figure()
@@ -187,11 +206,6 @@ def main(args=None):
         plt.title('3D Position Data')
         plt.show()
         print("plotting 3D data")
-    finally:
-        #
-        print("Shutting down in finally...")
-
-        
 
 
 if __name__ == '__main__':
