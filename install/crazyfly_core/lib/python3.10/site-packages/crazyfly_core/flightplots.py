@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 # Filepath to the CSV file
 file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250502_192149.csv"
@@ -40,3 +42,4 @@ plt.grid()
 # Show the plot
 plt.tight_layout()
 plt.show()
+

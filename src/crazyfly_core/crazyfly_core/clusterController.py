@@ -29,19 +29,13 @@ def main(args=None):
     cluster.C_des = cluster.frameOursToAnne([1.5, 1, 1, 0, 0, 0, 0, 1]) # convert to Anne's frame 
 
     # publish current cluster Pose for visualization
-    # NOTE : try removing the creation of this node, dont need it accroding to demi!
+    # TODO : need to figure out the issue of 3 duplicate nodes
     pubNode = rclpy.create_node('cluster_control_pub_node')
-    print("creating cluster control pub node")
-    pub_cur_cluster = pubNode.create_publisher(PoseStamped, '/cluster_state', 10)
-    # self.cur_cluster_pub = self.create_publisher(PoseStamped, '/cluster_state', 10) #this approach doesnt work unless we turn this into a class with a Node
 
-    pub_des_cluster = pubNode.create_publisher(PoseStamped, '/cluster_desired', 10)
-    
     # publishers for R_cmd values for each drone for PID control
     pub_cf1_cmd = pubNode.create_publisher(PoseStamped, '/cf1_cmd', 10)
     pub_cf2_cmd = pubNode.create_publisher(PoseStamped, '/cf2_cmd', 10)
     
-
     # Create a multi-threaded executor
     executor = MultiThreadedExecutor()
 
@@ -56,9 +50,13 @@ def main(args=None):
     cur_cf1_positions = []
     cur_cf2_positions = []
     cur_cluster_positions = []
+    cur_cluster_variables = []
     des_cluster_positions = []
+    des_cluster_variables = []
     des_cf1_positions = []
+    safe_cf1_positions = []
     des_cf2_positions = []
+    safe_cf2_positions = []
 
     # Frame capture interval (how often data should be collected for graphing)
     FRAME_CAPTURE_INTERVAL = 0.1 # frequency in seconds
@@ -74,9 +72,6 @@ def main(args=None):
             # needs to be assigned to temp variables to avoid race condition errors
             cur_position_cf1 = optitrack_subscriber_cf1.get_position()  # Drone 1 position
             cur_position_cf2 = optitrack_subscriber_cf2.get_position()  # Drone 2 position
-            
-            # print("cf1 position:", cur_position_cf1)
-            # print("cf2 position:", cur_position_cf2)
 
             # Update cluster with the current positions of the drones
             cluster.updatePositions(cur_position_cf1, cur_position_cf2)
@@ -84,50 +79,43 @@ def main(args=None):
             # Perform cluster calculations
             cluster.update()
 
-            # print("cf1 commanded position:", cluster.R_cmd[0:3])
-            # print("cf2 commanded position:", cluster.R_cmd[4:7])
-
-
-            # Publish messages for visualization on RViz2
-            cur_cluster_msg = PoseStamped()
-            cur_cluster_msg.header.stamp = pubNode.get_clock().now().to_msg()
-            cur_cluster_msg.header.frame_id = "world"
-            #need to convert to Anne's frame for visualization
-            # NOTE : transformations are weird to show up correctly in Rviz
-            cur_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_cur)
-            cur_cluster_msg.pose.position.x = cur_cluster_our_frame[0]
-            cur_cluster_msg.pose.position.y = cur_cluster_our_frame[1]
-            cur_cluster_msg.pose.position.z = cur_cluster_our_frame[2]
-            pub_cur_cluster.publish(cur_cluster_msg)
-
-            des_cluster_msg = PoseStamped()
-            des_cluster_msg.header.stamp = pubNode.get_clock().now().to_msg()
-            des_cluster_msg.header.frame_id = "world"
-            #need to convert to Anne's frame for visualization
-            des_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_des)
-            des_cluster_msg.pose.position.x = des_cluster_our_frame[0]
-            des_cluster_msg.pose.position.y = des_cluster_our_frame[1]
-            des_cluster_msg.pose.position.z = des_cluster_our_frame[2]
-            pub_des_cluster.publish(des_cluster_msg)
-
+            
             # publish R_cmd values for each drone for PID control
             des_cf1_msg = PoseStamped()
             des_cf1_msg.header.stamp = pubNode.get_clock().now().to_msg()
             des_cf1_msg.header.frame_id = "world"
             #R_cmd is already in our frame
-            des_cf1_msg.pose.position.x = cluster.R_cmd[0]
-            des_cf1_msg.pose.position.y = cluster.R_cmd[1]
-            des_cf1_msg.pose.position.z = cluster.R_cmd[2]
+            original_des_cf1 = cluster.R_cmd[:3]
+            # clamp the values betweeen 0 and 3 for safety (prevents commands outside of test space)
+            safe_cf1_cmd = [
+                max(0, min(original_des_cf1[0], 3)),  # x clamp cf 1
+                max(0, min(original_des_cf1[1], 3)),  # y clamp cf 1
+                max(0, min(original_des_cf1[2], 3))   # z clamp cf 1
+            ]
+            des_cf1_msg.pose.position.x = safe_cf1_cmd[0]
+            des_cf1_msg.pose.position.y = safe_cf1_cmd[1]
+            des_cf1_msg.pose.position.z = safe_cf1_cmd[2]
             pub_cf1_cmd.publish(des_cf1_msg)
 
             des_cf2_msg = PoseStamped()
             des_cf2_msg.header.stamp = pubNode.get_clock().now().to_msg()
             des_cf2_msg.header.frame_id = "world"
             #R_cmd is already in our frame
-            des_cf2_msg.pose.position.x = cluster.R_cmd[4]
-            des_cf2_msg.pose.position.y = cluster.R_cmd[5]
-            des_cf2_msg.pose.position.z = cluster.R_cmd[6]
+            original_des_cf2 = cluster.R_cmd[4:7]
+            # clamp the values betweeen 0 and 3 for safety (prevents commands outside of test space)
+            safe_cf2_cmd = [
+                max(0, min(original_des_cf2[0], 3)),  # x clamp cf 2
+                max(0, min(original_des_cf2[1], 3)),  # y clamp cf 2
+                max(0, min(original_des_cf2[2], 3))   # z clamp cf 2
+            ]
+            des_cf2_msg.pose.position.x = safe_cf2_cmd[0]
+            des_cf2_msg.pose.position.y = safe_cf2_cmd[1]
+            des_cf2_msg.pose.position.z = safe_cf2_cmd[2]
             pub_cf2_cmd.publish(des_cf2_msg)
+
+            # conver current and desired cluster positions to our frame
+            cur_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_cur)  # needed for data collection
+            des_cluster_our_frame = cluster.frameAnneToOurs(cluster.C_des)  # needed for data collection
 
             # check if enough time has passed to capture a frame
             # if so, record the current positions and timestamp
@@ -140,8 +128,14 @@ def main(args=None):
                 cur_cluster_positions.append(cur_cluster_our_frame[:3])
                 des_cluster_positions.append(des_cluster_our_frame[:3])
                 des_cf1_positions.append(cluster.R_cmd[:3])
+                safe_cf1_positions.append(safe_cf1_cmd)
                 des_cf2_positions.append(cluster.R_cmd[4:7])
-
+                safe_cf2_positions.append(safe_cf2_cmd)
+                #extract the cluster variables
+                cur_alpha, cur_beta, cur_phi1, cur_phi2, cur_p = cluster.C_cur[3:8]
+                des_alpha, des_beta, des_phi1, des_phi2, des_p = cluster.C_des[3:8]
+                cur_cluster_variables.append([cur_alpha, cur_beta, cur_phi1, cur_phi2, cur_p])
+                des_cluster_variables.append([des_alpha, des_beta, des_phi1, des_phi2, des_p])
                 #update last capture time
                 last_capture_time = current_time
 
@@ -155,21 +149,30 @@ def main(args=None):
         # Save data to CSV
         with open(f'cluster_data/cluster_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['Timestamp', 'Cur_CF1_X', 'Cur_CF1_Y', 'Cur_CF1_Z',
+            writer.writerow(['Timestamp', 
+                             'Cur_CF1_X', 'Cur_CF1_Y', 'Cur_CF1_Z',
                             'Cur_CF2_X', 'Cur_CF2_Y', 'Cur_CF2_Z',
                             'Cur_Cluster_X', 'Cur_Cluster_Y', 'Cur_Cluster_Z',
+                            'Cur_Alpha', 'Cur_Beta', 'Cur_Phi1', 'Cur_Phi2', 'Cur_P',
                             'Des_Cluster_X', 'Des_Cluster_Y', 'Des_Cluster_Z',
+                            'Des_Alpha', 'Des_Beta', 'Des_Phi1', 'Des_Phi2', 'Des_P',
                             'Des_CF1_X', 'Des_CF1_Y', 'Des_CF1_Z',
-                            'Des_CF2_X', 'Des_CF2_Y', 'Des_CF2_Z'])
+                            'Safe_CF1_X', 'Safe_CF1_Y', 'Safe_CF1_Z',
+                            'Des_CF2_X', 'Des_CF2_Y', 'Des_CF2_Z',
+                            'Safe_CF2_X', 'Safe_CF2_Y', 'Safe_CF2_Z'])
             for i in range(len(timestamps)):
                 writer.writerow([
                     timestamps[i],
                     *cur_cf1_positions[i],
                     *cur_cf2_positions[i],
                     *cur_cluster_positions[i],
+                    *cur_cluster_variables[i],
                     *des_cluster_positions[i],
+                    *des_cluster_variables[i],
                     *des_cf1_positions[i],
-                    *des_cf2_positions[i]
+                    *safe_cf1_positions[i],
+                    *des_cf2_positions[i],
+                    *safe_cf2_positions[i]
                 ])
 
     finally:
