@@ -46,7 +46,7 @@ class MinimalSubscriber(Node):
         
         # safety variable to prevent motors from running when testing
         # set to true to run motors
-        self.run_motors_bool = False
+        self.run_motors_bool = True
         
         
         self.subscription  # prevent unused variable warning

@@ -70,9 +70,9 @@ class PIDControllerCF1(Node):
         self.hover = 44000 #originally 46500     
         self.max_thrust = 55000 #origionall 50000
         self.min_thrust = 42000
-        self.k_p_y = 15000 #4000 seemed ideal value at the time
+        self.k_p_y = 30000 #Origionally 15000 May 6 
         self.k_i_y = 3250 #extra amount of thrust wanted (originally 2000)
-        self.k_d_y = 10000
+        self.k_d_y = 15000 #Origionally 10000
         #there used to be a threshold_met for thrust but was unused and now used for waypoint synchronization
 
         self.cur_y_error = 0.0
@@ -93,9 +93,9 @@ class PIDControllerCF1(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
         # values for horizontal Z (roll) PID
-        self.k_p_z = 2
+        self.k_p_z = 3.5 #origionally 2 May 6 
         self.k_i_z = 0.6
-        self.k_d_z = 3.5
+        self.k_d_z = 5.5 #previously 3.5 May 6 
         self.max_roll = 3.0
         self.min_roll = -3.0
 
@@ -132,12 +132,12 @@ class PIDControllerCF1(Node):
     
     def commanded_position_callback(self, msg):
         if msg.header.frame_id == "world":
-            # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
-            self.commanded_position[0] = self.constant_position[0] # use constant value for testing
+            self.commanded_position[0] = msg.pose.position.x #use actual commanded position
+            # self.commanded_position[0] = self.constant_position[0] # use constant value for testing
             self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
             # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
-            # self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
-            self.commanded_position[2] = self.constant_position[2] # use constant value for testing
+            self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
+            # self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 
             # print(f"Commanded position callback: {self.commanded_position}")
         # error handling for unexpected pose message

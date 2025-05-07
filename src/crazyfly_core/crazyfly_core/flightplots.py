@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Filepath to the CSV file
-file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250502_192149.csv"
+file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250506_184801.csv"
 
 # Read the CSV file into a DataFrame
 data = pd.read_csv(file_path)
@@ -43,3 +43,35 @@ plt.grid()
 plt.tight_layout()
 plt.show()
 
+# Convert the relevant columns to numpy arrays for compatibility with matplotlib
+cur_cf1_positions = data[['Cur_CF1_X', 'Cur_CF1_Z', 'Cur_CF1_Y']].to_numpy()
+cur_cf2_positions = data[['Cur_CF2_X', 'Cur_CF2_Z', 'Cur_CF2_Y']].to_numpy()
+cur_cluster_positions = data[['Cur_Cluster_X', 'Cur_Cluster_Z', 'Cur_Cluster_Y']].to_numpy()
+des_cluster_positions = data[['Des_Cluster_X', 'Des_Cluster_Z', 'Des_Cluster_Y']].to_numpy()
+des_cf1_positions = data[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
+des_cf2_positions = data[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
+
+# Plot 3D position data
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Plot each dataset
+ax.scatter(cur_cf1_positions[:, 0], cur_cf1_positions[:, 1], cur_cf1_positions[:, 2], label='Cur_CF1', c='r')
+ax.scatter(cur_cf2_positions[:, 0], cur_cf2_positions[:, 1], cur_cf2_positions[:, 2], label='Cur_CF2', c='g')
+ax.scatter(cur_cluster_positions[:, 0], cur_cluster_positions[:, 1], cur_cluster_positions[:, 2], label='Cur_Cluster', c='b')
+ax.scatter(des_cluster_positions[:, 0], des_cluster_positions[:, 1], des_cluster_positions[:, 2], label='Des_Cluster', c='y')
+ax.scatter(des_cf1_positions[:, 0], des_cf1_positions[:, 1], des_cf1_positions[:, 2], label='Des_CF1', c='m')
+ax.scatter(des_cf2_positions[:, 0], des_cf2_positions[:, 1], des_cf2_positions[:, 2], label='Des_CF2', c='c')
+
+# Normalize the axes to start at 0
+ax.set_xlim(left=0)
+ax.set_ylim(bottom=0)
+ax.set_zlim(bottom=0)
+
+# Label axes
+ax.set_xlabel('X Position')
+ax.set_ylabel('Z Position')
+ax.set_zlabel('Y Position')
+ax.legend()
+plt.title('3D Position Data')
+plt.show()

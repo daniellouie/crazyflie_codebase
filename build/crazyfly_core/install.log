@@ -1,6 +1,7 @@
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/cf_pid_controller.py
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/cf_distance.py
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/cf_driver.py
+/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/clusterControllerClass.py
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/optitrack_subscriber2.py
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/crazyflie_control.py
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/cf_command_controller2.py
@@ -20,6 +21,7 @@
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/cf_pid_controller.cpython-310.pyc
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/cf_distance.cpython-310.pyc
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/cf_driver.cpython-310.pyc
+/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/clusterControllerClass.cpython-310.pyc
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/optitrack_subscriber2.cpython-310.pyc
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/crazyflie_control.cpython-310.pyc
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/__pycache__/cf_command_controller2.cpython-310.pyc
@@ -50,6 +52,7 @@
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/cf_driver
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/cf_thrust_controller
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/clusterController
+/home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/clusterControllerClass
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/fake_thrust_pub
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/optitrack_subscriber
 /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core/optitrack_subscriber2

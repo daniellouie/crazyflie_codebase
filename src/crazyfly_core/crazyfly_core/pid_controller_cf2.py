@@ -70,7 +70,7 @@ class PIDControllerCF2(Node):
         self.hover = 44000 #originally 46500     
         self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
-        self.k_p_y = 19000 #previously 15000 on jan 22
+        self.k_p_y = 32000 #previously 19000 on May 6 
         self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
         self.k_d_y = 10500 #previously 10000
         self.threshold_met = False
@@ -83,7 +83,7 @@ class PIDControllerCF2(Node):
         # values for horizontal X (pitch) PID
         self.k_p_x = 2
         self.k_i_x = 0.6
-        self.k_d_x = 4.0
+        self.k_d_x = 4.0 #previously 4.0 May 6 
         self.max_pitch = 3.0
         self.min_pitch = -3.0
 
@@ -93,9 +93,9 @@ class PIDControllerCF2(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
         # values for horizontal Z (roll) PID
-        self.k_p_z = 2
+        self.k_p_z = 2 #Origionally 2
         self.k_i_z = 0.6
-        self.k_d_z = 4.0 #previously 3.5
+        self.k_d_z = 4.1 #previously 4.0 May 6 
         self.max_roll = 3.0
         self.min_roll = -3.0
 
@@ -133,12 +133,12 @@ class PIDControllerCF2(Node):
     
     def commanded_position_callback(self, msg):
         if msg.header.frame_id == "world":
-            # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
-            self.commanded_position[0] = self.constant_position[0] # use constant value for testing
+            self.commanded_position[0] = msg.pose.position.x #use actual commanded position
+            # self.commanded_position[0] = self.constant_position[0] # use constant value for testing
             self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
             # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
-            # self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
-            self.commanded_position[2] = self.constant_position[2] # use constant value for testing
+            self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
+            # self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 
             # print(f"Commanded position callback: {self.commanded_position}")
         # error handling for unexpected pose message
@@ -221,7 +221,7 @@ class PIDControllerCF2(Node):
         #if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
         #    self.cur_y_error = 0
 
-        y_fp = self.k_p_y * self.cur_y_error*2.0
+        y_fp = self.k_p_y * self.cur_y_error
         #print(f"y_fp: {y_fp}")
 
         #calculate what k_i would be
