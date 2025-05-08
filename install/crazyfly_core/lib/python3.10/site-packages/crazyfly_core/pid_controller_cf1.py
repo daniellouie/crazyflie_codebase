@@ -93,9 +93,9 @@ class PIDControllerCF1(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
         # values for horizontal Z (roll) PID
-        self.k_p_z = 2.0 #origionally 2 May 6 
+        self.k_p_z = 3.5 #origionally 2 May 6 
         self.k_i_z = 0.6
-        self.k_d_z = 3.5 #previously 3.5 May 6 
+        self.k_d_z = 5.5 #previously 3.5 May 6 
         self.max_roll = 3.0
         self.min_roll = -3.0
 

@@ -50,7 +50,7 @@ class PIDControllerCF2(Node):
         #INITIAL SET UP (just using current and target positions for now)
         self.current_position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         self.commanded_position = [0.0, 0.0, 0.0] # commanded position from the cluster controller
-        self.constant_position = [1.0, 1.0, 1.0] # constant position for testing
+        self.constant_position = [1.0, 1.0, 2.0] # constant position for testing
   
         # Controls variables
         self.t = 0.01 #average time between signals in seconds
@@ -70,7 +70,7 @@ class PIDControllerCF2(Node):
         self.hover = 44000 #originally 46500     
         self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
-        self.k_p_y = 30000 #previously 19000 on May 6 
+        self.k_p_y = 32000 #previously 19000 on May 6 
         self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
         self.k_d_y = 10500 #previously 10000
         self.threshold_met = False
@@ -93,7 +93,7 @@ class PIDControllerCF2(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
         # values for horizontal Z (roll) PID
-        self.k_p_z = 2.5 #Origionally 2 May 6 
+        self.k_p_z = 2 #Origionally 2
         self.k_i_z = 0.6
         self.k_d_z = 4.1 #previously 4.0 May 6 
         self.max_roll = 3.0

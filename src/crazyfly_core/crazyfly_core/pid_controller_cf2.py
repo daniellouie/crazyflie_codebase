@@ -50,7 +50,7 @@ class PIDControllerCF2(Node):
         #INITIAL SET UP (just using current and target positions for now)
         self.current_position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         self.commanded_position = [0.0, 0.0, 0.0] # commanded position from the cluster controller
-        self.constant_position = [1.0, 1.0, 1.0] # constant position for testing
+        self.constant_position = [1.0, 1.0, 2.0] # constant position for testing
   
         # Controls variables
         self.t = 0.01 #average time between signals in seconds

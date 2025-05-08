@@ -46,7 +46,7 @@ class MinimalSubscriber(Node):
         
         # safety variable to prevent motors from running when testing
         # set to true to run motors
-        self.run_motors_bool = True
+        self.run_motors_bool = False
         
         
         self.subscription  # prevent unused variable warning
@@ -82,7 +82,7 @@ class MinimalSubscriber(Node):
 
 
         # limit flight time for testing
-        self.flight_duration = 30.0 #in seconds
+        self.flight_duration = 15.0 #in seconds
 
 
         # constant command values for testing

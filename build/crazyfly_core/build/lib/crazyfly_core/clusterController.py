@@ -35,6 +35,10 @@ def main(args=None):
     # publishers for R_cmd values for each drone for PID control
     pub_cf1_cmd = pubNode.create_publisher(PoseStamped, '/cf1_cmd', 10)
     pub_cf2_cmd = pubNode.create_publisher(PoseStamped, '/cf2_cmd', 10)
+
+    pub_C_cur = pubNode.create_publisher(PoseStamped, 'cluster/C_cur', 10)
+    pub_C_des = pubNode.create_publisher(PoseStamped, 'cluster/C_des', 10)
+    pub_C_cmd = pubNode.create_publisher(PoseStamped, 'cluster/C_cmd', 10)
     
     # Create a multi-threaded executor
     executor = MultiThreadedExecutor()
@@ -78,6 +82,9 @@ def main(args=None):
 
             # Perform cluster calculations
             cluster.update()
+
+            # publish current cluster Pose for visualization
+
 
             
             # publish R_cmd values for each drone for PID control

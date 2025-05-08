@@ -1,0 +1,340 @@
+[0.125s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.125s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7f8a76308a60>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7f8a76308520>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7f8a76308520>>)
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.323s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.324s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/rsl/crazyfly_ws'
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.324s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.336s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['ignore', 'ignore_ament_install']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'ignore'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'ignore_ament_install'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['colcon_pkg']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'colcon_pkg'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['colcon_meta']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'colcon_meta'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['ros']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'ros'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['cmake', 'python']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'cmake'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'python'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extensions ['python_setup_py']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cache) by extension 'python_setup_py'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['ignore', 'ignore_ament_install']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'ignore'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'ignore_ament_install'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['colcon_pkg']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'colcon_pkg'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['colcon_meta']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'colcon_meta'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['ros']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'ros'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['cmake', 'python']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'cmake'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'python'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extensions ['python_setup_py']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(cluster_data) by extension 'python_setup_py'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['ignore', 'ignore_ament_install']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'colcon_meta'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['ros']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'ros'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['cmake', 'python']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'cmake'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'python'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extensions ['python_setup_py']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(data) by extension 'python_setup_py'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ignore_ament_install'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['colcon_pkg']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'colcon_pkg'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['colcon_meta']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'colcon_meta'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['ros']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ros'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['cmake', 'python']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'cmake'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'python'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['python_setup_py']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'python_setup_py'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'ignore_ament_install'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['colcon_pkg']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'colcon_pkg'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['colcon_meta']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'colcon_meta'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['ros']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'ros'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['cmake', 'python']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'cmake'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'python'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extensions ['python_setup_py']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/__pycache__) by extension 'python_setup_py'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['ignore', 'ignore_ament_install']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'ignore'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'ignore_ament_install'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['colcon_pkg']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'colcon_pkg'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['colcon_meta']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'colcon_meta'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['ros']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'ros'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['cmake', 'python']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'cmake'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'python'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extensions ['python_setup_py']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cache) by extension 'python_setup_py'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['ignore', 'ignore_ament_install']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'ignore'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'ignore_ament_install'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['colcon_pkg']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'colcon_pkg'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['colcon_meta']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'colcon_meta'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['ros']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'ros'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['cmake', 'python']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'cmake'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'python'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extensions ['python_setup_py']
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/cluster_data) by extension 'python_setup_py'
+[0.343s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['ignore', 'ignore_ament_install']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'ignore'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'ignore_ament_install'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['colcon_pkg']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'colcon_pkg'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['colcon_meta']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'colcon_meta'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['ros']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'ros'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['cmake', 'python']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'cmake'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'python'
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extensions ['python_setup_py']
+[0.344s] Level 1:colcon.colcon_core.package_identification:_identify(launch/data) by extension 'python_setup_py'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.345s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extensions ['ignore', 'ignore_ament_install']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extension 'ignore'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extension 'ignore_ament_install'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extensions ['colcon_pkg']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extension 'colcon_pkg'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extensions ['colcon_meta']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extension 'colcon_meta'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extensions ['ros']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/controller_core) by extension 'ros'
+[0.349s] DEBUG:colcon.colcon_core.package_identification:Package 'src/controller_core' with type 'ros.ament_python' and name 'controller_core'
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extensions ['ignore', 'ignore_ament_install']
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extension 'ignore'
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extension 'ignore_ament_install'
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extensions ['colcon_pkg']
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extension 'colcon_pkg'
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extensions ['colcon_meta']
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extension 'colcon_meta'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extensions ['ros']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/crazyfly_core) by extension 'ros'
+[0.350s] DEBUG:colcon.colcon_core.package_identification:Package 'src/crazyfly_core' with type 'ros.ament_python' and name 'crazyfly_core'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extensions ['ignore', 'ignore_ament_install']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extension 'ignore'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extension 'ignore_ament_install'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extensions ['colcon_pkg']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extension 'colcon_pkg'
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extensions ['colcon_meta']
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extension 'colcon_meta'
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extensions ['ros']
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/optitrack_core) by extension 'ros'
+[0.351s] DEBUG:colcon.colcon_core.package_identification:Package 'src/optitrack_core' with type 'ros.ament_python' and name 'optitrack_core'
+[0.351s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.351s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.351s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.351s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.351s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.373s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.373s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.376s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 3 installed packages in /home/rsl/crazyfly_ws/install
+[0.376s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/rsl/optitrack_ws/install
+[0.378s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 273 installed packages in /opt/ros/humble
+[0.390s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_args' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_target' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_clean_cache' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_clean_first' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'cmake_force_configure' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'ament_cmake_args' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'catkin_cmake_args' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'controller_core' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.434s] DEBUG:colcon.colcon_core.verb:Building package 'controller_core' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rsl/crazyfly_ws/build/controller_core', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rsl/crazyfly_ws/install/controller_core', 'merge_install': False, 'path': '/home/rsl/crazyfly_ws/src/controller_core', 'symlink_install': False, 'test_result_base': None}
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_args' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_target' from command line to 'None'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_clean_cache' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_clean_first' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'cmake_force_configure' from command line to 'False'
+[0.434s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'ament_cmake_args' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'catkin_cmake_args' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'crazyfly_core' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.435s] DEBUG:colcon.colcon_core.verb:Building package 'crazyfly_core' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rsl/crazyfly_ws/build/crazyfly_core', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rsl/crazyfly_ws/install/crazyfly_core', 'merge_install': False, 'path': '/home/rsl/crazyfly_ws/src/crazyfly_core', 'symlink_install': False, 'test_result_base': None}
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_args' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_target' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_clean_cache' from command line to 'False'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_clean_first' from command line to 'False'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'cmake_force_configure' from command line to 'False'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'ament_cmake_args' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'catkin_cmake_args' from command line to 'None'
+[0.435s] Level 5:colcon.colcon_core.verb:set package 'optitrack_core' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.435s] DEBUG:colcon.colcon_core.verb:Building package 'optitrack_core' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rsl/crazyfly_ws/build/optitrack_core', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rsl/crazyfly_ws/install/optitrack_core', 'merge_install': False, 'path': '/home/rsl/crazyfly_ws/src/optitrack_core', 'symlink_install': False, 'test_result_base': None}
+[0.435s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.436s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.437s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rsl/crazyfly_ws/src/controller_core' with build type 'ament_python'
+[0.437s] Level 1:colcon.colcon_core.shell:create_environment_hook('controller_core', 'ament_prefix_path')
+[0.439s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.439s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/ament_prefix_path.ps1'
+[0.440s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/ament_prefix_path.dsv'
+[0.441s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/ament_prefix_path.sh'
+[0.441s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.442s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.445s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rsl/crazyfly_ws/src/crazyfly_core' with build type 'ament_python'
+[0.446s] Level 1:colcon.colcon_core.shell:create_environment_hook('crazyfly_core', 'ament_prefix_path')
+[0.446s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/ament_prefix_path.ps1'
+[0.446s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/ament_prefix_path.dsv'
+[0.447s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/ament_prefix_path.sh'
+[0.447s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.447s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.451s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rsl/crazyfly_ws/src/optitrack_core' with build type 'ament_python'
+[0.451s] Level 1:colcon.colcon_core.shell:create_environment_hook('optitrack_core', 'ament_prefix_path')
+[0.451s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/ament_prefix_path.ps1'
+[0.452s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/ament_prefix_path.dsv'
+[0.452s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/ament_prefix_path.sh'
+[0.453s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.453s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.732s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rsl/crazyfly_ws/src/controller_core'
+[0.733s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.733s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.034s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rsl/crazyfly_ws/src/crazyfly_core'
+[1.035s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.035s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.339s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rsl/crazyfly_ws/src/optitrack_core'
+[1.340s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.340s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.737s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rsl/crazyfly_ws/src/controller_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/controller_core/prefix_override:/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/controller_core build --build-base /home/rsl/crazyfly_ws/build/controller_core/build install --record /home/rsl/crazyfly_ws/build/controller_core/install.log --single-version-externally-managed install_data
+[1.748s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rsl/crazyfly_ws/src/crazyfly_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data
+[1.765s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rsl/crazyfly_ws/src/optitrack_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/optitrack_core/prefix_override:/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/optitrack_core build --build-base /home/rsl/crazyfly_ws/build/optitrack_core/build install --record /home/rsl/crazyfly_ws/build/optitrack_core/install.log --single-version-externally-managed install_data
+[2.108s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rsl/crazyfly_ws/src/controller_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/controller_core/prefix_override:/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/controller_core build --build-base /home/rsl/crazyfly_ws/build/controller_core/build install --record /home/rsl/crazyfly_ws/build/controller_core/install.log --single-version-externally-managed install_data
+[2.112s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core' for CMake module files
+[2.113s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core' for CMake config files
+[2.114s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core/lib'
+[2.114s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core/bin'
+[2.114s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core/lib/pkgconfig/controller_core.pc'
+[2.115s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages'
+[2.115s] Level 1:colcon.colcon_core.shell:create_environment_hook('controller_core', 'pythonpath')
+[2.115s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/pythonpath.ps1'
+[2.116s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/pythonpath.dsv'
+[2.116s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/hook/pythonpath.sh'
+[2.117s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/controller_core/bin'
+[2.117s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(controller_core)
+[2.118s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/package.ps1'
+[2.119s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/package.dsv'
+[2.120s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/package.sh'
+[2.121s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/package.bash'
+[2.122s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/controller_core/share/controller_core/package.zsh'
+[2.123s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rsl/crazyfly_ws/install/controller_core/share/colcon-core/packages/controller_core)
+[2.124s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core' for CMake module files
+[2.125s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rsl/crazyfly_ws/src/optitrack_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/optitrack_core/prefix_override:/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/optitrack_core build --build-base /home/rsl/crazyfly_ws/build/optitrack_core/build install --record /home/rsl/crazyfly_ws/build/optitrack_core/install.log --single-version-externally-managed install_data
+[2.125s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core' for CMake config files
+[2.126s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core/lib'
+[2.126s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core/bin'
+[2.126s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core/lib/pkgconfig/optitrack_core.pc'
+[2.127s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages'
+[2.127s] Level 1:colcon.colcon_core.shell:create_environment_hook('optitrack_core', 'pythonpath')
+[2.127s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/pythonpath.ps1'
+[2.127s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/pythonpath.dsv'
+[2.128s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/hook/pythonpath.sh'
+[2.128s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/optitrack_core/bin'
+[2.128s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(optitrack_core)
+[2.129s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/package.ps1'
+[2.129s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/package.dsv'
+[2.129s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/package.sh'
+[2.130s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/package.bash'
+[2.130s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/optitrack_core/share/optitrack_core/package.zsh'
+[2.130s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rsl/crazyfly_ws/install/optitrack_core/share/colcon-core/packages/optitrack_core)
+[2.131s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core' for CMake module files
+[2.132s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rsl/crazyfly_ws/src/crazyfly_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data
+[2.132s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core' for CMake config files
+[2.133s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core/lib'
+[2.133s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core/bin'
+[2.133s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core/lib/pkgconfig/crazyfly_core.pc'
+[2.133s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages'
+[2.133s] Level 1:colcon.colcon_core.shell:create_environment_hook('crazyfly_core', 'pythonpath')
+[2.134s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/pythonpath.ps1'
+[2.134s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/pythonpath.dsv'
+[2.134s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/hook/pythonpath.sh'
+[2.135s] Level 1:colcon.colcon_core.environment:checking '/home/rsl/crazyfly_ws/install/crazyfly_core/bin'
+[2.135s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(crazyfly_core)
+[2.135s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/package.ps1'
+[2.136s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/package.dsv'
+[2.136s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/package.sh'
+[2.136s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/package.bash'
+[2.137s] INFO:colcon.colcon_core.shell:Creating package script '/home/rsl/crazyfly_ws/install/crazyfly_core/share/crazyfly_core/package.zsh'
+[2.137s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rsl/crazyfly_ws/install/crazyfly_core/share/colcon-core/packages/crazyfly_core)
+[2.137s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[2.138s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[2.138s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[2.138s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[2.144s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[2.144s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[2.144s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[2.166s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[2.166s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rsl/crazyfly_ws/install/local_setup.ps1'
+[2.169s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/rsl/crazyfly_ws/install/_local_setup_util_ps1.py'
+[2.172s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rsl/crazyfly_ws/install/setup.ps1'
+[2.175s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rsl/crazyfly_ws/install/local_setup.sh'
+[2.176s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/rsl/crazyfly_ws/install/_local_setup_util_sh.py'
+[2.176s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rsl/crazyfly_ws/install/setup.sh'
+[2.178s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rsl/crazyfly_ws/install/local_setup.bash'
+[2.179s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rsl/crazyfly_ws/install/setup.bash'
+[2.181s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rsl/crazyfly_ws/install/local_setup.zsh'
+[2.181s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rsl/crazyfly_ws/install/setup.zsh'

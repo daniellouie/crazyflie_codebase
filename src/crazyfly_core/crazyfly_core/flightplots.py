@@ -4,13 +4,13 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Filepath to the CSV file
-file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250506_184801.csv"
-
+file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250507_174545.csv"
 # Read the CSV file into a DataFrame
 data = pd.read_csv(file_path)
 
-col1 = 'Cur_Cluster_Y'
-col2 = 'Des_Cluster_Y'
+col1 = 'Des_CF2_Z'
+col2 = 'Safe_CF2_Z'
+col3 = 'Cur_CF2_Z'
 
 # Convert the 'Timestamp' column to datetime
 data['Timestamp'] = pd.to_datetime(data['Timestamp'])
@@ -26,16 +26,18 @@ data['Timestamp'] = pd.to_datetime(data['Timestamp'])
 timestamps = data['Timestamp'].to_numpy()
 line1 = data[col1].to_numpy()
 line2 = data[col2].to_numpy()
+line3 = data[col3].to_numpy()
 
 # Plot the time series for columns 2 (Cur_CF1_X) and 8 (Cur_Cluster_X)
 plt.figure(figsize=(12, 6))
 plt.plot(timestamps, line1, label=col1, color='blue')
 plt.plot(timestamps, line2, label=col2, color='orange')
+plt.plot(timestamps, line3, label=col3, color='green')
 
 # Add labels, title, and legend
 plt.xlabel('Timestamp')
 plt.ylabel('Values')
-plt.title('Time Series Plot of {col1} and {col2}')
+plt.title(f'Time Series Plot of {col1} and {col2} and {col3}')
 plt.legend()
 plt.grid()
 

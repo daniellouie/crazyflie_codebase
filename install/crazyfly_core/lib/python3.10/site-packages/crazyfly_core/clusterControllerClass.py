@@ -22,7 +22,20 @@ class ClusterController(Node):
 
         # Initialize the Cluster class
         self.cluster = Cluster()
-        self.cluster.C_des = self.cluster.frameOursToAnne([1.5, 1, 1, 0, 0, 0, 0, 1])
+
+        # define waypoints for the cluster
+        self.waypoints = [
+            [1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [2, 1, 1.5, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+        ]
+        self.cur_waypoint_index = 0
+        self.cluster.C_des = self.cluster.frameOursToAnne(self.waypoints[self.cur_waypoint_index])  # convert to Anne's frame
+
+        # initialize the time required to hold at each waypoint and the timer
+        self.waypoint_hold_time = 3.0 #in seconds
+        self.waypoint_start_time = None
+        self.waypoint_tolerance = 0.25 # in meters
+
 
         # Publishers
         self.pub_cf1_cmd = self.create_publisher(PoseStamped, '/cf1_cmd', 10)
@@ -64,12 +77,23 @@ class ClusterController(Node):
         des_cf1_msg.header.frame_id = "world"
 
         # Clamp the values between 0 and 3 for safety
-        original_des_cf1 = self.cluster.R_cmd[:3]
+        original_des_cf1 = self.cluster.R_cmd_ours[:3]
+        print("original_des_cf1", original_des_cf1)
         safe_cf1_cmd = [
-            max(0, min(original_des_cf1[0], 3)),
-            max(0, min(original_des_cf1[1], 3)),
-            max(0, min(original_des_cf1[2], 3))
+            0.0,
+            max(0.0, min(original_des_cf1[1], 3.0)),
+            max(0.0, min(original_des_cf1[2], 3.0))
         ]
+        if original_des_cf1[0] < 0.0:
+            print("original_des_cf1[0] < 0.0")
+            safe_cf1_cmd[0] = 0.0
+        elif original_des_cf1[0] > 3.0:
+            print("original_des_cf1[0] > 3.0")
+            safe_cf1_cmd[0] = 3.0
+        else:
+            print("original_des_cf1[0] between 0.0 and 3.0")
+            safe_cf1_cmd[0] = original_des_cf1[0]
+
         des_cf1_msg.pose.position.x = safe_cf1_cmd[0]
         des_cf1_msg.pose.position.y = safe_cf1_cmd[1]
         des_cf1_msg.pose.position.z = safe_cf1_cmd[2]
@@ -79,11 +103,11 @@ class ClusterController(Node):
         des_cf2_msg.header.stamp = self.get_clock().now().to_msg()
         des_cf2_msg.header.frame_id = "world"
 
-        original_des_cf2 = self.cluster.R_cmd[4:7]
+        original_des_cf2 = self.cluster.R_cmd_ours[4:7]
         safe_cf2_cmd = [
-            max(0, min(original_des_cf2[0], 3)),
-            max(0, min(original_des_cf2[1], 3)),
-            max(0, min(original_des_cf2[2], 3))
+            max(0.0, min(original_des_cf2[0], 3.0)),
+            max(0.0, min(original_des_cf2[1], 3.0)),
+            max(0.0, min(original_des_cf2[2], 3.0))
         ]
         des_cf2_msg.pose.position.x = safe_cf2_cmd[0]
         des_cf2_msg.pose.position.y = safe_cf2_cmd[1]
@@ -93,6 +117,36 @@ class ClusterController(Node):
         # Store safe commands for logging
         self.safe_cf1_positions.append(safe_cf1_cmd)
         self.safe_cf2_positions.append(safe_cf2_cmd)
+
+    # check if the cur cluster has reached the desired waypoint for hold_time
+    # returns true if so and false if not
+    def check_waypoint_reached(self):
+        cur_position = self.cluster.frameAnneToOurs(self.cluster.C_cur)[:3]
+        des_position = self.cluster.frameAnneToOurs(self.cluster.C_des)[:3]
+        position_error = np.linalg.norm(np.array(cur_position) - np.array(des_position))
+
+        if position_error < self.waypoint_tolerance:
+            print("within tolerance")
+            if self.waypoint_start_time is None: 
+                self.waypoint_start_time = datetime.now()
+            else:
+                elapsed_time = (datetime.now() - self.waypoint_start_time).total_seconds()
+                if elapsed_time >= self.waypoint_hold_time:
+                    return True
+        else:
+            self.waypoint_start_time = None
+
+        return False
+    
+    def update_waypoint(self):
+        if self.check_waypoint_reached():
+            if self.cur_waypoint_index + 1 < len(self.waypoints):
+                self.cur_waypoint_index += 1
+                self.cluster.C_des = self.cluster.frameOursToAnne(self.waypoints[self.cur_waypoint_index])
+                self.waypoint_start_time = None
+                print(f"Waypoint {self.cur_waypoint_index} reached. Moving to next waypoint.")
+            else:
+                print(f"All waypoints reached, maintaining waypoint {self.cur_waypoint_index}.")
 
     def record_data(self):
         # Record current and desired positions for graphing
@@ -110,8 +164,8 @@ class ClusterController(Node):
             self.cur_cf2_positions.append(cur_position_cf2)
             self.cur_cluster_positions.append(cur_cluster_our_frame[:3])
             self.des_cluster_positions.append(des_cluster_our_frame[:3])
-            self.des_cf1_positions.append(self.cluster.R_cmd[:3])
-            self.des_cf2_positions.append(self.cluster.R_cmd[4:7])
+            self.des_cf1_positions.append(self.cluster.R_cmd_ours[:3])
+            self.des_cf2_positions.append(self.cluster.R_cmd_ours[4:7])
 
             cur_alpha, cur_beta, cur_phi1, cur_phi2, cur_p = self.cluster.C_cur[3:8]
             des_alpha, des_beta, des_phi1, des_phi2, des_p = self.cluster.C_des[3:8]
@@ -190,7 +244,16 @@ class ClusterController(Node):
                 self.update_positions()
                 self.perform_cluster_calculations()
                 self.publish_commands()
+                R_cur = self.cluster.R_cmd_ours
+                C_cur = self.cluster.C_cur
+                C_des = self.cluster.C_des
+                C_err = self.cluster.C_err
+                print("R_cur:", R_cur)
+                print("C_cur:", C_cur)
+                print("C_des:", C_des)
+                print("C_err:", C_err)
                 self.record_data()
+                self.update_waypoint() #check and update waypoint
         except KeyboardInterrupt:
             self.get_logger().info("Shutting down...")
            

@@ -10,23 +10,12 @@ setup.py
 ../../build/crazyfly_core/crazyfly_core.egg-info/top_level.txt
 ../../build/crazyfly_core/crazyfly_core.egg-info/zip-safe
 crazyfly_core/__init__.py
-crazyfly_core/cf_command_controller.py
 crazyfly_core/cf_command_controller2.py
-crazyfly_core/cf_distance.py
-crazyfly_core/cf_driver.py
-crazyfly_core/cf_pid_controller.py
-crazyfly_core/cf_thrust_controller.py
 crazyfly_core/cluster.py
-crazyfly_core/clusterController.py
 crazyfly_core/clusterControllerClass.py
 crazyfly_core/clusterOptitrackSubscriber.py
 crazyfly_core/clusterTesting.py
-crazyfly_core/crazyflie_control.py
-crazyfly_core/fake_thrust_pub.py
 crazyfly_core/flightplots.py
-crazyfly_core/optitrack_subscriber (backup).py
-crazyfly_core/optitrack_subscriber.py
-crazyfly_core/optitrack_subscriber2.py
 crazyfly_core/pid_controller_cf1.py
 crazyfly_core/pid_controller_cf2.py
 resource/crazyfly_core
