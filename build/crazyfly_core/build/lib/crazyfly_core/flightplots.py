@@ -4,13 +4,13 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Filepath to the CSV file
-file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250507_173725.csv"
+file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250504_121505_Kp2.0,Kd10500,30sec.csv"
 # Read the CSV file into a DataFrame
 data = pd.read_csv(file_path)
 
-col1 = 'Des_CF1_X'
-col2 = 'Safe_CF1_X'
-col3 = 'Cur_CF1_X'
+col1 = 'Des_CF2_Y'
+col2 = 'Des_CF2_Y'
+col3 = 'Cur_CF2_Y'
 
 # Convert the 'Timestamp' column to datetime
 data['Timestamp'] = pd.to_datetime(data['Timestamp'])

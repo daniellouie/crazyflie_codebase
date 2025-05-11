@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab tab_name="tab1" containers="1">
+   <Container>
+    <DockSplitter count="2" orientation="-" sizes="0.501129;0.498871">
+     <DockSplitter count="2" orientation="|" sizes="0.500412;0.499588">
+      <DockArea name="...">
+       <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+        <range top="0.655934" left="211.009876" right="240.002014" bottom="-0.879601"/>
+        <limitY/>
+        <curve name="/cluster/current/data[3]" color="#1f77b4"/>
+        <curve name="/cluster/cmd/data[3]" color="#d62728"/>
+       </plot>
+      </DockArea>
+      <DockArea name="...">
+       <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+        <range top="0.344802" left="211.009876" right="240.002014" bottom="0.131127"/>
+        <limitY/>
+        <curve name="/cluster/cmd/data[6]" color="#1ac938"/>
+        <curve name="/cluster/current/data[6]" color="#ff7f0e"/>
+       </plot>
+      </DockArea>
+     </DockSplitter>
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.352432" left="211.009876" right="240.002014" bottom="1.177688"/>
+       <limitY/>
+       <curve name="/cluster/cmd/data[7]" color="#f14cc1"/>
+       <curve name="/cluster/current/data[7]" color="#9467bd"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="tab2" containers="1">
+   <Container>
+    <DockSplitter count="2" orientation="-" sizes="0.5;0.5">
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.255957" left="211.009279" right="240.002014" bottom="-0.918626"/>
+       <limitY/>
+       <curve name="/cf1_cmd/pose/position/x" color="#17becf"/>
+       <curve name="/cf1_cmd/pose/position/y" color="#bcbd22"/>
+       <curve name="/cf1_cmd/pose/position/z" color="#1f77b4"/>
+       <curve name="/cluster/current/data[3]" color="#1f77b4"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.873356" left="211.009279" right="240.002014" bottom="0.859299"/>
+       <limitY/>
+       <curve name="/cf2_cmd/pose/position/x" color="#d62728"/>
+       <curve name="/cf2_cmd/pose/position/y" color="#1ac938"/>
+       <curve name="/cf2_cmd/pose/position/z" color="#ff7f0e"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="tab3" containers="1">
+   <Container>
+    <DockSplitter count="2" orientation="-" sizes="0.5;0.5">
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.482655" left="211.007513" right="239.997917" bottom="-0.099457"/>
+       <limitY/>
+       <curve name="/vrpn_mocap/cf1/pose/pose/position/x" color="#f14cc1"/>
+       <curve name="/vrpn_mocap/cf1/pose/pose/position/y" color="#9467bd"/>
+       <curve name="/vrpn_mocap/cf1/pose/pose/position/z" color="#17becf"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.049278" left="211.007513" right="239.997917" bottom="0.696410"/>
+       <limitY/>
+       <curve name="/vrpn_mocap/cf2/pose/pose/position/x" color="#bcbd22"/>
+       <curve name="/vrpn_mocap/cf2/pose/pose/position/y" color="#1f77b4"/>
+       <curve name="/vrpn_mocap/cf2/pose/pose/position/z" color="#d62728"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="tab4" containers="1">
+   <Container>
+    <DockSplitter count="2" orientation="-" sizes="0.5;0.5">
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="0.655934" left="211.009876" right="240.002014" bottom="-0.879601"/>
+       <limitY/>
+       <curve name="/cluster/current/data[3]" color="#1f77b4"/>
+       <curve name="/cluster/cmd/data[3]" color="#d62728"/>
+       <curve name="/cluster/cmd/data[4]" color="#1ac938"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="0.344802" left="211.009876" right="240.002014" bottom="0.131127"/>
+       <limitY/>
+       <curve name="/cluster/current/data[6]" color="#ff7f0e"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <Tab tab_name="tab5" containers="1">
+   <Container>
+    <DockSplitter count="2" orientation="-" sizes="0.5;0.5">
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.481452" left="211.007513" right="240.001844" bottom="-0.050134"/>
+       <limitY/>
+       <curve name="/cf1_cmd/pose/position/x" color="#001cff"/>
+       <curve name="/vrpn_mocap/cf1/pose/pose/position/x" color="#f14cc1"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_y="false" mode="TimeSeries" style="Lines" flip_x="false">
+       <range top="2.025331" left="211.007513" right="240.001844" bottom="1.174452"/>
+       <limitY/>
+       <curve name="/cf2_cmd/pose/position/x" color="#d62728"/>
+       <curve name="/vrpn_mocap/cf2/pose/pose/position/x" color="#bcbd22"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="4"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <!-- - - - - - - - - - - - - - - -->
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <parameters delimiter="0" time_axis=""/>
+  </plugin>
+  <plugin ID="DataLoad MCAP"/>
+  <plugin ID="DataLoad ROS2 bags">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+   <selected_topics value=""/>
+  </plugin>
+  <plugin ID="DataLoad ULog"/>
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+   <selected_topics value="/cf1/commands;/cf1_cmd;/cf2/commands;/cf2_cmd;/cluster/cmd;/cluster/current;/cluster/desired;/vrpn_mocap/cf1/pose;/vrpn_mocap/cf2/pose"/>
+  </plugin>
+  <plugin ID="UDP Server"/>
+  <plugin ID="WebSocket Server"/>
+  <plugin ID="ZMQ Subscriber"/>
+  <plugin ID="Fast Fourier Transform"/>
+  <plugin ID="Quaternion to RPY"/>
+  <plugin ID="Reactive Script Editor">
+   <library code="--[[ Helper function to create a series from arrays&#xa;&#xa; new_series: a series previously created with ScatterXY.new(name)&#xa; prefix:     prefix of the timeseries, before the index of the array&#xa; suffix_X:   suffix to complete the name of the series containing the X value. If [nil], use the index of the array.&#xa; suffix_Y:   suffix to complete the name of the series containing the Y value&#xa; timestamp:   usually the tracker_time variable&#xa;              &#xa; Example:&#xa; &#xa; Assuming we have multiple series in the form:&#xa; &#xa;   /trajectory/node.{X}/position/x&#xa;   /trajectory/node.{X}/position/y&#xa;   &#xa; where {N} is the index of the array (integer). We can create a reactive series from the array with:&#xa; &#xa;   new_series = ScatterXY.new(&quot;my_trajectory&quot;) &#xa;   CreateSeriesFromArray( new_series, &quot;/trajectory/node&quot;, &quot;position/x&quot;, &quot;position/y&quot;, tracker_time );&#xa;--]]&#xa;&#xa;function CreateSeriesFromArray( new_series, prefix, suffix_X, suffix_Y, timestamp )&#xa;  &#xa;  --- clear previous values&#xa;  new_series:clear()&#xa;  &#xa;  --- Append points to new_series&#xa;  index = 0&#xa;  while(true) do&#xa;&#xa;    x = index;&#xa;    -- if not nil, get the X coordinate from a series&#xa;    if suffix_X ~= nil then &#xa;      series_x = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_X) )&#xa;      if series_x == nil then break end&#xa;      x = series_x:atTime(timestamp)&#x9; &#xa;    end&#xa;    &#xa;    series_y = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_Y) )&#xa;    if series_y == nil then break end &#xa;    y = series_y:atTime(timestamp)&#xa;    &#xa;    new_series:push_back(x,y)&#xa;    index = index+1&#xa;  end&#xa;end&#xa;&#xa;--[[ Similar to the built-in function GetSeriesNames(), but select only the names with a give prefix. --]]&#xa;&#xa;function GetSeriesNamesByPrefix(prefix)&#xa;  -- GetSeriesNames(9 is a built-in function&#xa;  all_names = GetSeriesNames()&#xa;  filtered_names = {}&#xa;  for i, name in ipairs(all_names)  do&#xa;    -- check the prefix&#xa;    if name:find(prefix, 1, #prefix) then&#xa;      table.insert(filtered_names, name);&#xa;    end&#xa;  end&#xa;  return filtered_names&#xa;end&#xa;&#xa;--[[ Modify an existing series, applying offsets to all their X and Y values&#xa;&#xa; series: an existing timeseries, obtained with TimeseriesView.find(name)&#xa; delta_x: offset to apply to each x value&#xa; delta_y: offset to apply to each y value &#xa;  &#xa;--]]&#xa;&#xa;function ApplyOffsetInPlace(series, delta_x, delta_y)&#xa;  -- use C++ indeces, not Lua indeces&#xa;  for index=0, series:size()-1 do&#xa;    x,y = series:at(index)&#xa;    series:set(index, x + delta_x, y + delta_y)&#xa;  end&#xa;end&#xa;"/>
+   <scripts/>
+  </plugin>
+  <plugin ID="CSV Exporter"/>
+  <plugin ID="ROS2 Topic Re-Publisher"/>
+ </Plugins>
+ <!-- - - - - - - - - - - - - - - -->
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
+ <!-- - - - - - - - - - - - - - - -->
+ <customMathEquations/>
+ <snippets/>
+ <!-- - - - - - - - - - - - - - - -->
+</root>
+

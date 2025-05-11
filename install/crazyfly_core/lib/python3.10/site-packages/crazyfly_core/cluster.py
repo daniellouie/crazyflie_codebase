@@ -15,11 +15,21 @@ class Cluster:
         self.C_des = np.zeros(8) # desired cluster position (xc, yc, zc, alpha, beta, phi1, phi2, p)
         self.C_cur = np.zeros(8) # current cluster position (xc, yc, zc, alpha, beta, phi1, phi2, p)
         self.C_cmd = np.zeros(8) # commanded cluster position (xc, yc, zc, alpha, beta, phi1, phi2, p)
-        self.C_err = np.zeros(3) # cluster position error (xc, yc, zc)
+        self.C_err = np.zeros(8) # cluster position error (xc, yc, zc)
         self.C_dot = np.zeros(8) # cluster velocity (xc_dot, yc_dot, zc_dot, alpha_dot, beta_dot, phi1_dot, phi2_dot, p_dot)
 
-        self.cluster_k_p = 0.8 # proportional gain for cluster controller 0.1 May 7 
-        self.dt = 4 # constant term to convert velocity to position
+        self.cluster_gains = [
+            1.0,  #X gains:
+            1.0,  #Y gains:
+            1.0,  #Z gains:
+            1.0,  #alpha gains:
+            1.0,  #beta gains:
+            1.0,  #phi1 gains: always 0
+            1.0,  #phi2 gains: always 0
+            1.0,  #p gains:
+        ]
+        self.dt = 0.6 # constant term to convert velocity to position
+        # dt = 0.6 May 9th
 
 
     def frameOursToAnne(self, our_frame):
@@ -33,8 +43,10 @@ class Cluster:
         our_drone2_pos = our_frame[4:7]
 
         anne_drone1_pos = np.dot(our_drone1_pos, transformation_matrix)
+
         # print("anne_drone1_pos", anne_drone1_pos)
         anne_drone2_pos = np.dot(our_drone2_pos, transformation_matrix)
+
         # print("anne_drone2_pos", anne_drone2_pos)
 
         anne_frame = np.concatenate((anne_drone1_pos, [our_frame[3]], anne_drone2_pos, [our_frame[7]]))
@@ -53,9 +65,11 @@ class Cluster:
         anne_drone2_pos = anne_frame[4:7]
 
         our_drone1_pos = np.dot(anne_drone1_pos, transformation_matrix)
+
         # print("our_drone1_pos", our_drone1_pos)
         our_drone2_pos = np.dot(anne_drone2_pos, transformation_matrix)
         # print("our_drone2_pos", our_drone2_pos)
+        
 
         our_frame = np.concatenate((our_drone1_pos, [anne_frame[3]], our_drone2_pos, [anne_frame[7]]))        
         return our_frame
@@ -87,14 +101,20 @@ class Cluster:
     # Input: array of D1 and D2 positions [x, y, z, yaw] for each drone, 8 variables total
     # Output: array of cluster space variables [xc yc zc alpha beta phi1 phi2 p]
     # TODO : review and test this function (possibly seperate into external file)
-    def forwardKinematics(self):    
-        self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+    def forwardKinematics(self, R = 1):    
+        if type(R) == int:
+            self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+            # decompose positions and orientations
+            x1, y1, z1, theta1 = self.R_cur_annes[0:4]
+            x2, y2, z2, theta2 = self.R_cur_annes[4:8]
+            # print("x1, y1, z1, theta1", x1, y1, z1, theta1)
+            # print("x2, y2, z2, theta2", x2, y2, z2, theta2)
+        else:
+            R_anne = self.frameOursToAnne(R) # convert to our frame
+            x1, y1, z1, theta1 = R_anne[0:4]
+            x2, y2, z2, theta2 = R_anne[4:8]
 
-        # decompose positions and orientations
-        x1, y1, z1, theta1 = self.R_cur_annes[0:4]
-        x2, y2, z2, theta2 = self.R_cur_annes[4:8]
-        # print("x1, y1, z1, theta1", x1, y1, z1, theta1)
-        # print("x2, y2, z2, theta2", x2, y2, z2, theta2)
+        
 
         # Global frame unit vectors
         xglobal = np.array([1, 0, 0])
@@ -134,6 +154,7 @@ class Cluster:
         gamma = 0 # not used in this implementation
 
         # # Yaw corrected for the cluster frame (heading)
+        # NOTE : not needed for current implementation, yaw of individual drones is controlled in individual PIDs
         # phi1 = theta1 - alpha
         # phi2 = theta2 - alpha
 
@@ -141,8 +162,11 @@ class Cluster:
         p = np.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)   
 
         # Cluster space variables
-        self.C_cur = [xc, yc, zc, alpha, beta, phi1, phi2, p]
-        return self.C_cur  # (in Anne's frame) this is the equivalent of Anne's K array in the paper
+        if type(R) == int:
+            self.C_cur = [xc, yc, zc, alpha, beta, phi1, phi2, p]
+            return self.C_cur  # (in Anne's frame) this is the equivalent of Anne's K array in the paper
+        else:
+            return np.array([xc, yc, zc, alpha, beta, phi1, phi2, p])
         
     # This function gets the position error of cluster
     # Input: C_des, C_cur
@@ -158,7 +182,7 @@ class Cluster:
     # TODO : needs tuning for p value, possibly use different gains for each axis?
     def clusterPController(self):
         # Calculate cluster velocity
-        self.C_dot = self.cluster_k_p * self.C_err * [1, 1, 1, 1, 1, 1, 1, 10] 
+        self.C_dot = self.cluster_gains * self.C_err
         return self.C_dot
 
     # This function calculates the inverse Jacobian for two drones
@@ -172,12 +196,20 @@ class Cluster:
         # Define the rows of the inverse Jacobian matrix (using element-wise operations, equivalent of ./ in MATLAB)
         x1dot = [1, 0, 0, (-1/2) * p * np.cos(alpha) * np.cos(beta), (1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
         y1dot = [0, 1, 0, (-1/2) * p * np.cos(beta) * np.sin(alpha), (-1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
-        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
+        # z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
+        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+
         theta1dot = [0, 0, 0, 1, 0, 1, 0, 0]
 
         x2dot = [1, 0, 0, (1/2) * p * np.cos(alpha) * np.cos(beta), (-1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
         y2dot = [0, 1, 0, (1/2) * p * np.cos(beta) * np.sin(alpha), (1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(alpha) * np.cos(beta)]
-        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
+        # z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
+        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+
         theta2dot = [0, 0, 0, 1, 0, 0, 1, 0]
 
         # Combine rows into the inverse Jacobian matrix

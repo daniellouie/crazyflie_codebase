@@ -132,10 +132,10 @@ class PIDControllerCF1(Node):
     
     def commanded_position_callback(self, msg):
         if msg.header.frame_id == "world":
-            self.commanded_position[0] = msg.pose.position.x #use actual commanded position
-            # self.commanded_position[0] = self.constant_position[0] # use constant value for testing
-            self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
-            # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
+            # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
+            self.commanded_position[0] = self.constant_position[0] # use constant value for testing
+            # self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
+            self.commanded_position[1] = self.constant_position[1] # use constant value for testing
             self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
             # self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 

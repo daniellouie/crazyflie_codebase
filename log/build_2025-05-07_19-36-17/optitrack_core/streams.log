@@ -1,0 +1,22 @@
+[1.288s] Invoking command in '/home/rsl/crazyfly_ws/src/optitrack_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/optitrack_core/prefix_override:/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/optitrack_core build --build-base /home/rsl/crazyfly_ws/build/optitrack_core/build install --record /home/rsl/crazyfly_ws/build/optitrack_core/install.log --single-version-externally-managed install_data
+[1.555s] running egg_info
+[1.562s] writing ../../build/optitrack_core/optitrack_core.egg-info/PKG-INFO
+[1.562s] writing dependency_links to ../../build/optitrack_core/optitrack_core.egg-info/dependency_links.txt
+[1.562s] writing entry points to ../../build/optitrack_core/optitrack_core.egg-info/entry_points.txt
+[1.563s] writing requirements to ../../build/optitrack_core/optitrack_core.egg-info/requires.txt
+[1.563s] writing top-level names to ../../build/optitrack_core/optitrack_core.egg-info/top_level.txt
+[1.565s] reading manifest file '../../build/optitrack_core/optitrack_core.egg-info/SOURCES.txt'
+[1.566s] adding license file 'LICENSE'
+[1.566s] writing manifest file '../../build/optitrack_core/optitrack_core.egg-info/SOURCES.txt'
+[1.566s] running build
+[1.567s] running build_py
+[1.567s] running install
+[1.567s] running install_lib
+[1.569s] running install_data
+[1.570s] running install_egg_info
+[1.571s] removing '/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core-0.0.0-py3.10.egg-info' (and everything under it)
+[1.571s] Copying ../../build/optitrack_core/optitrack_core.egg-info to /home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages/optitrack_core-0.0.0-py3.10.egg-info
+[1.572s] running install_scripts
+[1.594s] Installing get_data script to /home/rsl/crazyfly_ws/install/optitrack_core/lib/optitrack_core
+[1.595s] writing list of installed files to '/home/rsl/crazyfly_ws/build/optitrack_core/install.log'
+[1.638s] Invoked command in '/home/rsl/crazyfly_ws/src/optitrack_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/optitrack_core/prefix_override:/home/rsl/crazyfly_ws/install/optitrack_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/optitrack_core build --build-base /home/rsl/crazyfly_ws/build/optitrack_core/build install --record /home/rsl/crazyfly_ws/build/optitrack_core/install.log --single-version-externally-managed install_data

@@ -2,6 +2,7 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Float32MultiArray
 from .cluster import Cluster
 from .clusterOptitrackSubscriber import ClusterOptitrackSubscriber
 from datetime import datetime
@@ -25,8 +26,8 @@ class ClusterController(Node):
 
         # define waypoints for the cluster
         self.waypoints = [
-            [1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            [2, 1, 1.5, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.5, 1.0, 1.0, 1.57, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
+            # [1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
         ]
         self.cur_waypoint_index = 0
         self.cluster.C_des = self.cluster.frameOursToAnne(self.waypoints[self.cur_waypoint_index])  # convert to Anne's frame
@@ -40,6 +41,10 @@ class ClusterController(Node):
         # Publishers
         self.pub_cf1_cmd = self.create_publisher(PoseStamped, '/cf1_cmd', 10)
         self.pub_cf2_cmd = self.create_publisher(PoseStamped, '/cf2_cmd', 10)
+
+        self.pub_cur_cluster = self.create_publisher(Float32MultiArray, '/cluster/current', 10)
+        self.pub_des_cluster = self.create_publisher(Float32MultiArray, '/cluster/desired', 10)
+        self.pub_cmd_cluster = self.create_publisher(Float32MultiArray, '/cluster/cmd', 10)
 
         # Data storage for recording positions
         self.timestamps = []
@@ -78,16 +83,23 @@ class ClusterController(Node):
 
         # Clamp the values between 0 and 3 for safety
         original_des_cf1 = self.cluster.R_cmd_ours[:3]
-        print("original_des_cf1", original_des_cf1)
+        # print("original_des_cf1", original_des_cf1)
+        # TODO : fix safety clamping, not functioning properly
         safe_cf1_cmd = [
             max(0.0, min(original_des_cf1[0], 3.0)),
             max(0.0, min(original_des_cf1[1], 3.0)),
             max(0.0, min(original_des_cf1[2], 3.0))
         ]
-        des_cf1_msg.pose.position.x = safe_cf1_cmd[0]
-        des_cf1_msg.pose.position.y = safe_cf1_cmd[1]
-        des_cf1_msg.pose.position.z = safe_cf1_cmd[2]
+        # des_cf1_msg.pose.position.x = safe_cf1_cmd[0]
+        # des_cf1_msg.pose.position.y = safe_cf1_cmd[1]
+        # des_cf1_msg.pose.position.z = safe_cf1_cmd[2]
+        # self.pub_cf1_cmd.publish(des_cf1_msg)
+
+        des_cf1_msg.pose.position.x = original_des_cf1[0]
+        des_cf1_msg.pose.position.y = original_des_cf1[1]
+        des_cf1_msg.pose.position.z = original_des_cf1[2]
         self.pub_cf1_cmd.publish(des_cf1_msg)
+
 
         des_cf2_msg = PoseStamped()
         des_cf2_msg.header.stamp = self.get_clock().now().to_msg()
@@ -99,24 +111,50 @@ class ClusterController(Node):
             max(0.0, min(original_des_cf2[1], 3.0)),
             max(0.0, min(original_des_cf2[2], 3.0))
         ]
-        des_cf2_msg.pose.position.x = safe_cf2_cmd[0]
-        des_cf2_msg.pose.position.y = safe_cf2_cmd[1]
-        des_cf2_msg.pose.position.z = safe_cf2_cmd[2]
+        # des_cf2_msg.pose.position.x = safe_cf2_cmd[0]
+        # des_cf2_msg.pose.position.y = safe_cf2_cmd[1]
+        # des_cf2_msg.pose.position.z = safe_cf2_cmd[2]
+
+        des_cf2_msg.pose.position.x = original_des_cf2[0]
+        des_cf2_msg.pose.position.y = original_des_cf2[1]
+        des_cf2_msg.pose.position.z = original_des_cf2[2]
         self.pub_cf2_cmd.publish(des_cf2_msg)
 
         # Store safe commands for logging
         self.safe_cf1_positions.append(safe_cf1_cmd)
         self.safe_cf2_positions.append(safe_cf2_cmd)
 
+    # publish the current, desired, and command cluster states
+    def publish_cluster_msgs(self):
+        # Publish the current cluster state
+        cur_cluster_msg = Float32MultiArray()
+        
+        cur_cluster_msg.data = self.cluster.frameAnneToOurs(self.cluster.C_cur).tolist()
+        self.pub_cur_cluster.publish(cur_cluster_msg)
+
+        # Publish the desired cluster state
+        des_cluster_msg = Float32MultiArray()
+        des_cluster_msg.data = self.cluster.frameAnneToOurs(self.cluster.C_des).tolist()
+        self.pub_des_cluster.publish(des_cluster_msg)
+
+        # Publish the command cluster state for graphing
+        # NOTE : this throws a runtime warning, weird division in FKin (doesnt affect actual light)
+        # NOTE NOTE : this is a terrible way to test this, needs to be fixed
+        # cmd_cluster_msg = Float32MultiArray()
+        # cmd_cluster_msg.data = self.cluster.frameAnneToOurs(self.cluster.forwardKinematics(self.cluster.R_cmd_ours)).tolist()
+        # self.pub_cmd_cluster.publish(cmd_cluster_msg)
+
+
     # check if the cur cluster has reached the desired waypoint for hold_time
     # returns true if so and false if not
+    # NOTE : Frame transformation is not quite right for cluster space, will still work for x,y,z
     def check_waypoint_reached(self):
         cur_position = self.cluster.frameAnneToOurs(self.cluster.C_cur)[:3]
         des_position = self.cluster.frameAnneToOurs(self.cluster.C_des)[:3]
         position_error = np.linalg.norm(np.array(cur_position) - np.array(des_position))
 
         if position_error < self.waypoint_tolerance:
-            print("within tolerance")
+            # print("within tolerance")
             if self.waypoint_start_time is None: 
                 self.waypoint_start_time = datetime.now()
             else:
@@ -234,14 +272,15 @@ class ClusterController(Node):
                 self.update_positions()
                 self.perform_cluster_calculations()
                 self.publish_commands()
-                R_cur = self.cluster.R_cmd_ours
-                C_cur = self.cluster.C_cur
-                C_des = self.cluster.C_des
-                C_err = self.cluster.C_err
-                print("R_cur:", R_cur)
-                print("C_cur:", C_cur)
-                print("C_des:", C_des)
-                print("C_err:", C_err)
+                self.publish_cluster_msgs()
+                # R_cur = self.cluster.R_cmd_ours
+                # C_cur = self.cluster.C_cur
+                # C_des = self.cluster.C_des
+                # C_err = self.cluster.C_err
+                # print("R_cur:", R_cur)
+                # print("C_cur:", C_cur)
+                # print("C_des:", C_des)
+                # print("C_err:", C_err)
                 self.record_data()
                 self.update_waypoint() #check and update waypoint
         except KeyboardInterrupt:
