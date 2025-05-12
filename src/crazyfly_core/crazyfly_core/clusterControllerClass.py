@@ -26,16 +26,19 @@ class ClusterController(Node):
 
         # define waypoints for the cluster
         self.waypoints = [
-            [1.5, 1.0, 1.0, 1.57, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
-            # [1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.0, 1.0, 1.5, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [2.0, 1.0, 1.5, 0, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
         ]
         self.cur_waypoint_index = 0
+        # NOTE : converting to annes frame here causes issues because the conversion is not meant for cluster space variables, will switch around stuff
         self.cluster.C_des = self.cluster.frameOursToAnne(self.waypoints[self.cur_waypoint_index])  # convert to Anne's frame
 
         # initialize the time required to hold at each waypoint and the timer
         self.waypoint_hold_time = 3.0 #in seconds
         self.waypoint_start_time = None
         self.waypoint_tolerance = 0.25 # in meters
+        # bool updated to check if the cluster is within the tolerance, only print message if it changes
+        self.within_tolerance = False
 
 
         # Publishers
@@ -140,9 +143,9 @@ class ClusterController(Node):
         # Publish the command cluster state for graphing
         # NOTE : this throws a runtime warning, weird division in FKin (doesnt affect actual light)
         # NOTE NOTE : this is a terrible way to test this, needs to be fixed
-        # cmd_cluster_msg = Float32MultiArray()
-        # cmd_cluster_msg.data = self.cluster.frameAnneToOurs(self.cluster.forwardKinematics(self.cluster.R_cmd_ours)).tolist()
-        # self.pub_cmd_cluster.publish(cmd_cluster_msg)
+        cmd_cluster_msg = Float32MultiArray()
+        cmd_cluster_msg.data = self.cluster.frameAnneToOurs(self.cluster.forwardKinematics(self.cluster.R_cmd_ours)).tolist()
+        self.pub_cmd_cluster.publish(cmd_cluster_msg)
 
 
     # check if the cur cluster has reached the desired waypoint for hold_time
@@ -152,9 +155,11 @@ class ClusterController(Node):
         cur_position = self.cluster.frameAnneToOurs(self.cluster.C_cur)[:3]
         des_position = self.cluster.frameAnneToOurs(self.cluster.C_des)[:3]
         position_error = np.linalg.norm(np.array(cur_position) - np.array(des_position))
-
+        
         if position_error < self.waypoint_tolerance:
-            # print("within tolerance")
+            if self.within_tolerance is False:
+                print("within tolerance")
+                self.within_tolerance = True
             if self.waypoint_start_time is None: 
                 self.waypoint_start_time = datetime.now()
             else:
@@ -162,6 +167,9 @@ class ClusterController(Node):
                 if elapsed_time >= self.waypoint_hold_time:
                     return True
         else:
+            if self.within_tolerance is True:
+                print("not within tolerance")
+                self.within_tolerance = False
             self.waypoint_start_time = None
 
         return False

@@ -40,6 +40,14 @@ class PIDControllerCF2(Node):
             10
         )
 
+        #temp hack to change constants to next waypoint
+        self.create_subscription(
+            Float32MultiArray,
+            '/cluster/desired',
+            self.check_desired_waypoint,
+            10
+        )
+
         #message to send flight commands to crazyflie program
         self.pub_commands = self.create_publisher(
             Float32MultiArray, 
@@ -50,7 +58,7 @@ class PIDControllerCF2(Node):
         #INITIAL SET UP (just using current and target positions for now)
         self.current_position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         self.commanded_position = [0.0, 0.0, 0.0] # commanded position from the cluster controller
-        self.constant_position = [1.0, 1.0, 1.0] # constant position for testing
+        self.constant_position = [1.0, 1.0, 2.0] # constant position for testing
   
         # Controls variables
         self.t = 0.01 #average time between signals in seconds
@@ -108,6 +116,13 @@ class PIDControllerCF2(Node):
         self.startTimer = False
         self.startTime = time.time()
 
+    #temp hack to change constants to next waypoint
+    def check_desired_waypoint(self, msg):
+        if msg.data[0] == 2.0:
+            self.constant_position[0] = 2.0
+            # print(f"Received desired x waypoint: {msg.data[0]}")
+
+
     def current_position_callback(self, msg):
         # print(f"Received pose: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
         # need this conditional to avoid QoS error
@@ -135,10 +150,10 @@ class PIDControllerCF2(Node):
         if msg.header.frame_id == "world":
             # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
             self.commanded_position[0] = self.constant_position[0] # use constant value for testing
-            # self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
-            self.commanded_position[1] = self.constant_position[1] # use constant value for testing
-            self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
-            # self.commanded_position[2] = self.constant_position[2] # use constant value for testing
+            self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
+            # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
+            # self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
+            self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 
             # print(f"Commanded position callback: {self.commanded_position}")
         # error handling for unexpected pose message

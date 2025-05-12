@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Filepath to the CSV file
-file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250507_140342_GWP.csv"
+file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250511_165115.csv"
 # Read the CSV file into a DataFrame
 data = pd.read_csv(file_path)
 

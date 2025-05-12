@@ -1,0 +1,2 @@
+/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/clusterControllerClass.py:29: SyntaxWarning: list indices must be integers or slices, not tuple; perhaps you missed a comma?
+  [1.0, 1.0, 1.5, 0, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p

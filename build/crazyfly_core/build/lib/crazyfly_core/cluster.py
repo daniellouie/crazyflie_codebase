@@ -197,18 +197,18 @@ class Cluster:
         x1dot = [1, 0, 0, (-1/2) * p * np.cos(alpha) * np.cos(beta), (1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
         y1dot = [0, 1, 0, (-1/2) * p * np.cos(beta) * np.sin(alpha), (-1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
         # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        # z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
         # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        # z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
 
         theta1dot = [0, 0, 0, 1, 0, 1, 0, 0]
 
         x2dot = [1, 0, 0, (1/2) * p * np.cos(alpha) * np.cos(beta), (-1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
         y2dot = [0, 1, 0, (1/2) * p * np.cos(beta) * np.sin(alpha), (1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(alpha) * np.cos(beta)]
         # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        # z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
         # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        # z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
 
         theta2dot = [0, 0, 0, 1, 0, 0, 1, 0]
 

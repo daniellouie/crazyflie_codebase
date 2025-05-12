@@ -1,0 +1,22 @@
+[1.712s] Invoking command in '/home/rsl/crazyfly_ws/src/controller_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/controller_core/prefix_override:/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/controller_core build --build-base /home/rsl/crazyfly_ws/build/controller_core/build install --record /home/rsl/crazyfly_ws/build/controller_core/install.log --single-version-externally-managed install_data
+[2.129s] running egg_info
+[2.136s] writing ../../build/controller_core/controller_core.egg-info/PKG-INFO
+[2.136s] writing dependency_links to ../../build/controller_core/controller_core.egg-info/dependency_links.txt
+[2.137s] writing entry points to ../../build/controller_core/controller_core.egg-info/entry_points.txt
+[2.137s] writing requirements to ../../build/controller_core/controller_core.egg-info/requires.txt
+[2.137s] writing top-level names to ../../build/controller_core/controller_core.egg-info/top_level.txt
+[2.141s] reading manifest file '../../build/controller_core/controller_core.egg-info/SOURCES.txt'
+[2.141s] adding license file 'LICENSE'
+[2.142s] writing manifest file '../../build/controller_core/controller_core.egg-info/SOURCES.txt'
+[2.142s] running build
+[2.143s] running build_py
+[2.143s] running install
+[2.143s] running install_lib
+[2.145s] running install_data
+[2.145s] running install_egg_info
+[2.147s] removing '/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages/controller_core-0.0.0-py3.10.egg-info' (and everything under it)
+[2.147s] Copying ../../build/controller_core/controller_core.egg-info to /home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages/controller_core-0.0.0-py3.10.egg-info
+[2.149s] running install_scripts
+[2.171s] Installing ctrl_node script to /home/rsl/crazyfly_ws/install/controller_core/lib/controller_core
+[2.171s] writing list of installed files to '/home/rsl/crazyfly_ws/build/controller_core/install.log'
+[2.207s] Invoked command in '/home/rsl/crazyfly_ws/src/controller_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/controller_core/prefix_override:/home/rsl/crazyfly_ws/install/controller_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/controller_core build --build-base /home/rsl/crazyfly_ws/build/controller_core/build install --record /home/rsl/crazyfly_ws/build/controller_core/install.log --single-version-externally-managed install_data
