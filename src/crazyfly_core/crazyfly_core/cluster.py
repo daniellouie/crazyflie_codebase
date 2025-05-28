@@ -132,26 +132,35 @@ class Cluster:
 
         # NOTE : Imported from Anne's work, not currently in use for our implementation
         # Vectors pointing to Drone 1
-        y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
-        x_vec = np.cross(y_vec, zglobal)
-        z_vec = np.cross(x_vec, y_vec)
+        # y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
+        # x_vec = np.cross(y_vec, zglobal)
+        # z_vec = np.cross(x_vec, y_vec)
 
         # Normalize vectors (using element-wise division, equivalent of ./ in MATLAB)
-        y_vec_norm = y_vec / np.linalg.norm(y_vec)
-        x_vec_norm = x_vec / np.linalg.norm(x_vec)
-        z_vec_norm = z_vec / np.linalg.norm(z_vec)
+        # y_vec_norm = y_vec / np.linalg.norm(y_vec)
+        # x_vec_norm = x_vec / np.linalg.norm(x_vec)
+        # z_vec_norm = z_vec / np.linalg.norm(z_vec)
 
         # Rotation matrix
-        rot = np.array([
-            [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
-            [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
-            [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
-        ])
+        # rot = np.array([
+        #     [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
+        #     [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
+        #     [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
+        # ])
 
         # Rotation matrix angles
-        alpha = np.arctan2(rot[1,0], rot[0,0])
-        beta = np.arctan2(rot[2,1], rot[2,2])
+        # alpha = np.arctan2(rot[1,0], rot[0,0])
+        # beta = np.arctan2(rot[2,1], rot[2,2])
+
+
+        # ---------------- NEW ---------------- #
+        #NOTE: Changing from anne's old to New variables
         gamma = 0 # not used in this implementation
+        alpha = np.arctan2((x2-x1), (z2-z1))
+        beta = np.arctan2((y2-y1), np.sqrt((z2-z1)**2 + (x2-x1)**2))
+        phi1 = alpha - theta1
+        phi2 = alpha - theta2
+
 
         # # Yaw corrected for the cluster frame (heading)
         # NOTE : not needed for current implementation, yaw of individual drones is controlled in individual PIDs
