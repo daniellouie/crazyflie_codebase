@@ -103,7 +103,9 @@ class Cluster:
     # TODO : review and test this function (possibly seperate into external file)
     def forwardKinematics(self, R = 1):    
         if type(R) == int:
-            self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+            # old conversion, not needed
+            # self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+            self.R_cur_annes = self.R_cur_ours 
             # decompose positions and orientations
             x1, y1, z1, theta1 = self.R_cur_annes[0:4]
             x2, y2, z2, theta2 = self.R_cur_annes[4:8]
@@ -111,6 +113,7 @@ class Cluster:
             # print("x2, y2, z2, theta2", x2, y2, z2, theta2)
         else:
             R_anne = self.frameOursToAnne(R) # convert to our frame
+            R_anne = R
             x1, y1, z1, theta1 = R_anne[0:4]
             x2, y2, z2, theta2 = R_anne[4:8]
 
@@ -201,26 +204,21 @@ class Cluster:
     def calculateInverseJacobian(self):
         # Decompose the cluster state vector
         xC, yC, zC, alpha, beta, phi1, phi2, p = self.C_cur
-
+        
+        # NOTE: theta_C is alpha and Beta is beta
+        
         # Define the rows of the inverse Jacobian matrix (using element-wise operations, equivalent of ./ in MATLAB)
-        x1dot = [1, 0, 0, (-1/2) * p * np.cos(alpha) * np.cos(beta), (1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
-        y1dot = [0, 1, 0, (-1/2) * p * np.cos(beta) * np.sin(alpha), (-1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
-        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
-        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        # z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
 
-        theta1dot = [0, 0, 0, 1, 0, 1, 0, 0]
-
-        x2dot = [1, 0, 0, (1/2) * p * np.cos(alpha) * np.cos(beta), (-1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
-        y2dot = [0, 1, 0, (1/2) * p * np.cos(beta) * np.sin(alpha), (1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(alpha) * np.cos(beta)]
-        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
-        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        # z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
-
-        theta2dot = [0, 0, 0, 1, 0, 0, 1, 0]
-
+        # --------------------------------------------------------------- ROWS OF J_INV --------------------------------------------------------------- #
+        x1dot = [1, 0, 0, (-p/2)  * np.cos(alpha) * np.cos(beta), (p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
+        y1dot = [0, 1, 0, 0, (-p/2) * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        z1dot = [0, 0, 1, (p/2)*np.sin(alpha)*np.cos(beta), (p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (-p/2) * np.cos(alpha) * np.cos(beta)]
+        theta1dot = [0, 0, 0, 1, 0, -1, 0, 0]
+        x2dot = [1, 0, 0, (p/2) * np.cos(alpha) * np.cos(beta), (-p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
+        y2dot = [0, 1, 0, 0, (p/2) * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        z2dot = [0, 0, 1, (-p/2) * np.sin(alpha) * np.cos(beta), (-p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
+        theta2dot = [0, 0, 0, 1, 0, 0, -1, 0]
+       # ----------------------------------------------------------------- END OF ROWS OF J_INV ------------------------------------------------------- #
         # Combine rows into the inverse Jacobian matrix
         J_inv = np.array([x1dot, y1dot, z1dot, theta1dot, x2dot, y2dot, z2dot, theta2dot])
 

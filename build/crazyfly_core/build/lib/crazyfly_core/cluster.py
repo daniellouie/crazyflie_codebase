@@ -103,7 +103,9 @@ class Cluster:
     # TODO : review and test this function (possibly seperate into external file)
     def forwardKinematics(self, R = 1):    
         if type(R) == int:
-            self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+            # old conversion, not needed
+            # self.R_cur_annes = self.frameOursToAnne(self.R_cur_ours) # convert to Anne's frame
+            self.R_cur_annes = self.R_cur_ours 
             # decompose positions and orientations
             x1, y1, z1, theta1 = self.R_cur_annes[0:4]
             x2, y2, z2, theta2 = self.R_cur_annes[4:8]
@@ -111,6 +113,7 @@ class Cluster:
             # print("x2, y2, z2, theta2", x2, y2, z2, theta2)
         else:
             R_anne = self.frameOursToAnne(R) # convert to our frame
+            R_anne = R
             x1, y1, z1, theta1 = R_anne[0:4]
             x2, y2, z2, theta2 = R_anne[4:8]
 
@@ -132,26 +135,35 @@ class Cluster:
 
         # NOTE : Imported from Anne's work, not currently in use for our implementation
         # Vectors pointing to Drone 1
-        y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
-        x_vec = np.cross(y_vec, zglobal)
-        z_vec = np.cross(x_vec, y_vec)
+        # y_vec = np.array([x1 - xc, y1 - yc, z1 - zc])
+        # x_vec = np.cross(y_vec, zglobal)
+        # z_vec = np.cross(x_vec, y_vec)
 
         # Normalize vectors (using element-wise division, equivalent of ./ in MATLAB)
-        y_vec_norm = y_vec / np.linalg.norm(y_vec)
-        x_vec_norm = x_vec / np.linalg.norm(x_vec)
-        z_vec_norm = z_vec / np.linalg.norm(z_vec)
+        # y_vec_norm = y_vec / np.linalg.norm(y_vec)
+        # x_vec_norm = x_vec / np.linalg.norm(x_vec)
+        # z_vec_norm = z_vec / np.linalg.norm(z_vec)
 
         # Rotation matrix
-        rot = np.array([
-            [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
-            [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
-            [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
-        ])
+        # rot = np.array([
+        #     [np.dot(x_vec_norm, yglobal), np.dot(y_vec_norm, yglobal), np.dot(z_vec_norm, yglobal)],
+        #     [np.dot(x_vec_norm, xglobal), np.dot(y_vec_norm, xglobal), np.dot(z_vec_norm, xglobal)],
+        #     [np.dot(x_vec_norm, zglobal), np.dot(y_vec_norm, zglobal), np.dot(z_vec_norm, zglobal)]
+        # ])
 
         # Rotation matrix angles
-        alpha = np.arctan2(rot[1,0], rot[0,0])
-        beta = np.arctan2(rot[2,1], rot[2,2])
+        # alpha = np.arctan2(rot[1,0], rot[0,0])
+        # beta = np.arctan2(rot[2,1], rot[2,2])
+
+
+        # ---------------- NEW ---------------- #
+        #NOTE: Changing from anne's old to New variables
         gamma = 0 # not used in this implementation
+        alpha = np.arctan2((x2-x1), (z2-z1))
+        beta = np.arctan2((y2-y1), np.sqrt((z2-z1)**2 + (x2-x1)**2))
+        phi1 = alpha - theta1
+        phi2 = alpha - theta2
+
 
         # # Yaw corrected for the cluster frame (heading)
         # NOTE : not needed for current implementation, yaw of individual drones is controlled in individual PIDs
@@ -192,26 +204,21 @@ class Cluster:
     def calculateInverseJacobian(self):
         # Decompose the cluster state vector
         xC, yC, zC, alpha, beta, phi1, phi2, p = self.C_cur
-
+        
+        # NOTE: theta_C is alpha and Beta is beta
+        
         # Define the rows of the inverse Jacobian matrix (using element-wise operations, equivalent of ./ in MATLAB)
-        x1dot = [1, 0, 0, (-1/2) * p * np.cos(alpha) * np.cos(beta), (1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
-        y1dot = [0, 1, 0, (-1/2) * p * np.cos(beta) * np.sin(alpha), (-1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
-        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
-        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        # z1dot = [0, 0, 1, 0, (1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
 
-        theta1dot = [0, 0, 0, 1, 0, 1, 0, 0]
-
-        x2dot = [1, 0, 0, (1/2) * p * np.cos(alpha) * np.cos(beta), (-1/2) * p * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
-        y2dot = [0, 1, 0, (1/2) * p * np.cos(beta) * np.sin(alpha), (1/2) * p * np.cos(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(alpha) * np.cos(beta)]
-        # NOTE : this is original z1dot from Anne's paper, we are testing flipping negatives
-        z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
-        # NOTE : this is Chris W's z1dot used for testing difference from Anne's version
-        # z2dot = [0, 0, 1, 0, (-1/2) * p * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
-
-        theta2dot = [0, 0, 0, 1, 0, 0, 1, 0]
-
+        # --------------------------------------------------------------- ROWS OF J_INV --------------------------------------------------------------- #
+        x1dot = [1, 0, 0, (-p/2)  * np.cos(alpha) * np.cos(beta), (p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
+        y1dot = [0, 1, 0, 0, (-p/2) * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
+        z1dot = [0, 0, 1, (p/2)*np.sin(alpha)*np.cos(beta), (p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (-p/2) * np.cos(alpha) * np.cos(beta)]
+        theta1dot = [0, 0, 0, 1, 0, -1, 0, 0]
+        x2dot = [1, 0, 0, (p/2) * np.cos(alpha) * np.cos(beta), (-p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
+        y2dot = [0, 1, 0, 0, (p/2) * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
+        z2dot = [0, 0, 1, (-p/2) * np.sin(alpha) * np.cos(beta), (-p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (1/2) * np.cos(alpha) * np.cos(beta)]
+        theta2dot = [0, 0, 0, 1, 0, 0, -1, 0]
+       # ----------------------------------------------------------------- END OF ROWS OF J_INV ------------------------------------------------------- #
         # Combine rows into the inverse Jacobian matrix
         J_inv = np.array([x1dot, y1dot, z1dot, theta1dot, x2dot, y2dot, z2dot, theta2dot])
 
