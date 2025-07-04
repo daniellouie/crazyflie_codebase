@@ -31,6 +31,7 @@ setup(
             'pid_controller_cf1 = crazyfly_core.pid_controller_cf1:main',   #pid controller for cf1 in cluster control
             'pid_controller_cf2 = crazyfly_core.pid_controller_cf2:main',   #pid controller for cf2 in cluster control
             'clusterControllerClass = crazyfly_core.clusterControllerClass:main', #testing clustercontrollerCLASS version
+            'clusterControllerClass_new = crazyfly_core.clusterControllerClass_new:main' #testing for new LOCAl frame 7/01/25 -Connor
         ],
     },
 )

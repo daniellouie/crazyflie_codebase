@@ -220,15 +220,6 @@ class MinimalSubscriber(Node):
             # print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
 
 
-    # Unused function that uses Threading
-    def _send_thrust_command(self):
-        
-        while True:
-            self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
-            self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
-            time.sleep(0.05)  # Send commands at 20Hz
-
-
     def _connected(self, link_uri):
         """ This callback is called from the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""

@@ -1,11 +1,33 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import pathlib  
+import subprocess, shlex
+import os
+
+# ---------------------------           AUTOMATICALLY READS FILE NOW             -------------------------------------------
+WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
+#  print(f"this is the workspace {WORKSPACE}")    
+DATA_DIR    = WORKSPACE / "cluster_data"                       # <— save_data_to_csv() writes here
+PATTERN     = "cluster_data_*.csv"                             # matches all cluster logs
+
+csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
+
+# ERROR STATEMENT
+if not csv_files:
+    raise FileNotFoundError(f"No files matching {PATTERN} in {DATA_DIR}")
+
+file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
+print(f"[flightplots] LATEST FLIGHT: {file_path}")
+
+# open file to see data
+# subprocess.run(shlex.split(f"code -r {file_path}"))
+# --------------------------------------------------------------------------------------------------------------------------------
 
 
 # Filepath to the CSV file
-file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250511_165115.csv"
-# Read the CSV file into a DataFrame
+# file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250701_154916.csv"
+# # Read the CSV file into a DataFrame
 data = pd.read_csv(file_path)
 
 col1 = 'Des_CF2_Y'
@@ -77,3 +99,16 @@ ax.set_zlabel('Y Position')
 ax.legend()
 plt.title('3D Position Data')
 plt.show()
+
+
+# --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
+df = pd.read_csv("~/crazyfly_ws/I_Joc_values/cluster_dot.csv")   # same path as logger
+plt.plot(df.time_s, df.x1dot, label="x1_dot")
+plt.plot(df.time_s, df.y1dot, label="y1_dot")
+plt.plot(df.time_s, df.z1dot, label="z1_dot")
+plt.plot(df.time_s, df.x2dot, label="x2_dot")
+plt.plot(df.time_s, df.y2dot, label="y2_dot")
+plt.plot(df.time_s, df.z2dot, label="z2_dot")
+plt.xlabel("Time [s]"); plt.ylabel("Commanded velocity [m/s]")
+plt.title("Inverse-Jacobian linear velocity commands")
+plt.legend(); plt.grid(True); plt.tight_layout(); plt.show()

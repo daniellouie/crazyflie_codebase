@@ -44,10 +44,6 @@ class MinimalSubscriber(Node):
             self.listener_callback2,
             10)
         
-        # safety variable to prevent motors from running when testing
-        # set to true to run motors
-        self.run_motors_bool = False
-        
         
         self.subscription  # prevent unused variable warning
 
@@ -80,9 +76,13 @@ class MinimalSubscriber(Node):
 
 
 
-
+        # ------ THESE CAN BE CHANGED FOR TESTING ------ 
         # limit flight time for testing
         self.flight_duration = 30.0 #in seconds
+        # safety variable to prevent motors from running when testing
+        # set to true to run motors
+        self.run_motors_bool = False
+        # ----------------------------------------------
 
 
         # constant command values for testing
@@ -218,15 +218,6 @@ class MinimalSubscriber(Node):
             # temporarily commented out flight command for testing
             self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
             # print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
-
-
-    # Unused function that uses Threading
-    def _send_thrust_command(self):
-        
-        while True:
-            self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
-            self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
-            time.sleep(0.05)  # Send commands at 20Hz
 
 
     def _connected(self, link_uri):

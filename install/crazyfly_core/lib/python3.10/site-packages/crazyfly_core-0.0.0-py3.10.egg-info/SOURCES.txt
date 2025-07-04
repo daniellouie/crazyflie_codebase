@@ -13,8 +13,10 @@ crazyfly_core/__init__.py
 crazyfly_core/cf_command_controller2.py
 crazyfly_core/cluster.py
 crazyfly_core/clusterControllerClass.py
+crazyfly_core/clusterControllerClass_new.py
 crazyfly_core/clusterOptitrackSubscriber.py
 crazyfly_core/clusterTesting.py
+crazyfly_core/cluster_new.py
 crazyfly_core/flightplots.py
 crazyfly_core/pid_controller_cf1.py
 crazyfly_core/pid_controller_cf2.py

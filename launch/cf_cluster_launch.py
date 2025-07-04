@@ -6,8 +6,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node( 
             package='crazyfly_core',
-            executable='clusterControllerClass',
-            name='cluster_controller_node',
+            executable='clusterControllerClass_new',
+            name='cluster_controller_class_new',
             output='screen'
         ),
         Node(

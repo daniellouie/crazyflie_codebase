@@ -11,12 +11,12 @@ cluster.R_cur = np.array([1,0,1,0,2,0,1,0])
 # Set a desired cluster position (example values)\
 # NOTE : C_des needs to converted to Anne's frame (done)
 C_des_ours = np.array([1.5,1,2,0,0,0,0,1])
-cluster.C_des = cluster.frameOursToAnne(C_des_ours)
+cluster.C_des = C_des_ours
 
 # Step-by-step testing
-print("Testing frameOursToAnne...")
-R_cur_transformed = cluster.frameOursToAnne(cluster.R_cur)
-print("R_cur_transformed (transformed positions):", R_cur_transformed)
+# print("Testing frameOursToAnne...")
+# R_cur_transformed = cluster.frameOursToAnne(cluster.R_cur)
+# print("R_cur_transformed (transformed positions):", R_cur_transformed)
 
 print("Testing forwardKinematics...")
 C_cur = cluster.forwardKinematics()
