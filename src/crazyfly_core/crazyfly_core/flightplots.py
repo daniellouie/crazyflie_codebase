@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import pathlib  
 import subprocess, shlex
 import os
-
+'''
 # ---------------------------           AUTOMATICALLY READS FILE NOW             -------------------------------------------
 WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
 #  print(f"this is the workspace {WORKSPACE}")    
@@ -99,7 +99,7 @@ ax.set_zlabel('Y Position')
 ax.legend()
 plt.title('3D Position Data')
 plt.show()
-
+'''
 
 # --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
 df = pd.read_csv("~/crazyfly_ws/I_Joc_values/cluster_dot.csv")   # same path as logger
