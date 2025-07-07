@@ -2,6 +2,7 @@ import numpy as np
 import time
 import csv
 import os
+from datetime import datetime
 
 # ---------------------------------- for plotting the J_inv -----------------------------------------
 LOG_DIR = os.path.expanduser("~/crazyfly_ws/I_Joc_values")     
@@ -41,6 +42,7 @@ class Cluster_new:
 
         #-------------------------- PLOTTING THE INVERSE JACOBIAN FOR LOOKING AT INPUT COMMANDS ---------------------------------------#
         self.cluster_dot = []
+        self.time =[]
         #-----------------------------------------------------------------------------------------------------------------------------#
 
 
@@ -180,30 +182,37 @@ class Cluster_new:
         self.cluster_dot.append([
             time.time(),  # wall-clock seconds
                               
-            #####  plotting all axes  #####
+            #####  values for all axes  #####
             *self.R_dot[0:3],  # (x,y,z)_dot of drone 1
-            *self.R_dot[4:7],  # (x,y,z)_dot of drone 2
+            *self.R_dot[4:7]  # (x,y,z)_dot of drone 2
+            # self.R_dot[0],
+            # self.R_dot[1],
+            # self.R_dot[2],
+            # self.R_dot[4],
+            # self.R_dot[5],
+            # self.R_dot[6],
             #####                     ######
 
             # self.R_dot[0],   # x_dot of drone 1
             # self.R_dot[4]])  # x_dot of drone 2
-])
-        
+        ])
 
         return self.R_dot
     
 
-
-    def dump_cluster_dot(self, fname="cluster_dot.csv"):
-        path = os.path.join(LOG_DIR, fname)             # <— file ends up here
-        with open(path, "w", newline="") as f:
-            w = csv.writer(f)
+    
+    def dump_cluster_dot(self):
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
+        fname = f"cluster_dot_{ts}.csv" #name of csv
+        path = os.path.join(LOG_DIR, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        with open(path, "w", newline="") as file:
+            w = csv.writer(file)
             w.writerow(       # header row
                 ["time_s",
                 "x1dot","y1dot","z1dot",
                 "x2dot","y2dot","z2dot"])
-            w.writerows(self.cluster_dot)
-        print(f"[Cluster] x-velocity log written to {path}")
+            w.writerows(self.cluster_dot)  #cluster values
+        print(f"[Cluster] log written to {path}")
     
     # --------------------------------------------------------------------------------------------------------------------------------------------- #
     

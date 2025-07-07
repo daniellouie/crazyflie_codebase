@@ -81,7 +81,7 @@ class MinimalSubscriber(Node):
         self.flight_duration = 30.0 #in seconds
         # safety variable to prevent motors from running when testing
         # set to true to run motors
-        self.run_motors_bool = False
+        self.run_motors_bool = True
         # ----------------------------------------------
 
 
@@ -216,7 +216,7 @@ class MinimalSubscriber(Node):
             # Send commands to drone 2
 
             # temporarily commented out flight command for testing
-            self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
+            # self._cf2.commander.send_setpoint(self.roll2, self.pitch2, self.yawrate2, self.thrust2)
             # print(f"Drone 2: Roll = {self.roll2}, Pitch = {self.pitch2}, Yawrate = {self.yawrate2}, Thrust = {self.thrust2}")
 
 

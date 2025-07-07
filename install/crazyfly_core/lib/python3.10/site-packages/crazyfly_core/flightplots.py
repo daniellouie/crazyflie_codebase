@@ -4,25 +4,42 @@ from mpl_toolkits.mplot3d import Axes3D
 import pathlib  
 import subprocess, shlex
 import os
+import time
+import numpy as np
+from matplotlib.animation import FuncAnimation
+# --------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------        AUTOREADER FOR POSITION & INVERSE JACOBIAN DATA    --------------- 07/04/25 -------------
+# --------------------------------------------------------------------------------------------------------------------------------
 
-# ---------------------------           AUTOMATICALLY READS FILE NOW             -------------------------------------------
 WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
+WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
 #  print(f"this is the workspace {WORKSPACE}")    
-DATA_DIR    = WORKSPACE / "cluster_data"                       # <— save_data_to_csv() writes here
+DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
+INV_DATA_DIR = WORKSPACE2 / "I_Joc_values"                       
 PATTERN     = "cluster_data_*.csv"                             # matches all cluster logs
+FILE_PATTERN = "cluster_dot_*.csv"
 
 csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
+I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
 
 # ERROR STATEMENT
 if not csv_files:
     raise FileNotFoundError(f"No files matching {PATTERN} in {DATA_DIR}")
+if not I_Joc_files:
+    raise FileNotFoundError(f"No file matching {FILE_PATTERN} in {INV_DATA_DIR}")
 
 file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
+I_joc_path = I_Joc_files[-1]
 print(f"[flightplots] LATEST FLIGHT: {file_path}")
+print(f"[I_joc] LATEST INPUTS {I_joc_path}")
 
 # open file to see data
 # subprocess.run(shlex.split(f"code -r {file_path}"))
+
 # --------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 # Filepath to the CSV file
@@ -36,13 +53,13 @@ col3 = 'Cur_CF2_Y'
 
 # Convert the 'Timestamp' column to datetime
 data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+''''
+# Ensure the data columns are numeric and handle any potential issues with missing or invalid data
+data['Cur_CF1_Y'] = pd.to_numeric(data['Cur_CF1_Y'], errors='coerce')
+data['Des_CF1_Y'] = pd.to_numeric(data['Des_CF1_Y'], errors='coerce')
 
-# # Ensure the data columns are numeric and handle any potential issues with missing or invalid data
-# data['Cur_CF1_Y'] = pd.to_numeric(data['Cur_CF1_Y'], errors='coerce')
-# data['Des_CF1_Y'] = pd.to_numeric(data['Des_CF1_Y'], errors='coerce')
-
-# # Drop rows with NaN values in the relevant columns
-# data = data.dropna(subset=['Timestamp', 'Cur_CF1_Y', 'Des_CF1_Y'])
+# Drop rows with NaN values in the relevant columns
+data = data.dropna(subset=['Timestamp', 'Cur_CF1_Y', 'Des_CF1_Y'])
 
 # Convert the relevant columns to numpy arrays for compatibility with matplotlib
 timestamps = data['Timestamp'].to_numpy()
@@ -66,7 +83,7 @@ plt.grid()
 # Show the plot
 plt.tight_layout()
 plt.show()
-
+ '''
 # Convert the relevant columns to numpy arrays for compatibility with matplotlib
 cur_cf1_positions = data[['Cur_CF1_X', 'Cur_CF1_Z', 'Cur_CF1_Y']].to_numpy()
 cur_cf2_positions = data[['Cur_CF2_X', 'Cur_CF2_Z', 'Cur_CF2_Y']].to_numpy()
@@ -76,8 +93,8 @@ des_cf1_positions = data[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
 des_cf2_positions = data[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
 
 # Plot 3D position data
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+fig = plt.figure("3D Positions")
+ax = fig.add_subplot(111, projection="3d")
 
 # Plot each dataset
 ax.scatter(cur_cf1_positions[:, 0], cur_cf1_positions[:, 1], cur_cf1_positions[:, 2], label='Cur_CF1', c='r')
@@ -98,21 +115,87 @@ ax.set_ylabel('Z Position')
 ax.set_zlabel('Y Position')
 ax.legend()
 plt.title('3D Position Data')
+
+
+
+
+# --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
+df = pd.read_csv(I_joc_path)   # same path as logger
+df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]  #iloc is pandas method for selected rows and columns. "integer-location"
+t = df["rel_time"].to_numpy()
+
+fig_IJ= plt.figure("Inverse Jacobian Commands to Drones")
+ack = fig_IJ.add_subplot(111)
+
+
+ack.plot(t, df["x1dot"].to_numpy(), label="x1_dot")
+ack.plot(t, df["x2dot"].to_numpy(), label="x2_dot")
+ack.plot(t, df["y1dot"].to_numpy(), label="y1_dot")
+ack.plot(t, df["y2dot"].to_numpy(), label="y2_dot")
+ack.plot(t, df["z1dot"].to_numpy(), label="z1_dot")
+ack.plot(t, df["z2dot"].to_numpy(), label="z2_dot")
+ack.set_xlabel("Time [s]"); ack.set_ylabel("Commanded velocity [m/s]")
+ack.legend(); ack.grid(True); fig_IJ.tight_layout(); 
 plt.show()
 
 
 
+# --------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------          ANIMATIONS             ---------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------
+
+
+# storing and setting up values for the first positional graph
+
+max_frames = min(len(data), len(df))  #sync the index for animation
+
+fig_anim_pos = plt.figure("3D Position Animations")
+an_pos = fig_anim_pos.add_subplot(111, projection ="3d")
+
+(line_cf1_cur, )= an_pos.plot([], [], [], c ="r", label = "Cf1_cur") # This uses tuple-unpacking (the '(line_cf1_cur, )' )
+(line_cf2_cur, )= an_pos.plot([], [], [], c ="g", label = "Cf2_cur")
+(line_clus_cur, )= an_pos.plot([], [], [], c ="b", label = "Clus_cur")
+(line_clus_des, ) = an_pos.plot([], [], [], c ="y", label = "Clus_des")
+(line_cf1_des, )= an_pos.plot([], [], [], c ="m", label = "Cf1_des")
+(line_cf2_des, )= an_pos.plot([], [], [], c ="c", label = "Cf2_des")
+
+an_pos.set_xlabel("X"); an_pos.set_ylabel("Y"); an_pos.set_zlabel("Z")
+an_pos.legend()
+an_pos.set_xlim(cur_cf1_positions[:,0].min(), cur_cf1_positions[:,0].max())
+an_pos.set_ylim(cur_cf1_positions[:,2].min(), cur_cf1_positions[:,2].max())
+an_pos.set_zlim(cur_cf1_positions[:,1].min(), cur_cf1_positions[:,1].max())
 
 
 
-csv_path = os.path.expanduser('~/crazyfly_ws/I_Joc_values/cluster_dot.csv')
-df = pd.read_csv("~/crazyfly_ws/I_Joc_values/cluster_dot.csv")   # same path as logger
-plt.plot(df.time_s, df.x1dot, label="ẋ₁")
-plt.plot(df.time_s, df.y1dot, label="ẏ₁")
-plt.plot(df.time_s, df.z1dot, label="ż₁")
-plt.plot(df.time_s, df.x2dot, label="ẋ₂")
-plt.plot(df.time_s, df.y2dot, label="ẏ₂")
-plt.plot(df.time_s, df.z2dot, label="ż₂")
-plt.xlabel("Time [s]"); plt.ylabel("Commanded velocity [m/s]")
-plt.title("Inverse-Jacobian linear velocity commands")
-plt.legend(); plt.grid(True); plt.tight_layout(); plt.show()
+# setting up the velocity graph
+fig_anim_IJ = plt.figure("Inverse Jacobian Commands Animated")
+an_IJ = fig_anim_IJ.add_subplot(111)
+
+
+anim_x1dot, = an_IJ.plot([],[], label = "x1_dot")
+anim_x2dot, = an_IJ.plot([],[], label = "x2_dot")
+anim_y1dot, = an_IJ.plot([],[], label = "y1_dot")
+anim_y2dot, = an_IJ.plot([],[], label = "y2_dot")
+anim_z1dot, = an_IJ.plot([],[], label = "z1_dot")
+anim_z2dot, = an_IJ.plot([],[], label = "z2_dot")
+
+an_IJ.set_xlim(0, t.max())
+an_IJ.set_ylim(df.drop(columns="rel_time").min().min(), df.drop(columns="rel_time").max().max())
+an_IJ.set_xlabel("Time (s)")
+an_IJ.set_ylabel("command velocities (m/s)")
+an_IJ.legend(); an_IJ.grid(True)
+
+def update(frame):
+    anim_x1dot.set_data((t[:frame], df["x1dot"].iloc[:frame]))
+    anim_x2dot.set_data((t[:frame], df["x2dot"].iloc[:frame]))
+    anim_y1dot.set_data((t[:frame], df["y1dot"].iloc[:frame]))
+    anim_y2dot.set_data((t[:frame], df["y2dot"].iloc[:frame]))
+    anim_z1dot.set_data((t[:frame], df["z1dot"].iloc[:frame]))
+    anim_z2dot.set_data((t[:frame], df["z2dot"].iloc[:frame]))
+    
+
+
+
+
+
+
