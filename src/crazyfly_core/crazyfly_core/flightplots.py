@@ -277,4 +277,66 @@ def update(frame):
 
 num_frames = min(len(p) for p in datasets.values())
 ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
+#plt.show()
+
+#Animation for 2D Graph
+
+# Load and preprocess data
+#df = pd.read_csv(I_joc_path)
+# df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
+# t = df["rel_time"].to_numpy()
+
+# Extract each signal as a NumPy array
+# x1dot = df["x1dot"].to_numpy()
+# x2dot = df["x2dot"].to_numpy()
+# y1dot = df["y1dot"].to_numpy()
+# y2dot = df["y2dot"].to_numpy()
+# z1dot = df["z1dot"].to_numpy()
+# z2dot = df["z2dot"].to_numpy()
+
+step = 43
+
+# Downsampled time and signals
+t2 = df["rel_time"].to_numpy()[::step]
+x1dot = df["x1dot"].to_numpy()[::step]
+x2dot = df["x2dot"].to_numpy()[::step]
+y1dot = df["y1dot"].to_numpy()[::step]
+y2dot = df["y2dot"].to_numpy()[::step]
+z1dot = df["z1dot"].to_numpy()[::step]
+z2dot = df["z2dot"].to_numpy()[::step]
+
+# Create animated figure
+fig_IJ = plt.figure("Inverse Jacobian Commands to Drones")
+ack = fig_IJ.add_subplot(111)
+
+ack.set_xlabel("Time [s]")
+ack.set_ylabel("Commanded velocity [m/s]")
+ack.grid(True)
+ack.set_xlim(t[0], t2[-1])
+ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
+              df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
+
+# Initialize lines
+(line_x1,) = ack.plot([], [], label="x1_dot")
+(line_x2,) = ack.plot([], [], label="x2_dot")
+(line_y1,) = ack.plot([], [], label="y1_dot")
+(line_y2,) = ack.plot([], [], label="y2_dot")
+(line_z1,) = ack.plot([], [], label="z1_dot")
+(line_z2,) = ack.plot([], [], label="z2_dot")
+
+ack.legend()
+fig_IJ.tight_layout()
+
+# Update function for animation
+def update_1(frame):
+    line_x1.set_data(t2[:frame], x1dot[:frame])
+    line_x2.set_data(t2[:frame], x2dot[:frame])
+    line_y1.set_data(t2[:frame], y1dot[:frame])
+    line_y2.set_data(t2[:frame], y2dot[:frame])
+    line_z1.set_data(t2[:frame], z1dot[:frame])
+    line_z2.set_data(t2[:frame], z2dot[:frame])
+    return line_x1, line_x2, line_y1, line_y2, line_z1, line_z2
+
+# Create animation
+ani_2d = FuncAnimation(fig_IJ, update_1, frames=len(t2), interval=100, blit=True)
 plt.show()
