@@ -220,9 +220,18 @@ with open(I_joc_path, 'r') as f:
 
 step = twod_lines/threed_lines
 step = int(step)
+data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+
+start_time = data['Timestamp'].iloc[0]
+end_time = data['Timestamp'].iloc[-1]
+
+elapsed_seconds = (end_time - start_time).total_seconds()
+print(elapsed_seconds)
+
+t2 = np.linspace(0, elapsed_seconds, len(df["x1dot"].to_numpy()[::step]))
 
 # Downsampled time and signals
-t2 = df["rel_time"].to_numpy()[::step]
+#t2 = df["rel_time"].to_numpy()[::step]
 x1dot = df["x1dot"].to_numpy()[::step]
 x2dot = df["x2dot"].to_numpy()[::step]
 y1dot = df["y1dot"].to_numpy()[::step]
@@ -237,7 +246,7 @@ ack = fig_IJ.add_subplot(111)
 ack.set_xlabel("Time [s]")
 ack.set_ylabel("Commanded velocity [m/s]")
 ack.grid(True)
-ack.set_xlim(t[0], t2[-1])
+ack.set_xlim(t2[0], t2[-1])
 ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
               df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
 

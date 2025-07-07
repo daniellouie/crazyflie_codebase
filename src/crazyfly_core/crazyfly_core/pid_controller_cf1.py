@@ -211,6 +211,7 @@ class PIDControllerCF1(Node):
     # X Axis control
     def calculate_pitch(self):
         # (P term)
+
         self.cur_x_error = self.commanded_position[0] - self.current_position[0]
         if -0.01 <= self.cur_x_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
             self.cur_x_error = 0

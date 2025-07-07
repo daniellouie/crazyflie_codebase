@@ -210,7 +210,7 @@ class MinimalSubscriber(Node):
         # if safety variable is set to true, run motors
         if self.run_motors_bool:
             # Send commands to drone 1
-            #  self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
+             self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, self.thrust1)
             # print(f"Drone 1: Roll = {self.roll1}, Pitch = {self.pitch1}, Yawrate = {self.yawrate1}, Thrust = {self.thrust1}")
 
             # Send commands to drone 2

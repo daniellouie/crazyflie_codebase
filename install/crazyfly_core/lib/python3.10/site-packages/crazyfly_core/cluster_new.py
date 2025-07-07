@@ -23,7 +23,6 @@ class Cluster_new:
         self.C_cmd = np.zeros(8) # commanded cluster position (xc, yc, zc, alpha, beta, phi1, phi2, p)
         self.C_err = np.zeros(8) # cluster position error (xc, yc, zc)
         self.C_dot = np.zeros(8) # cluster velocity (xc_dot, yc_dot, zc_dot, alpha_dot, beta_dot, phi1_dot, phi2_dot, p_dot)
-
         self.cluster_gains = [
             1.0,  #X gains:
             1.0,  #Y gains:
@@ -202,8 +201,8 @@ class Cluster_new:
 
     
     def dump_cluster_dot(self):
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
-        fname = f"cluster_dot_{ts}.csv" #name of csv
+        time_s = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
+        fname = f"cluster_dot_{time_s}.csv" #name of csv
         path = os.path.join(LOG_DIR, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
