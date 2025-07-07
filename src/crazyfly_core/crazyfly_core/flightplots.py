@@ -212,7 +212,14 @@ ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
 
 #Animation for 2D Graph
 
-step = 43
+with open(file_path, 'r') as f:
+    threed_lines = sum(1 for line in f)
+
+with open(I_joc_path, 'r') as f:
+    twod_lines = sum(1 for line in f)
+
+step = twod_lines/threed_lines
+step = int(step)
 
 # Downsampled time and signals
 t2 = df["rel_time"].to_numpy()[::step]
