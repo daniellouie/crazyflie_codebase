@@ -144,74 +144,7 @@ plt.show()
 # --------------------------------------------          ANIMATIONS             ---------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-
-# # storing and setting up values for the first positional graphplt.show
-
-# max_frames = min(len(data), len(df))  #sync the index for animation
-
-# fig_anim_pos = plt.figure("3D Position Animations")
-# an_pos = fig_anim_pos.add_subplot(111, projection ="3d")
-
-# (line_cf1_cur, )= an_pos.plot([], [], [], c ="r", label = "Cf1_cur") # This uses tuple-unpacking (the '(line_cf1_cur, )' )
-# (line_cf2_cur, )= an_pos.plot([], [], [], c ="g", label = "Cf2_cur")
-# (line_clus_cur, )= an_pos.plot([], [], [], c ="b", label = "Clus_cur")
-# (line_clus_des, ) = an_pos.plot([], [], [], c ="y", label = "Clus_des")
-# (line_cf1_des, )= an_pos.plot([], [], [], c ="m", label = "Cf1_des")
-# (line_cf2_des, )= an_pos.plot([], [], [], c ="c", label = "Cf2_des")
-
-# an_pos.set_xlabel("X"); an_pos.set_ylabel("Y"); an_pos.set_zlabel("Z")
-# an_pos.legend()
-# an_pos.set_xlim(cur_cf1_positions[:,0].min(), cur_cf1_positions[:,0].max())
-# an_pos.set_ylim(cur_cf1_positions[:,2].min(), cur_cf1_positions[:,2].max())
-# an_pos.set_zlim(cur_cf1_positions[:,1].min(), cur_cf1_positions[:,1].max())
-
-
-
-# # setting up the velocity graph
-# fig_anim_IJ = plt.figure("Inverse Jacobian Commands Animated")
-# an_IJ = fig_anim_IJ.add_subplot(111)
-
-
-# anim_x1dot, = an_IJ.plot([],[], label = "x1_dot")
-# anim_x2dot, = an_IJ.plot([],[], label = "x2_dot")
-# anim_y1dot, = an_IJ.plot([],[], label = "y1_dot")
-# anim_y2dot, = an_IJ.plot([],[], label = "y2_dot")
-# anim_z1dot, = an_IJ.plot([],[], label = "z1_dot")
-# anim_z2dot, = an_IJ.plot([],[], label = "z2_dot")
-
-# an_IJ.set_xlim(0, t.max())
-# an_IJ.set_ylim(df.drop(columns="rel_time").min().min(), df.drop(columns="rel_time").max().max())
-# an_IJ.set_xlabel("Time (s)")
-# an_IJ.set_ylabel("command velocities (m/s)")
-# an_IJ.legend(); an_IJ.grid(True)
-
-# def update(frame):
-#     line_cf1_cur.set_data(cur_cf1_positions[:frame,0], cur_cf1_positions[:frame,2])
-#     line_cf1_cur.set_3d_properties(cur_cf1_positions[:frame,1])
-
-#     line_cf1_des.set_data(cur_cf2_positions[])
-
-
-
-
-
-
-#     anim_x1dot.set_data((t[:frame], df["x1dot"].iloc[:frame]))
-#     anim_x2dot.set_data((t[:frame], df["x2dot"].iloc[:frame]))
-#     anim_y1dot.set_data((t[:frame], df["y1dot"].iloc[:frame]))
-#     anim_y2dot.set_data((t[:frame], df["y2dot"].iloc[:frame]))
-#     anim_z1dot.set_data((t[:frame], df["z1dot"].iloc[:frame]))
-#     anim_z2dot.set_data((t[:frame], df["z2dot"].iloc[:frame]))
-    
-
-#     return(line_cf1_cur)
-
-
-
-# anim_pos = FuncAnimation(fig_anim_pos,update,frames = max_frames, interval = 50, blit = False)
-# ani_vel = FuncAnimation(fig_anim_IJ, update, frames=max_frames, interval=50, blit=False)
-# plt.show()
-
+#Animation for 3D Graph
 fig = plt.figure("3D Positions Over Time")
 ax = fig.add_subplot(111, projection="3d")
 
@@ -244,7 +177,6 @@ ax.set_xlabel('X Position')
 ax.set_ylabel('Z Position')
 ax.set_zlabel('Y Position')
 
-# trail scatters
 scatters = {
     'Cur_CF1': ax.scatter([], [], [], color='r', label='Cur_CF1'),
     'Cur_CF2': ax.scatter([], [], [], color='g', label='Cur_CF2'),
@@ -277,22 +209,8 @@ def update(frame):
 
 num_frames = min(len(p) for p in datasets.values())
 ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
-#plt.show()
 
 #Animation for 2D Graph
-
-# Load and preprocess data
-#df = pd.read_csv(I_joc_path)
-# df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
-# t = df["rel_time"].to_numpy()
-
-# Extract each signal as a NumPy array
-# x1dot = df["x1dot"].to_numpy()
-# x2dot = df["x2dot"].to_numpy()
-# y1dot = df["y1dot"].to_numpy()
-# y2dot = df["y2dot"].to_numpy()
-# z1dot = df["z1dot"].to_numpy()
-# z2dot = df["z2dot"].to_numpy()
 
 step = 43
 
