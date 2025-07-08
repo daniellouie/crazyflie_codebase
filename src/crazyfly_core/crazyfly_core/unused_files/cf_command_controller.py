@@ -84,6 +84,10 @@ class MinimalSubscriber(Node):
     # this function is called each time a 'command' message is received
     def listener_callback(self, msg):
         # ensure commands for all axis are recieved
+        self.roll1 = msg.data[0]
+        self.pitch1 = msg.data[1]
+        self.yawrate1 = msg.data[2]
+        self.thrust1 = int(msg.data[3])
         if len(msg.data) >= 7:
             self.roll1 = msg.data[0]
             self.pitch1 = msg.data[1]
@@ -139,7 +143,7 @@ class MinimalSubscriber(Node):
     def _connected(self, link_uri):
         """ This callback is called from the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
-
+        print(f"CONNECTED TO {link_uri}")
         # Start a separate thread to continuously send thrust commands.
         #temporatily commented out for debugging (not working)
         #Thread(target=self._send_thrust_command).start()
