@@ -144,10 +144,14 @@ plt.show()
 # --------------------------------------------          ANIMATIONS             ---------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-#Animation for 3D Graph
+#-----------------------
+# Animation for 3D Graph
+#-----------------------
+
 fig = plt.figure("3D Positions Over Time")
 ax = fig.add_subplot(111, projection="3d")
 
+# converting datasets into numpy array
 all_positions = np.vstack([
     cur_cf1_positions,
     cur_cf2_positions,
@@ -157,7 +161,7 @@ all_positions = np.vstack([
     des_cf2_positions,
 ])
 
-
+# setting appropriate labels/bounds of graphs based on position data
 padding = 0.05
 x_min, x_max = all_positions[:, 0].min(), all_positions[:, 0].max()
 y_min, y_max = all_positions[:, 1].min(), all_positions[:, 1].max()
@@ -177,6 +181,7 @@ ax.set_xlabel('X Position')
 ax.set_ylabel('Z Position')
 ax.set_zlabel('Y Position')
 
+#generating scatterplot for each dataset
 scatters = {
     'Cur_CF1': ax.scatter([], [], [], color='r', label='Cur_CF1'),
     'Cur_CF2': ax.scatter([], [], [], color='g', label='Cur_CF2'),
@@ -210,27 +215,28 @@ def update(frame):
 num_frames = min(len(p) for p in datasets.values())
 ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
 
+#-----------------------
 #Animation for 2D Graph
+#-----------------------
 
+# reads both csv files for 3d and 2d graphs to calculate number of lines
 with open(file_path, 'r') as f:
     threed_lines = sum(1 for line in f)
 
 with open(I_joc_path, 'r') as f:
     twod_lines = sum(1 for line in f)
 
+# calculates elapsed time to match timing of both graphs simultaniously when being animated
 step = twod_lines/threed_lines
 step = int(step)
 data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-
 start_time = data['Timestamp'].iloc[0]
 end_time = data['Timestamp'].iloc[-1]
-
 elapsed_seconds = (end_time - start_time).total_seconds()
 print(elapsed_seconds)
-
 t2 = np.linspace(0, elapsed_seconds, len(df["x1dot"].to_numpy()[::step]))
 
-# Downsampled time and signals
+# downsampled time and signals
 #t2 = df["rel_time"].to_numpy()[::step]
 x1dot = df["x1dot"].to_numpy()[::step]
 x2dot = df["x2dot"].to_numpy()[::step]
@@ -239,7 +245,7 @@ y2dot = df["y2dot"].to_numpy()[::step]
 z1dot = df["z1dot"].to_numpy()[::step]
 z2dot = df["z2dot"].to_numpy()[::step]
 
-# Create animated figure
+# create animated figure
 fig_IJ = plt.figure("Inverse Jacobian Commands to Drones")
 ack = fig_IJ.add_subplot(111)
 
@@ -250,7 +256,7 @@ ack.set_xlim(t2[0], t2[-1])
 ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
               df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
 
-# Initialize lines
+# initialize lines
 (line_x1,) = ack.plot([], [], label="x1_dot")
 (line_x2,) = ack.plot([], [], label="x2_dot")
 (line_y1,) = ack.plot([], [], label="y1_dot")
@@ -261,7 +267,7 @@ ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy
 ack.legend()
 fig_IJ.tight_layout()
 
-# Update function for animation
+# update function for animation
 def update_1(frame):
     line_x1.set_data(t2[:frame], x1dot[:frame])
     line_x2.set_data(t2[:frame], x2dot[:frame])
@@ -271,6 +277,6 @@ def update_1(frame):
     line_z2.set_data(t2[:frame], z2dot[:frame])
     return line_x1, line_x2, line_y1, line_y2, line_z1, line_z2
 
-# Create animation
+# create animation
 ani_2d = FuncAnimation(fig_IJ, update_1, frames=len(t2), interval=100, blit=True)
 plt.show()
