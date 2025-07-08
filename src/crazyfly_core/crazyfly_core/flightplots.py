@@ -120,22 +120,54 @@ plt.title('3D Position Data')
 
 
 # --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
-df = pd.read_csv(I_joc_path)   # same path as logger
-df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]  #iloc is pandas method for selected rows and columns. "integer-location"
+# df = pd.read_csv(I_joc_path)   # same path as logger
+# df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]  #iloc is pandas method for selected rows and columns. "integer-location"
+# t = df["rel_time"].to_numpy()
+
+# fig_IJ= plt.figure("Inverse Jacobian Commands to Drones")
+# ack = fig_IJ.add_subplot(111)
+
+
+# ack.plot(t, df["x1dot"].to_numpy(), label="x1_dot")
+# ack.plot(t, df["x2dot"].to_numpy(), label="x2_dot")
+# ack.plot(t, df["y1dot"].to_numpy(), label="y1_dot")
+# ack.plot(t, df["y2dot"].to_numpy(), label="y2_dot")
+# ack.plot(t, df["z1dot"].to_numpy(), label="z1_dot")
+# ack.plot(t, df["z2dot"].to_numpy(), label="z2_dot")
+# ack.set_xlabel("Time [s]"); ack.set_ylabel("Commanded velocity [m/s]")
+# ack.legend(); ack.grid(True); fig_IJ.tight_layout(); 
+# plt.show()
+
+df = pd.read_csv(I_joc_path)
+df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
 t = df["rel_time"].to_numpy()
 
-fig_IJ= plt.figure("Inverse Jacobian Commands to Drones")
-ack = fig_IJ.add_subplot(111)
+# Create figure and subplots
+fig_IJ, (ack11, ack12) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+fig_IJ.suptitle("Inverse Jacobian Commands to Drones")
 
+# Shared y-axis limits
+y_min = df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1
+y_max = df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1
 
-ack.plot(t, df["x1dot"].to_numpy(), label="x1_dot")
-ack.plot(t, df["x2dot"].to_numpy(), label="x2_dot")
-ack.plot(t, df["y1dot"].to_numpy(), label="y1_dot")
-ack.plot(t, df["y2dot"].to_numpy(), label="y2_dot")
-ack.plot(t, df["z1dot"].to_numpy(), label="z1_dot")
-ack.plot(t, df["z2dot"].to_numpy(), label="z2_dot")
-ack.set_xlabel("Time [s]"); ack.set_ylabel("Commanded velocity [m/s]")
-ack.legend(); ack.grid(True); fig_IJ.tight_layout(); 
+# Subplot for CF1 (ack11)
+ack11.plot(t, df["x1dot"], label="x1_dot", color="red")
+ack11.plot(t, df["y1dot"], label="y1_dot", color="green")
+ack11.plot(t, df["z1dot"], label="z1_dot", color="blue")
+ack11.set_ylabel("CF1 Velocity [m/s]")
+ack11.grid(True)
+ack11.legend()
+
+# Subplot for CF2 (ack12)
+ack12.plot(t, df["x2dot"], label="x2_dot", color="purple")
+ack12.plot(t, df["y2dot"], label="y2_dot", color="brown")
+ack12.plot(t, df["z2dot"], label="z2_dot", color="orange")
+ack12.set_ylabel("CF2 Velocity [m/s]")
+ack12.set_xlabel("Time [s]")
+ack12.grid(True)
+ack12.legend()
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
 
 
@@ -245,27 +277,73 @@ y2dot = df["y2dot"].to_numpy()[::step]
 z1dot = df["z1dot"].to_numpy()[::step]
 z2dot = df["z2dot"].to_numpy()[::step]
 
+# # create animated figure
+# fig_IJ = plt.figure("Inverse Jacobian Commands to Drones")
+# ack = fig_IJ.add_subplot(111)
+
+# ack.set_xlabel("Time [s]")
+# ack.set_ylabel("Commanded velocity [m/s]")
+# ack.grid(True)
+# ack.set_xlim(t2[0], t2[-1])
+# ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
+#               df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
+
+# # initialize lines
+# (line_x1,) = ack.plot([], [], label="x1_dot")
+# (line_x2,) = ack.plot([], [], label="x2_dot")
+# (line_y1,) = ack.plot([], [], label="y1_dot")
+# (line_y2,) = ack.plot([], [], label="y2_dot")
+# (line_z1,) = ack.plot([], [], label="z1_dot")
+# (line_z2,) = ack.plot([], [], label="z2_dot")
+
+# ack.legend()
+# fig_IJ.tight_layout()
+
+# # update function for animation
+# def update_1(frame):
+#     line_x1.set_data(t2[:frame], x1dot[:frame])
+#     line_x2.set_data(t2[:frame], x2dot[:frame])
+#     line_y1.set_data(t2[:frame], y1dot[:frame])
+#     line_y2.set_data(t2[:frame], y2dot[:frame])
+#     line_z1.set_data(t2[:frame], z1dot[:frame])
+#     line_z2.set_data(t2[:frame], z2dot[:frame])
+#     return line_x1, line_x2, line_y1, line_y2, line_z1, line_z2
+
+# # create animation
+# ani_2d = FuncAnimation(fig_IJ, update_1, frames=len(t2), interval=100, blit=True)
+# plt.show()
+
 # create animated figure
-fig_IJ = plt.figure("Inverse Jacobian Commands to Drones")
-ack = fig_IJ.add_subplot(111)
+fig_IJ, (ack1, ack2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+fig_IJ.suptitle("Inverse Jacobian Commands to Drones")
 
-ack.set_xlabel("Time [s]")
-ack.set_ylabel("Commanded velocity [m/s]")
-ack.grid(True)
-ack.set_xlim(t2[0], t2[-1])
-ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
-              df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
+# shared axis limits
+y_min = df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1
+y_max = df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1
 
-# initialize lines
-(line_x1,) = ack.plot([], [], label="x1_dot")
-(line_x2,) = ack.plot([], [], label="x2_dot")
-(line_y1,) = ack.plot([], [], label="y1_dot")
-(line_y2,) = ack.plot([], [], label="y2_dot")
-(line_z1,) = ack.plot([], [], label="z1_dot")
-(line_z2,) = ack.plot([], [], label="z2_dot")
+# plot 1: cf1
+ack1.set_ylabel("velocity [m/s]")
+ack1.set_xlabel("Time [s]")
+ack1.set_xlim(t2[0], t2[-1])
+ack1.set_ylim(y_min, y_max)
+ack1.grid(True)
+(line_x1,) = ack1.plot([], [], label="x1dot", color='red')
+(line_y1,) = ack1.plot([], [], label="y1dot", color='green')
+(line_z1,) = ack1.plot([], [], label="z1dot", color='blue')
+ack1.legend()
 
-ack.legend()
-fig_IJ.tight_layout()
+# plot 2: cf2
+ack2.set_ylabel("z velocity [m/s]")
+ack2.set_xlabel("Time [s]")
+ack2.set_xlim(t2[0], t2[-1])
+ack2.set_ylim(y_min, y_max)
+ack2.grid(True)
+(line_x2,) = ack2.plot([], [], label="x2dot", color='purple')
+(line_y2,) = ack2.plot([], [], label="y2dot", color='brown')
+(line_z2,) = ack2.plot([], [], label="z2dot", color='green')
+ack2.legend()
+
+fig_IJ.tight_layout(rect=[0, 0.03, 1, 0.95])  # leave space for suptitle
 
 # update function for animation
 def update_1(frame):
@@ -277,6 +355,6 @@ def update_1(frame):
     line_z2.set_data(t2[:frame], z2dot[:frame])
     return line_x1, line_x2, line_y1, line_y2, line_z1, line_z2
 
-# create animation
+# Create animation
 ani_2d = FuncAnimation(fig_IJ, update_1, frames=len(t2), interval=100, blit=True)
 plt.show()
