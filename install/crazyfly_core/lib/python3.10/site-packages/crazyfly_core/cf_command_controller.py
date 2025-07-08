@@ -14,8 +14,9 @@ import matplotlib.pyplot as plt
 import time
 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
-link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
+link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
+# test
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -25,7 +26,7 @@ class MinimalSubscriber(Node):
         super().__init__('cf_driver')
         self.subscription = self.create_subscription(
             Float32MultiArray,
-            '/cf1/commands',
+            '/cf2/commands',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning

@@ -45,8 +45,8 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
-        self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
-        # self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
+        self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
 
         
         #THIS IS FUTURE CODE FOR MULTIPLE DRONES POTENTIALLY 
@@ -76,7 +76,7 @@ class OptiTrackSubscriber2(Node):
         self.k_p_y = 19000 #previously 15000 on jan 22
         self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
         self.k_d_y = 10000
-        self.threshold_met = False
+        # self.threshold_met = False
 
         self.cur_y_error = 0.0
         self.prev_y_error = 0.0
@@ -114,6 +114,7 @@ class OptiTrackSubscriber2(Node):
 
     def listener_callback(self, msg):
         # need this conditional to avoid QoS error
+        self.get_logger().info(str(msg.header.frame_id))
         if msg.header.frame_id == "world":
             # store the current x,y,x position of the drone (in meters)
             self.position[0] = msg.pose.position.x
@@ -142,6 +143,7 @@ class OptiTrackSubscriber2(Node):
             msg = Float32MultiArray()
             msg.data = [float(roll), float(pitch), float(yawrate), float(thrust), 
                         float(self.position[0]), float(self.position[1]), float(self.position[2])]
+            self.get_logger().info(str(msg.data))
             self.pub_commands.publish(msg) #publish commands for drone controller
             
             # #This is a timer so the drones stay in one location for a few seconds 

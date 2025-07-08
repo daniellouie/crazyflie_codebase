@@ -47,8 +47,8 @@ class OptiTrackSubscriber(Node):
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         #self.target_positions = [[.10, 1.0, 1.0],[1.0, 1.0, 2.0],[1.0, 1.0, 1.0]] #set single position
-        self.target_positions = [[1.0, 0.75, 1.0],[1.0, 0.75, 2.0]] #set single position (x,y,z)
-        # self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 0.75, 1.0],[1.0, 0.75, 2.0]] #set single position (x,y,z)
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
 
         
         
