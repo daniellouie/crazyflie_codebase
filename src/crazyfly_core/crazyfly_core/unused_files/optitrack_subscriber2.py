@@ -45,8 +45,8 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
-        self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
-        # self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
+        self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
 
         
         #THIS IS FUTURE CODE FOR MULTIPLE DRONES POTENTIALLY 
@@ -71,11 +71,11 @@ class OptiTrackSubscriber2(Node):
 
         # values for vertical Y (thrust) PID
         self.hover = 44000 #originally 46500     
-        self.max_thrust = 55000 #origionall 50000
+        self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
-        self.k_p_y = 19000 #previously 15000 on jan 22
+        self.k_p_y = 32000 #previously 15000 on jan 22
         self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
-        self.k_d_y = 10000
+        self.k_d_y = 10500
         self.threshold_met = False
 
         self.cur_y_error = 0.0
@@ -86,7 +86,7 @@ class OptiTrackSubscriber2(Node):
         # values for horizontal X (pitch) PID
         self.k_p_x = 2
         self.k_i_x = 0.6
-        self.k_d_x = 4.0
+        self.k_d_x = 4.1
         self.max_pitch = 3.0
         self.min_pitch = -3.0
 
@@ -98,7 +98,7 @@ class OptiTrackSubscriber2(Node):
         # values for horizontal Z (roll) PID
         self.k_p_z = 2
         self.k_i_z = 0.6
-        self.k_d_z = 4.0 #previously 3.5
+        self.k_d_z = 4.1 #previously 3.5
         self.max_roll = 3.0
         self.min_roll = -3.0
 
