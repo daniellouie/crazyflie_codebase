@@ -39,9 +39,6 @@ print(f"[I_joc] LATEST INPUTS {I_joc_path}")
 # --------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
 # Filepath to the CSV file
 # file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250701_154916.csv"
 # # Read the CSV file into a DataFrame
@@ -120,23 +117,6 @@ plt.title('3D Position Data')
 
 
 # --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
-# df = pd.read_csv(I_joc_path)   # same path as logger
-# df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]  #iloc is pandas method for selected rows and columns. "integer-location"
-# t = df["rel_time"].to_numpy()
-
-# fig_IJ= plt.figure("Inverse Jacobian Commands to Drones")
-# ack = fig_IJ.add_subplot(111)
-
-
-# ack.plot(t, df["x1dot"].to_numpy(), label="x1_dot")
-# ack.plot(t, df["x2dot"].to_numpy(), label="x2_dot")
-# ack.plot(t, df["y1dot"].to_numpy(), label="y1_dot")
-# ack.plot(t, df["y2dot"].to_numpy(), label="y2_dot")
-# ack.plot(t, df["z1dot"].to_numpy(), label="z1_dot")
-# ack.plot(t, df["z2dot"].to_numpy(), label="z2_dot")
-# ack.set_xlabel("Time [s]"); ack.set_ylabel("Commanded velocity [m/s]")
-# ack.legend(); ack.grid(True); fig_IJ.tight_layout(); 
-# plt.show()
 
 df = pd.read_csv(I_joc_path)
 df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
@@ -176,14 +156,14 @@ plt.show()
 # --------------------------------------------          ANIMATIONS             ---------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-#-----------------------
-# Animation for 3D Graph
-#-----------------------
+#--------------------------
+#| Animation for 3D Graph |
+#--------------------------
 
 fig = plt.figure("3D Positions Over Time")
 ax = fig.add_subplot(111, projection="3d")
 
-# converting datasets into numpy array
+# compute bounds as before…
 all_positions = np.vstack([
     cur_cf1_positions,
     cur_cf2_positions,
@@ -192,64 +172,69 @@ all_positions = np.vstack([
     des_cf1_positions,
     des_cf2_positions,
 ])
-
-# setting appropriate labels/bounds of graphs based on position data
 padding = 0.05
-x_min, x_max = all_positions[:, 0].min(), all_positions[:, 0].max()
-y_min, y_max = all_positions[:, 1].min(), all_positions[:, 1].max()
-z_min, z_max = all_positions[:, 2].min(), all_positions[:, 2].max()
-
+x_min, x_max = all_positions[:,0].min(), all_positions[:,0].max()
 x_range = x_max - x_min
-y_range = y_max - y_min
-z_range = z_max - z_min
-
-ax.set_xlim(x_min - padding * x_range, x_max + padding * x_range)
-#ax.set_ylim(z_min - padding * z_range, z_max + padding * z_range)  # Z is on Y-axis
-#ax.set_zlim(y_max + padding * y_range, y_min - padding * y_range)
+ax.set_xlim(x_min - padding*x_range, x_max + padding*x_range)
 ax.set_ylim(0,2)
 ax.set_zlim(0,1)
-
 ax.set_xlabel('X Position')
 ax.set_ylabel('Z Position')
 ax.set_zlabel('Y Position')
 
-#generating scatterplot for each dataset
-scatters = {
-    'Cur_CF1': ax.scatter([], [], [], color='r', label='Cur_CF1'),
-    'Cur_CF2': ax.scatter([], [], [], color='g', label='Cur_CF2'),
-    'Cur_Cluster': ax.scatter([], [], [], color='b', label='Cur_Cluster'),
-    'Des_Cluster': ax.scatter([], [], [], color='y', label='Des_Cluster'),
-    'Des_CF1': ax.scatter([], [], [], color='m', label='Des_CF1'),
-    'Des_CF2': ax.scatter([], [], [], color='c', label='Des_CF2'),
+# datasets with their colors
+datasets = {
+    'Cur_CF1': (cur_cf1_positions, 'r'),
+    'Cur_CF2': (cur_cf2_positions, 'g'),
+    'Cur_Cluster': (cur_cluster_positions, 'gray'),
+    'Des_Cluster': (des_cluster_positions, 'purple'),
+    'Des_CF1': (des_cf1_positions, 'm'),
+    'Des_CF2': (des_cf2_positions, 'c'),
 }
-ax.legend()
+
+trail_scatters = {}
+head_scatters = {}
+for key, (pos, color) in datasets.items():
+    if key.startswith('Des_Cluster'):
+        trail_scatters[key] = ax.scatter([], [], [], c=color, s=80, alpha=0.6)
+    elif key.startswith('Des_'):
+        trail_scatters[key] = ax.scatter([], [], [], c=color, s=30, alpha=0.6)
+    else:
+        trail_scatters[key] = ax.scatter([], [], [], c=color, s=10, alpha=0.6)
+    if key.startswith('Cur_'):
+        head_scatters[key] = ax.scatter([], [], [], c='k', s=60)
+
+# ax.legend(datasets.keys(), loc='lower left')
+handles = [trail_scatters[key] for key in datasets]
+labels  = list(datasets.keys())
+
+ax.legend(handles, labels,
+          loc='lower left',
+        #   bbox_to_anchor=(1.05, 1),
+          borderaxespad=0.)
+
 plt.title('3D Position Data')
 
-datasets = {
-    'Cur_CF1': cur_cf1_positions,
-    'Cur_CF2': cur_cf2_positions,
-    'Cur_Cluster': cur_cluster_positions,
-    'Des_Cluster': des_cluster_positions,
-    'Des_CF1': des_cf1_positions,
-    'Des_CF2': des_cf2_positions,
-}
-
 def update(frame):
-    for key, scatter in scatters.items():
-        pos = datasets[key]
-        if frame < len(pos):
-            xs = pos[:frame+1, 0]
-            ys = pos[:frame+1, 1]
-            zs = pos[:frame+1, 2]
-            scatter._offsets3d = (xs, ys, zs)
-    return scatters.values()
+    artists = []
+    for key, (pos, color) in datasets.items():
+        # update trail
+        xs, ys, zs = pos[:frame+1,0], pos[:frame+1,1], pos[:frame+1,2]
+        trail_scatters[key]._offsets3d = (xs, ys, zs)
+        artists.append(trail_scatters[key])
+        # update head only if it exists
+        if key in head_scatters:
+            xh, yh, zh = pos[frame,0], pos[frame,1], pos[frame,2]
+            head_scatters[key]._offsets3d = ([xh], [yh], [zh])
+            artists.append(head_scatters[key])
+    return artists
 
-num_frames = min(len(p) for p in datasets.values())
+num_frames = min(len(p) for p, _ in datasets.values())
 ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
 
-#-----------------------
-#Animation for 2D Graph
-#-----------------------
+#--------------------------
+#| Animation for 2D Graph |
+#--------------------------
 
 # reads both csv files for 3d and 2d graphs to calculate number of lines
 with open(file_path, 'r') as f:
@@ -276,42 +261,6 @@ y1dot = df["y1dot"].to_numpy()[::step]
 y2dot = df["y2dot"].to_numpy()[::step]
 z1dot = df["z1dot"].to_numpy()[::step]
 z2dot = df["z2dot"].to_numpy()[::step]
-
-# # create animated figure
-# fig_IJ = plt.figure("Inverse Jacobian Commands to Drones")
-# ack = fig_IJ.add_subplot(111)
-
-# ack.set_xlabel("Time [s]")
-# ack.set_ylabel("Commanded velocity [m/s]")
-# ack.grid(True)
-# ack.set_xlim(t2[0], t2[-1])
-# ack.set_ylim(df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().min() - 0.1,
-#               df[["x1dot", "x2dot", "y1dot", "y2dot", "z1dot", "z2dot"]].to_numpy().max() + 0.1)
-
-# # initialize lines
-# (line_x1,) = ack.plot([], [], label="x1_dot")
-# (line_x2,) = ack.plot([], [], label="x2_dot")
-# (line_y1,) = ack.plot([], [], label="y1_dot")
-# (line_y2,) = ack.plot([], [], label="y2_dot")
-# (line_z1,) = ack.plot([], [], label="z1_dot")
-# (line_z2,) = ack.plot([], [], label="z2_dot")
-
-# ack.legend()
-# fig_IJ.tight_layout()
-
-# # update function for animation
-# def update_1(frame):
-#     line_x1.set_data(t2[:frame], x1dot[:frame])
-#     line_x2.set_data(t2[:frame], x2dot[:frame])
-#     line_y1.set_data(t2[:frame], y1dot[:frame])
-#     line_y2.set_data(t2[:frame], y2dot[:frame])
-#     line_z1.set_data(t2[:frame], z1dot[:frame])
-#     line_z2.set_data(t2[:frame], z2dot[:frame])
-#     return line_x1, line_x2, line_y1, line_y2, line_z1, line_z2
-
-# # create animation
-# ani_2d = FuncAnimation(fig_IJ, update_1, frames=len(t2), interval=100, blit=True)
-# plt.show()
 
 # create animated figure
 fig_IJ, (ack1, ack2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)

@@ -3,9 +3,11 @@ import time
 import csv
 import os
 from datetime import datetime
+import re
 
 # ---------------------------------- for plotting the J_inv -----------------------------------------
 LOG_DIR = os.path.expanduser("~/crazyfly_ws/I_Joc_values")     
+LOG_CF2_TUNING = os.path.expanduser("~/crazyfly_ws/cf2_tuning")
 os.makedirs(LOG_DIR, exist_ok=True)  
 
 class Cluster_new:
@@ -201,6 +203,31 @@ class Cluster_new:
 
     
     def dump_cluster_dot(self):
+
+        # #NOTE: CHANGE TO LOG_DIR FOR CLUSTER
+        # existing_files = [f for f in os.listdir(LOG_CF2_TUNING) if f.startswith("cf2_tuning_") and f.endswith(".csv")]  
+        # run_number = []
+        
+        # for f in existing_files:
+        #     match = re.search(r"cf2_tuning_(\d+)\.csv.", f)
+        #     if match:
+        #         run_number.append(int(match.group(1)))
+
+        # next_run = max(run_number, default = 0) + 1
+        # fname = f"cf2_tuning_{next_run:03}.csv"
+        # path = os.path.join(LOG_CF2_TUNING, fname)
+
+        # with open(path, "w", newline="") as file:
+        #      w = csv.writer(file)
+        #      w.writerow(       # header row
+        #         ["time_s",
+        #         "x1dot","y1dot","z1dot",
+        #         "x2dot","y2dot","z2dot"])
+        #      w.writerows(self.cluster_dot) 
+        # print(f"[CF2 TUNING] log written to path {path}")
+
+
+
         time_s = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
         fname = f"cluster_dot_{time_s}.csv" #name of csv
         path = os.path.join(LOG_DIR, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory

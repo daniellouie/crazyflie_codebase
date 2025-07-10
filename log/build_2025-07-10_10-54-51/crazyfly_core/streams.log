@@ -1,0 +1,68 @@
+[1.186s] Invoking command in '/home/rsl/crazyfly_ws/src/crazyfly_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data
+[1.440s] running egg_info
+[1.446s] writing ../../build/crazyfly_core/crazyfly_core.egg-info/PKG-INFO
+[1.447s] writing dependency_links to ../../build/crazyfly_core/crazyfly_core.egg-info/dependency_links.txt
+[1.447s] writing entry points to ../../build/crazyfly_core/crazyfly_core.egg-info/entry_points.txt
+[1.447s] writing requirements to ../../build/crazyfly_core/crazyfly_core.egg-info/requires.txt
+[1.447s] writing top-level names to ../../build/crazyfly_core/crazyfly_core.egg-info/top_level.txt
+[1.450s] reading manifest file '../../build/crazyfly_core/crazyfly_core.egg-info/SOURCES.txt'
+[1.451s] adding license file 'LICENSE'
+[1.452s] writing manifest file '../../build/crazyfly_core/crazyfly_core.egg-info/SOURCES.txt'
+[1.452s] running build
+[1.452s] running build_py
+[1.453s] creating /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.453s] copying crazyfly_core/unused_files/cf_pid_controller.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.453s] copying crazyfly_core/unused_files/cf_distance.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.453s] copying crazyfly_core/unused_files/cf_driver.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.454s] copying crazyfly_core/unused_files/optitrack_subscriber2.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.454s] copying crazyfly_core/unused_files/crazyflie_control.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.454s] copying crazyfly_core/unused_files/fake_thrust_pub.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.455s] copying crazyfly_core/unused_files/cf_thrust_controller.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.455s] copying crazyfly_core/unused_files/clusterController.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.455s] copying crazyfly_core/unused_files/cf_command_controller.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.455s] copying crazyfly_core/unused_files/__init__.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.455s] copying crazyfly_core/unused_files/optitrack_subscriber.py -> /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files
+[1.456s] running install
+[1.456s] running install_lib
+[1.457s] creating /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.457s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/cf_pid_controller.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.458s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/cf_distance.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.458s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/cf_driver.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.458s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/optitrack_subscriber2.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.458s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/crazyflie_control.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/fake_thrust_pub.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/cf_thrust_controller.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/clusterController.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/cf_command_controller.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/__init__.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.459s] copying /home/rsl/crazyfly_ws/build/crazyfly_core/build/lib/crazyfly_core/unused_files/optitrack_subscriber.py -> /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files
+[1.460s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/cf_pid_controller.py to cf_pid_controller.cpython-310.pyc
+[1.462s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/cf_distance.py to cf_distance.cpython-310.pyc
+[1.462s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/cf_driver.py to cf_driver.cpython-310.pyc
+[1.463s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/optitrack_subscriber2.py to optitrack_subscriber2.cpython-310.pyc
+[1.465s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/crazyflie_control.py to crazyflie_control.cpython-310.pyc
+[1.465s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/fake_thrust_pub.py to fake_thrust_pub.cpython-310.pyc
+[1.466s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/cf_thrust_controller.py to cf_thrust_controller.cpython-310.pyc
+[1.467s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/clusterController.py to clusterController.cpython-310.pyc
+[1.468s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/cf_command_controller.py to cf_command_controller.cpython-310.pyc
+[1.469s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/__init__.py to __init__.cpython-310.pyc
+[1.470s] byte-compiling /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core/unused_files/optitrack_subscriber.py to optitrack_subscriber.cpython-310.pyc
+[1.471s] running install_data
+[1.472s] running install_egg_info
+[1.474s] removing '/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core-0.0.0-py3.10.egg-info' (and everything under it)
+[1.474s] Copying ../../build/crazyfly_core/crazyfly_core.egg-info to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core-0.0.0-py3.10.egg-info
+[1.475s] running install_scripts
+[1.495s] Installing cf_command_controller script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.495s] Installing cf_command_controller2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.495s] Installing cf_driver script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing cf_thrust_controller script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing clusterController script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing clusterControllerClass script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing clusterControllerClass_new script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing fake_thrust_pub script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.496s] Installing optitrack_subscriber script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.497s] Installing optitrack_subscriber2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.497s] Installing pid_controller_cf1 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.497s] Installing pid_controller_cf2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.497s] writing list of installed files to '/home/rsl/crazyfly_ws/build/crazyfly_core/install.log'
+[1.536s] Invoked command in '/home/rsl/crazyfly_ws/src/crazyfly_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data
