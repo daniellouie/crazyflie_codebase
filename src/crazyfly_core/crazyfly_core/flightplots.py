@@ -11,36 +11,45 @@ from matplotlib.animation import FuncAnimation
 # ------------------------------        AUTOREADER FOR POSITION & INVERSE JACOBIAN DATA    --------------- 07/04/25 -------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
-WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
-WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
+def FILE_INITIATION():
 
-DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
-INV_DATA_DIR = WORKSPACE2 / "I_Joc_values"  
-CF2_TUNING = WORKSPACE3 / "cf2_tuning"     
+    # WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
+    # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
+    # WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
+    WORKSPACE = pathlib.Path.home() / "crazyfly_ws"   # <— fixed
+    DATA_DIR      = WORKSPACE / "cluster_data"
+    INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
+    CF2_TUNING    = WORKSPACE / "cf2_tuning"
 
-PATTERN     = "cluster_data_*.csv"                             # matches all cluster logs
-FILE_PATTERN = "cluster_dot_*.csv"
-FILE_PATTERN2 = "cf2_tuning_*.csv"
 
-csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
-I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
-cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
+    # DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
+    # INV_DATA_DIR = WORKSPACE2 / "I_Joc_values"  
+    # CF2_TUNING = WORKSPACE3 / "cf2_tuning"     
 
-# ERROR STATEMENT
-if not csv_files:
-    raise FileNotFoundError(f"No files matching {PATTERN} in {DATA_DIR}")
-if not I_Joc_files:
-    raise FileNotFoundError(f"No file matching {FILE_PATTERN} in {INV_DATA_DIR}")
-if not cf2_files:
-    raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
+    PATTERN     = "cluster_data_*.csv"                             # matches all cluster logs
+    FILE_PATTERN = "cluster_dot_*.csv"
+    FILE_PATTERN2 = "cf2_tuning_*.csv"
 
-file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
-I_joc_path = I_Joc_files[-1]
-cf2_path = cf2_files[-1]
+    csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
+    I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
+    cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
 
-print(f"[flightplots] LATEST FLIGHT: {file_path}")
-print(f"[I_joc] LATEST INPUTS {I_joc_path}")
+    # ERROR STATEMENT
+    if not csv_files:
+        raise FileNotFoundError(f"No files matching {PATTERN} in {DATA_DIR}")
+    if not I_Joc_files:
+        raise FileNotFoundError(f"No file matching {FILE_PATTERN} in {INV_DATA_DIR}")
+    if not cf2_files:
+        raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
+
+    file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
+    I_joc_path = I_Joc_files[-1]
+    cf2_path = cf2_files[-1]
+
+    print(f"[flightplots] LATEST FLIGHT: {file_path}")
+    print(f"[I_joc] LATEST INPUTS {I_joc_path}")
+    #temporary fix
+    return cf2_path
 
 # open file to see data
 # subprocess.run(shlex.split(f"code -r {file_path}"))
@@ -51,8 +60,12 @@ print(f"[I_joc] LATEST INPUTS {I_joc_path}")
 # Filepath to the CSV file
 # file_path = "/home/rsl/crazyfly_ws/cluster_data/cluster_data_20250701_154916.csv"
 # # Read the CSV file into a DataFrame
-data = pd.read_csv(file_path)
+#data = pd.read_csv(file_path)
 
+
+
+"""#-----------------------------------
+data = pd.read_csv(FILE_INITIATION())
 
 
 # Convert the 'Timestamp' column to datetime
@@ -98,8 +111,8 @@ cur_cluster_positions = data[['Cur_Cluster_X', 'Cur_Cluster_Z', 'Cur_Cluster_Y']
 des_cluster_positions = data[['Des_Cluster_X', 'Des_Cluster_Z', 'Des_Cluster_Y']].to_numpy()
 des_cf1_positions = data[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
 des_cf2_positions = data[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
-
-
+#-----------------------------------------------
+"""
 def static_threeD_position():
     # Plot 3D position data
     fig = plt.figure("3D Positions")
@@ -329,6 +342,8 @@ def anim_2d_plot():
 # we are using this to tune cf2 by itself
 def cf2_tuning_static():
 
+    #data = pd.read_csv(cf2_path)
+    cf2_path = FILE_INITIATION()
     data = pd.read_csv(cf2_path)
 
     # Convert the 'Timestamp' column to datetime

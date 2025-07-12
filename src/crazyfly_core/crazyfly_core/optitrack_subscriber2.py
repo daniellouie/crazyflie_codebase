@@ -18,7 +18,7 @@ import os
 import csv
 from rclpy.logging import get_logger
 from datetime import datetime
-from flightplots import cf2_path, cf2_tuning_static
+from .flightplots import FILE_INITIATION, cf2_tuning_static
 
 CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
 
@@ -78,7 +78,7 @@ class OptiTrackSubscriber2(Node):
 
         # values for vertical Y (thrust) PID
         #NOTE: TUNE HERE
-        self.hover = 44000 #originally 46500     
+        self.hover = 44001 #originally 46500     
         self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
         self.k_p_y = 32000 #previously 15000 on jan 22
@@ -122,8 +122,9 @@ class OptiTrackSubscriber2(Node):
 
     def save_pid(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        cf2_path = FILE_INITIATION()
         cf2_tuning_name = os.path.basename(cf2_path)
-        fname = f"cf2_pid_{cf2_tuning_name[11:26]}.csv" #name of csv
+        fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         #print(f"PATHHHHH {path}")
         logger = get_logger("cf_pid_logger")
@@ -359,9 +360,9 @@ def main(args=None):
     optitrack_subscriber2 = OptiTrackSubscriber2()
     optitrack_subscriber2.save_pid()
 
-
     rclpy.spin(optitrack_subscriber2)
 
+    cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
     optitrack_subscriber2.destroy_node()
     rclpy.shutdown()
     cf2_tuning_static()
@@ -372,3 +373,8 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()  
+
+
+
+# what's wrong: 2d graph does not show up after cf2 runs
+# pid csv date is off because it is created before cf2 tuning is
