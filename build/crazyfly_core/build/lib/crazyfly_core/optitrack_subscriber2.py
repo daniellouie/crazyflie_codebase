@@ -14,6 +14,14 @@ import time
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+import os
+import csv
+from rclpy.logging import get_logger
+from datetime import datetime
+from .flightplots import FILE_INITIATION, cf2_tuning_static
+
+CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
+
 class OptiTrackSubscriber2(Node):
     def __init__(self):
         super().__init__('opti_track_subscriber2')
@@ -70,7 +78,7 @@ class OptiTrackSubscriber2(Node):
 
         # values for vertical Y (thrust) PID
         #NOTE: TUNE HERE
-        self.hover = 44000 #originally 46500     
+        self.hover = 44001 #originally 46500     
         self.max_thrust = 56000 #origionall 50000
         self.min_thrust = 42000
         self.k_p_y = 32000 #previously 15000 on jan 22
@@ -88,7 +96,7 @@ class OptiTrackSubscriber2(Node):
         self.k_p_x = 2
         self.k_i_x = 0.6
         self.k_d_x = 4.1
-        self.max_pitch = 3.0
+        self.max_pitch = 3.0-1
         self.min_pitch = -3.0
 
         self.cur_x_error = 0.0
@@ -112,14 +120,35 @@ class OptiTrackSubscriber2(Node):
         self.startTimer = False
         self.startTime = time.time()
 
-    def save_all_pid(self, w):
-        w.writerow([
-            self.hover, self.max_thrust, self.min_thrust,
-            self.k_p_x, self.k_i_x, self.k_d_x,
-            self.k_p_y, self.k_i_y, self.k_d_y,
-            self.k_p_z, self.k_i_z, self.k_d_z
+    def save_pid(self):
+        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        cf2_path = FILE_INITIATION()
+        cf2_tuning_name = os.path.basename(cf2_path)
+        fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
+        path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        #print(f"PATHHHHH {path}")
+        logger = get_logger("cf_pid_logger")
+        logger.info(f"---------------------------------PID WRITE TO {path}")
+        #self.get_logger().info(f"[PID] Will write to: {path}")
+        with open(path, "w", newline="") as file:
+            w = csv.writer(file)
+            w.writerow([
+                "time", "hover", "max_thrust", "min_thrust",
+                "k_p_x", "k_i_x", "k_d_x",
+                "k_p_y", "k_i_y", "k_d_y",
+                "k_p_z", "k_i_z", "k_d_z"
+            ])
 
-        ])
+            w.writerow([
+                time_s,
+                self.hover, self.max_thrust, self.min_thrust,
+                self.k_p_x, self.k_i_x, self.k_d_x,
+                self.k_p_y, self.k_i_y, self.k_d_y,
+                self.k_p_z, self.k_i_z, self.k_d_z
+            ])
+
+        print(f"[PID] log written to {path}") 
+        logger.info(f"------------------------------[PID] log written to {path}")       
 
     def listener_callback(self, msg):
         # need this conditional to avoid QoS error
@@ -329,11 +358,14 @@ def main(args=None):
     rclpy.init(args=args)
 
     optitrack_subscriber2 = OptiTrackSubscriber2()
+    optitrack_subscriber2.save_pid()
 
     rclpy.spin(optitrack_subscriber2)
 
+    cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
     optitrack_subscriber2.destroy_node()
     rclpy.shutdown()
+    cf2_tuning_static()
 
 
 

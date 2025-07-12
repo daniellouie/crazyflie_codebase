@@ -19,7 +19,6 @@ from .optitrack_subscriber2 import OptiTrackSubscriber2
 from rclpy.logging import get_logger
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning")
-CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
@@ -205,7 +204,7 @@ class MinimalSubscriber(Node):
         print(f"[Cluster] log written to {path}")'''
 
     def save_data(self):
-        time_s = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
+        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
         fname = f"cf2_tuning_{time_s}.csv" #name of csv
         path = os.path.join(CF2_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
@@ -219,41 +218,7 @@ class MinimalSubscriber(Node):
             for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
                 w.writerow([t, x, y, z])
         print(f"[FLIGHT] log written for cf2 to {path}")
-        logger = get_logger("cf_tuning_logger")
-        logger.info(f"----------------$$$$$$$-----------------PID WRITE TO {path}")
-    
-    def save_pid(self):
-        logger = get_logger("cf_pid_logger")
-        #logger.info(f"---------%%%%%%%%%------------------------PID WRITE TO {path}")
-        cf2_tuning = OptiTrackSubscriber2()
-
-        time_s = datetime.now().strftime("%Y%m%d_%H%M%S") #creates timestamp for every file
-        fname = f"cf2_pid_{time_s}.csv" #name of csv
-        path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        #print(f"PATHHHHH {path}")
-        logger = get_logger("cf_pid_logger")
-        logger.info(f"---------------------------------PID WRITE TO {path}")
-        #self.get_logger().info(f"[PID] Will write to: {path}")
-        with open(path, "w", newline="") as file:
-            w = csv.writer(file)
-            w.writerow([
-                "hover", "max_thrust", "min_thrust",
-                "k_p_x", "k_i_x", "k_d_x",
-                "k_p_y", "k_i_y", "k_d_y",
-                "k_p_z", "k_i_z", "k_d_z"
-            ])
-            
-            cf2_tuning.save_all_pid(w)
-
-            # w.writerow([
-            #     cf2_tuning.hover, cf2_tuning.max_thrust, cf2_tuning.min_thrust,
-            #     cf2_tuning.k_p_x, cf2_tuning.k_i_x, cf2_tuning.k_d_x,
-            #     cf2_tuning.k_p_y, cf2_tuning.k_i_y, cf2_tuning.k_d_y,
-            #     cf2_tuning.k_p_z, cf2_tuning.k_i_z, cf2_tuning.k_d_z
-            # ])
-
-        print(f"[PID] log written to {path}") 
-        logger.info(f"------------------------------[PID] log written to {path}")       
+       
 
 def main(args=None):
     rclpy.init(args=args)
@@ -309,7 +274,6 @@ def main(args=None):
     print("Plotted")
 
     minimal_subscriber.save_data()
-    minimal_subscriber.save_pid()
 
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
