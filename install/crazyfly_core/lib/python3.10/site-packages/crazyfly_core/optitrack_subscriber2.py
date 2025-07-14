@@ -18,7 +18,7 @@ import os
 import csv
 from rclpy.logging import get_logger
 from datetime import datetime
-from .flightplots import FILE_INITIATION, cf2_tuning_static
+from .flightplots import FILE_INITIATION#, cf2_tuning_static
 
 CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
 
@@ -362,10 +362,10 @@ def main(args=None):
 
     rclpy.spin(optitrack_subscriber2)
 
-    cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
+    #cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
     optitrack_subscriber2.destroy_node()
     rclpy.shutdown()
-    cf2_tuning_static()
+    #cf2_tuning_static()
 
 
 
@@ -373,3 +373,8 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()  
+
+
+
+# what's wrong: 2d graph does not show up after cf2 runs
+# pid csv date is off because it is created before cf2 tuning is

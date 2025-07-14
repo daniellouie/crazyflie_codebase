@@ -17,6 +17,7 @@ from datetime import datetime
 import csv
 from .optitrack_subscriber2 import OptiTrackSubscriber2
 from rclpy.logging import get_logger
+#from .flightplots import FILE_INITIATION, cf2_tuning_static
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning")
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
@@ -274,6 +275,8 @@ def main(args=None):
     print("Plotted")
 
     minimal_subscriber.save_data()
+    #cf2_tuning_static()
+    
 
     minimal_subscriber.destroy_node()
     rclpy.shutdown()

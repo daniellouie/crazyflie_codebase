@@ -18,7 +18,7 @@ import os
 import csv
 from rclpy.logging import get_logger
 from datetime import datetime
-from .flightplots import FILE_INITIATION, cf2_tuning_static
+from .flightplots import FILE_INITIATION#, cf2_tuning_static
 
 CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
 
@@ -86,6 +86,7 @@ class OptiTrackSubscriber2(Node):
         self.k_d_y = 10500
         # self.threshold_met = False
 
+        # NEVER CHANGES
         self.cur_y_error = 0.0
         self.prev_y_error = 0.0
         self.int_y_error = 0.0
@@ -99,6 +100,7 @@ class OptiTrackSubscriber2(Node):
         self.max_pitch = 3.0-1
         self.min_pitch = -3.0
 
+        # NEVER CHANGES
         self.cur_x_error = 0.0
         self.prev_x_error = 0.0
         self.int_x_error = 0.0
@@ -109,9 +111,12 @@ class OptiTrackSubscriber2(Node):
         self.k_p_z = 2
         self.k_i_z = 0.6
         self.k_d_z = 4.1 #previously 3.5
+
+        # NEVER CHANGES
         self.max_roll = 3.0
         self.min_roll = -3.0
 
+        # NEVER CHANGES
         self.cur_z_error = 0.0
         self.prev_z_error = 0.0
         self.int_z_error = 0.0
@@ -362,10 +367,10 @@ def main(args=None):
 
     rclpy.spin(optitrack_subscriber2)
 
-    cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
+    #cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
     optitrack_subscriber2.destroy_node()
     rclpy.shutdown()
-    cf2_tuning_static()
+    #cf2_tuning_static()
 
 
 
