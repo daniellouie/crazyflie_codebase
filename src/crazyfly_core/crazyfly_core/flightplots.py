@@ -383,4 +383,4 @@ def cf2_tuning_static():
     plt.title('3D Position Data')
     plt.show()
 
-cf2_tuning_static()
+#cf2_tuning_static()

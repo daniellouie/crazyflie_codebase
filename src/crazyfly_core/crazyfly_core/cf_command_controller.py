@@ -58,7 +58,7 @@ class MinimalSubscriber(Node):
         
 
         # limit flight time for testing
-        self.flight_duration = 10.0 #in seconds
+        self.flight_duration = 15.0 #in seconds
 
         # constant command values for testing
         self.const_thrust = 44000 
@@ -174,6 +174,7 @@ class MinimalSubscriber(Node):
             time.sleep(0.1)
         self._cf1.commander.send_setpoint(0, 0, 0, 0)  # Stop the motors
         self._cf1.close_link()  # Disconnect from the Crazyflie
+        rclpy.shutdown() #gpt recommended code, temporary
 
         
 

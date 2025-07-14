@@ -76,42 +76,50 @@ class OptiTrackSubscriber2(Node):
         self.max_yawrate = 15
         self.min_yawrate = -15
 
-        # values for vertical Y (thrust) PID
-        #NOTE: TUNE HERE
-        self.hover = 44001 #originally 46500     
-        self.max_thrust = 56000 #origionall 50000
-        self.min_thrust = 42000
-        self.k_p_y = 32000 #previously 15000 on jan 22
-        self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
-        self.k_d_y = 10500
-        # self.threshold_met = False
+        #-----------------------------------------------------------------
 
+        # ───────────────────────────  CONSTANTS BLOCK  ────────────────────────────
+        # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
+        self.hover       = 41700      # trim thrust to hold level hover
+        self.max_thrust  = 58000
+        self.min_thrust  = 42000
+        self.k_p_y       = 34000+3400      # P-gain
+        self.k_i_y       = 800        # I-gain
+        self.k_d_y       = 12000      # D-gain
+
+        # values for horizontal X (pitch) PID  ── *UNCHANGED YET*
+        self.k_p_x       = 2
+        self.k_i_x       = 0.6
+        self.k_d_x       = 4.1
+        self.max_pitch   = 3.0 - 1    # (your original expression)
+        self.min_pitch   = -3.0
+
+        # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
+        self.k_p_z       = 2
+        self.k_i_z       = 0.6
+        self.k_d_z       = 4.1
+        # ───────────────────────────────────────────────────────────────────────────
+
+
+        #-----------------------------------------------------------------
+        
+        # NEVER CHANGES
         self.cur_y_error = 0.0
         self.prev_y_error = 0.0
         self.int_y_error = 0.0
         self.int_y_max = 5000 # maximum added thrust from integral component
 
-        # values for horizontal X (pitch) PID
-        #NOTE: TUNE HERE
-        self.k_p_x = 2
-        self.k_i_x = 0.6
-        self.k_d_x = 4.1
-        self.max_pitch = 3.0-1
-        self.min_pitch = -3.0
-
+        # NEVER CHANGES
         self.cur_x_error = 0.0
         self.prev_x_error = 0.0
         self.int_x_error = 0.0
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
-        # values for horizontal Z (roll) PID
-        #NOTE:TUNE HERE
-        self.k_p_z = 2
-        self.k_i_z = 0.6
-        self.k_d_z = 4.1 #previously 3.5
+        # NEVER CHANGES
         self.max_roll = 3.0
         self.min_roll = -3.0
 
+        # NEVER CHANGES
         self.cur_z_error = 0.0
         self.prev_z_error = 0.0
         self.int_z_error = 0.0
@@ -354,18 +362,33 @@ class OptiTrackSubscriber2(Node):
     def get_position(self):
         return self.position
     
+# def main(args=None):
+#     rclpy.init(args=args)
+
+#     optitrack_subscriber2 = OptiTrackSubscriber2()
+#     optitrack_subscriber2.save_pid()
+
+#     rclpy.spin(optitrack_subscriber2)
+
+#     #cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
+#     optitrack_subscriber2.destroy_node()
+#     rclpy.shutdown()
+#     #cf2_tuning_static()
 def main(args=None):
     rclpy.init(args=args)
-
     optitrack_subscriber2 = OptiTrackSubscriber2()
-    optitrack_subscriber2.save_pid()
 
-    rclpy.spin(optitrack_subscriber2)
+    try:
+        optitrack_subscriber2.save_pid()
+        rclpy.spin(optitrack_subscriber2)
+    except KeyboardInterrupt:
+        print("Shutting down due to keyboard interrupt")
+    finally:
+        optitrack_subscriber2.destroy_node()
+        rclpy.shutdown()
+        #cf2_tuning_static()
 
-    #cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
-    optitrack_subscriber2.destroy_node()
-    rclpy.shutdown()
-    #cf2_tuning_static()
+
 
 
 
@@ -378,3 +401,42 @@ if __name__ == '__main__':
 
 # what's wrong: 2d graph does not show up after cf2 runs
 # pid csv date is off because it is created before cf2 tuning is
+
+#original values before I started tuning on july 14, 2025
+'''
+# values for vertical Y (thrust) PID
+        #NOTE: TUNE HERE
+        self.hover = 44001 #originally 46500     
+        self.max_thrust = 56000 #origionall 50000
+        self.min_thrust = 42000
+        self.k_p_y = 32000 #previously 15000 on jan 22
+        self.k_i_y = 1500 #extra amount of thrust wanted (originally 2000)
+        self.k_d_y = 10500
+        # self.threshold_met = False
+
+        # values for horizontal X (pitch) PID
+        #NOTE: TUNE HERE
+        self.k_p_x = 2
+        self.k_i_x = 0.6
+        self.k_d_x = 4.1
+        self.max_pitch = 3.0-1
+        self.min_pitch = -3.0
+
+        # values for horizontal Z (roll) PID
+        #NOTE:TUNE HERE
+        self.k_p_z = 2
+        self.k_i_z = 0.6
+        self.k_d_z = 4.1 #previously 3.5
+
+        # NEVER CHANGES
+        self.cur_y_error = 0.0
+        self.prev_y_error = 0.0
+        self.int_y_error = 0.0
+        self.int_y_max = 5000 # maximum added thrust from integral component
+
+        # NEVER CHANGES
+        self.cur_x_error = 0.0
+        self.prev_x_error = 0.0
+        self.int_x_error = 0.0
+        self.int_x_max = 3.0 # maximum added pitch from integral component
+'''
