@@ -51,6 +51,8 @@ class OptiTrackSubscriber2(Node):
 
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
+        #self.position = [[2.0, 1.0, 1.0]] #trying out stationary position
+        
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
         self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
@@ -439,4 +441,19 @@ if __name__ == '__main__':
         self.prev_x_error = 0.0
         self.int_x_error = 0.0
         self.int_x_max = 3.0 # maximum added pitch from integral component
+'''
+
+'''
+optitrack stationary cf2 values
+how stable?
+position:
+    x: 1.6873......
+    y: 1.149.....
+    z: 1.010.....
+orientation:
+    x: -.028......
+    y: -0.869.....
+    z: 0.05....
+    w: -0.489......
+need to calculate error when cf2 is in a stationary location to determine accuracy of optitrack
 '''

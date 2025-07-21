@@ -49,7 +49,24 @@ def FILE_INITIATION():
     print(f"[flightplots] LATEST FLIGHT: {file_path}")
     print(f"[I_joc] LATEST INPUTS {I_joc_path}")
     #temporary fix
+    #return cf2_path
+    #return file_path, I_joc_path, cf2_path
     return cf2_path
+
+def load_position_data(file_path):
+    df = pd.read_csv(file_path)
+    df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+    df = df.dropna(subset=['Timestamp', 'Cur_CF1_Y', 'Des_CF1_Y'])
+
+    cur_cf1_positions = df[['Cur_CF1_X', 'Cur_CF1_Z', 'Cur_CF1_Y']].to_numpy()
+    cur_cf2_positions = df[['Cur_CF2_X', 'Cur_CF2_Z', 'Cur_CF2_Y']].to_numpy()
+    cur_cluster_positions = df[['Cur_Cluster_X', 'Cur_Cluster_Z', 'Cur_Cluster_Y']].to_numpy()
+    des_cluster_positions = df[['Des_Cluster_X', 'Des_Cluster_Z', 'Des_Cluster_Y']].to_numpy()
+    des_cf1_positions = df[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
+    des_cf2_positions = df[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
+
+    return df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions
+
 
 # open file to see data
 # subprocess.run(shlex.split(f"code -r {file_path}"))
@@ -113,7 +130,7 @@ des_cf1_positions = data[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
 des_cf2_positions = data[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
 #-----------------------------------------------
 """
-def static_threeD_position():
+def static_threeD_position(*positions):
     # Plot 3D position data
     fig = plt.figure("3D Positions")
     ax = fig.add_subplot(111, projection="3d")
@@ -142,7 +159,7 @@ def static_threeD_position():
 
 
 # --------------------------------- INVERSE JACOBIAN PLOTS -------------------------------------
-def static_inv_plot():
+def static_inv_plot(I_joc_path):
     df = pd.read_csv(I_joc_path)
     df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
     t = df["rel_time"].to_numpy()
@@ -185,7 +202,7 @@ def static_inv_plot():
 #| Animation for 3D Graph |
 #--------------------------
 # 3 graph for the position of the cluster
-def anim_threeD_Plot():
+def anim_threeD_Plot(*positions):
     fig = plt.figure("3D Positions Over Time")
     ax = fig.add_subplot(111, projection="3d")
 
@@ -262,7 +279,7 @@ def anim_threeD_Plot():
 #| Animation for 2D Graph |
 #--------------------------
 # 2d inverse jacobian graph for the cluster
-def anim_2d_plot():
+def anim_2d_plot(I_joc_path, file_path, timestamp_df):
 
     df = pd.read_csv(I_joc_path)
     df["rel_time"] = df["time_s"] - df["time_s"].iloc[0]
@@ -340,7 +357,7 @@ def anim_2d_plot():
     plt.show()
 
 # we are using this to tune cf2 by itself
-def cf2_tuning_static():
+def cf2_tuning_static(cf2_path):
 
     #data = pd.read_csv(cf2_path)
     cf2_path = FILE_INITIATION()
@@ -384,3 +401,18 @@ def cf2_tuning_static():
     plt.show()
 
 #cf2_tuning_static()
+
+def main():
+    file_path, I_joc_path, cf2_path = FILE_INITIATION()
+    
+    df, cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2 = load_position_data(file_path)
+    positions = (cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2)
+
+    # static_threeD_position(*positions)
+    # anim_threeD_Plot(*positions)
+    # static_inv_plot(I_joc_path)
+    # anim_2d_plot(I_joc_path, file_path, df)
+    # cf2_tuning_static(cf2_path)
+
+if __name__ == "__main__":
+    main()

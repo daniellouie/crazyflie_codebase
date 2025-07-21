@@ -51,6 +51,8 @@ class OptiTrackSubscriber2(Node):
 
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
+        #self.position = [[2.0, 1.0, 1.0]] #trying out stationary position
+        
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
         self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
@@ -80,8 +82,8 @@ class OptiTrackSubscriber2(Node):
 
         # ───────────────────────────  CONSTANTS BLOCK  ────────────────────────────
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 41700      # trim thrust to hold level hover
-        self.max_thrust  = 58000
+        self.hover       = 41600      # trim thrust to hold level hover
+        self.max_thrust  = 56000
         self.min_thrust  = 42000
         self.k_p_y       = 34000+3400      # P-gain
         self.k_i_y       = 800        # I-gain
