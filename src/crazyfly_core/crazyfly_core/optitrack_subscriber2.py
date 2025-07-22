@@ -132,7 +132,7 @@ class OptiTrackSubscriber2(Node):
 
     def save_pid(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        cf2_path = FILE_INITIATION()
+        cf2_path = FILE_INITIATION("cf2_path")
         cf2_tuning_name = os.path.basename(cf2_path)
         fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory

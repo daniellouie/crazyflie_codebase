@@ -11,7 +11,7 @@ from matplotlib.animation import FuncAnimation
 # ------------------------------        AUTOREADER FOR POSITION & INVERSE JACOBIAN DATA    --------------- 07/04/25 -------------
 # --------------------------------------------------------------------------------------------------------------------------------
 
-def FILE_INITIATION():
+def FILE_INITIATION(i):
 
     # WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
     # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
@@ -51,7 +51,14 @@ def FILE_INITIATION():
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
-    return cf2_path
+    if i == "cf2_path":
+        return cf2_path
+    if i == "I_joc_path":
+        return I_joc_path
+    if i == "file_path":
+        return file_path
+    else:
+        return cf2_path
 
 def load_position_data(file_path):
     df = pd.read_csv(file_path)
@@ -403,7 +410,9 @@ def cf2_tuning_static(cf2_path):
 #cf2_tuning_static()
 
 def main():
-    file_path, I_joc_path, cf2_path = FILE_INITIATION()
+    file_path = FILE_INITIATION("file_path")
+    I_joc_path = FILE_INITIATION("I_joc_path")
+    cf2_path = FILE_INITIATION("cf2_path")
     
     df, cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2 = load_position_data(file_path)
     positions = (cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2)
