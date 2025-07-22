@@ -142,6 +142,7 @@ def static_threeD_position(*positions):
     fig = plt.figure("3D Positions")
     ax = fig.add_subplot(111, projection="3d")
 
+    # unknown variables resolved by parameter
     # Plot each dataset
     ax.scatter(cur_cf1_positions[:, 0], cur_cf1_positions[:, 1], cur_cf1_positions[:, 2], label='Cur_CF1', c='r')
     ax.scatter(cur_cf2_positions[:, 0], cur_cf2_positions[:, 1], cur_cf2_positions[:, 2], label='Cur_CF2', c='g')
@@ -213,6 +214,7 @@ def anim_threeD_Plot(*positions):
     fig = plt.figure("3D Positions Over Time")
     ax = fig.add_subplot(111, projection="3d")
 
+    # unknown variables resolved by parameter
     # compute bounds as before…
     all_positions = np.vstack([
         cur_cf1_positions,
@@ -232,6 +234,7 @@ def anim_threeD_Plot(*positions):
     ax.set_ylabel('Z Position')
     ax.set_zlabel('Y Position')
 
+    # unknown variables resolved by parameter
     # datasets with their colors
     datasets = {
         'Cur_CF1': (cur_cf1_positions, 'r'),
@@ -301,6 +304,8 @@ def anim_2d_plot(I_joc_path, file_path, timestamp_df):
     # calculates elapsed time to match timing of both graphs simultaniously when being animated
     step = twod_lines/threed_lines
     step = int(step)
+    file_path = FILE_INITIATION("file_path")
+    data = pd.read_csv(file_path)
     data['Timestamp'] = pd.to_datetime(data['Timestamp'])
     start_time = data['Timestamp'].iloc[0]
     end_time = data['Timestamp'].iloc[-1]
@@ -367,7 +372,7 @@ def anim_2d_plot(I_joc_path, file_path, timestamp_df):
 def cf2_tuning_static(cf2_path):
 
     #data = pd.read_csv(cf2_path)
-    cf2_path = FILE_INITIATION()
+    cf2_path = FILE_INITIATION("cf2_path")
     data = pd.read_csv(cf2_path)
 
     # Convert the 'Timestamp' column to datetime
@@ -413,9 +418,9 @@ def main():
     file_path = FILE_INITIATION("file_path")
     I_joc_path = FILE_INITIATION("I_joc_path")
     cf2_path = FILE_INITIATION("cf2_path")
-    
-    df, cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2 = load_position_data(file_path)
-    positions = (cur_cf1, cur_cf2, cur_cluster, des_cluster, des_cf1, des_cf2)
+
+    df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
+    positions = (cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
 
     # static_threeD_position(*positions)
     # anim_threeD_Plot(*positions)
