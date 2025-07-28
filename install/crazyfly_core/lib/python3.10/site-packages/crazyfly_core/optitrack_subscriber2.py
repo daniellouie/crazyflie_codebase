@@ -97,7 +97,7 @@ class OptiTrackSubscriber2(Node):
         self.min_pitch   = -3.0
 
         # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
-        self.k_p_z       = 2
+        self.k_p_z       = 1.6 # was 2
         self.k_i_z       = 0.6
         self.k_d_z       = 4.1
         # ───────────────────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ class OptiTrackSubscriber2(Node):
 
     def save_pid(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        cf2_path = FILE_INITIATION()
+        cf2_path = FILE_INITIATION("cf2_path")
         cf2_tuning_name = os.path.basename(cf2_path)
         fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
@@ -441,4 +441,19 @@ if __name__ == '__main__':
         self.prev_x_error = 0.0
         self.int_x_error = 0.0
         self.int_x_max = 3.0 # maximum added pitch from integral component
+'''
+
+'''
+optitrack stationary cf2 values
+how stable?
+position:
+    x: 1.6873......
+    y: 1.149.....
+    z: 1.010.....
+orientation:
+    x: -.028......
+    y: -0.869.....
+    z: 0.05....
+    w: -0.489......
+need to calculate error when cf2 is in a stationary location to determine accuracy of optitrack
 '''

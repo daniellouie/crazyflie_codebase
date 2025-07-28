@@ -97,7 +97,7 @@ class OptiTrackSubscriber2(Node):
         self.min_pitch   = -3.0
 
         # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
-        self.k_p_z       = 2
+        self.k_p_z       = 1.6 # was 2
         self.k_i_z       = 0.6
         self.k_d_z       = 4.1
         # ───────────────────────────────────────────────────────────────────────────

@@ -220,7 +220,6 @@ class MinimalSubscriber(Node):
             for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
                 w.writerow([t, x, y, z])
         print(f"[FLIGHT] log written for cf2 to {path}")
-       
 
 def main(args=None):
     rclpy.init(args=args)

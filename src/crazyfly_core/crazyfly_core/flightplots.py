@@ -7,6 +7,7 @@ import os
 import time
 import numpy as np
 from matplotlib.animation import FuncAnimation
+import math
 # --------------------------------------------------------------------------------------------------------------------------------
 # ------------------------------        AUTOREADER FOR POSITION & INVERSE JACOBIAN DATA    --------------- 07/04/25 -------------
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -414,6 +415,38 @@ def cf2_tuning_static(cf2_path):
 
 #cf2_tuning_static()
 
+def rmse(diff):
+    return diff**2
+
+def cluster_accuracy():
+    results = []
+    file_path = FILE_INITIATION("file_path")
+    df = pd.read_csv(file_path)
+
+    df['Err_CF1_X'] = ['Cur_CF1_X'] - df['Des_CF1_X']
+    err_series_x = df['Err_CF1_X']
+    err_values_x = err_series_x.to_numpy()
+    diff_x = err_values_x.sum()
+    sum_x = rmse(diff_x)
+    rmse_x = math.sqrt(sum_x/len(df))
+
+    df['Err_CF1_Y'] = ['Cur_CF1_Y'] - df['Des_CF1_Y']
+    err_series_y = df['Err_CF1_Y']
+    err_values_y = err_series_y.to_numpy()
+    diff_y = err_values_y.sum()
+    sum_y = rmse(diff_y)
+    rmse_y = math.sqrt(sum_y/len(df))
+
+    df['Err_CF1_Z'] = ['Cur_CF1_Z'] - df['Des_CF1_Z']
+    err_series_z = df['Err_CF1_Z']
+    err_values_z = err_series_z.to_numpy()
+    diff_z = err_values_z.sum()
+    sum_z = rmse(diff_z)
+    rmse_z = math.sqrt(sum_z/len(df))
+    print("x error: ", rmse_x)
+    print("y error: ", rmse_y)
+    print("z error: ", rmse_z)
+
 def main():
     file_path = FILE_INITIATION("file_path")
     I_joc_path = FILE_INITIATION("I_joc_path")
@@ -427,6 +460,7 @@ def main():
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     # cf2_tuning_static(cf2_path)
+    # cluster_accuracy()
 
 if __name__ == "__main__":
     main()
