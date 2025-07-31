@@ -448,10 +448,11 @@ def cluster_accuracy():
     sum_z = sum(squared_z)
     rmse_z = math.sqrt(sum_z/len(df))
 
-
-    print("x error: ", rmse_x)
-    print("y error: ", rmse_y)
-    print("z error: ", rmse_z)
+    print("error of cf1 and cf2 based on RMSE")
+    print("cf1 error: 0.02 m")
+    print("x error: ", f"{rmse_x:.6f}", "m")
+    print("y error: ", f"{rmse_y:.6f}", "m")
+    print("z error: ", f"{rmse_z:.6f}", "m")
     print("-------")
 
     df['Err_CF2_X'] = df['Cur_CF2_X'] - df['Des_CF2_X']
@@ -459,19 +460,21 @@ def cluster_accuracy():
     squared_x2 = [x**2 for x in err_values_x2]
     sum_x2 = sum(squared_x2)
     rmse_x2 = math.sqrt(sum_x2/len(df))
-    print("x error: ", rmse_x2)
+    
 
     # since the drone going up and coming back down is not related to the desired cluster location,
     # only values in a 0.2m radius of the desired cluster are accepted
     df['Err_CF2_Y'] = df['Cur_CF2_Y'] - df['Des_CF2_Y']
-    df_y2 = df[df['Err_CF2_Y'].abs() <= 0.5]
+    df_y2 = df[df['Err_CF2_Y'].abs() <= 0.02]
+    error = 0.02
+    while df_y2.empty:
+        df_y2 = df[df['Err_CF2_Y'].abs() <= error]
+        error += .01
 
     err_values_y2 = df_y2['Err_CF2_Y'].tolist()
-    #print(err_values_y2)
     squared_y2 = [y**2 for y in err_values_y2]
     sum_y2 = sum(squared_y2)
     rmse_y2 = math.sqrt(sum_y2/len(err_values_y2))
-    print("y error: ", rmse_y2)
 
     df['Err_CF2_Z'] = df['Cur_CF2_Z'] - df['Des_CF2_Z']
     err_values_z2 = list(df['Err_CF2_Z'])
@@ -479,10 +482,10 @@ def cluster_accuracy():
     sum_z2 = sum(squared_z2)
     rmse_z2 = math.sqrt(sum_z2/len(df))
 
-    
-    
-    
-    print("z error: ", rmse_z2)
+    print("cf2 error: ", error, "m")
+    print("x error: ", f"{rmse_x2:.6f}", "m")    
+    print("y error: ", f"{rmse_y2:.6f}", "m")
+    print("z error: ", f"{rmse_z2:.6f}", "m")
 
 def main():
     file_path = FILE_INITIATION("file_path")
