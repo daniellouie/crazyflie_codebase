@@ -418,31 +418,35 @@ def cf2_tuning_static(cf2_path):
 def rmse(diff):
     return diff**2
 
+# calculates error of x y and z for each drone in a cluster using RMSE within 0.2m of desired cluster location
+# currently hard-coded for simple motion of going up 1 m in the air, holding position, and coming back down
 def cluster_accuracy():
-    results = []
     file_path = FILE_INITIATION("file_path")
     df = pd.read_csv(file_path)
 
-    df['Err_CF1_X'] = ['Cur_CF1_X'] - df['Des_CF1_X']
-    err_series_x = df['Err_CF1_X']
-    err_values_x = err_series_x.to_numpy()
-    diff_x = err_values_x.sum()
-    sum_x = rmse(diff_x)
+    df['Err_CF1_X'] = df['Cur_CF1_X'] - df['Des_CF1_X']
+    err_values_x = list(df['Err_CF1_X'])
+    squared_x = [x**2 for x in err_values_x]
+    sum_x = sum(squared_x)
     rmse_x = math.sqrt(sum_x/len(df))
 
-    df['Err_CF1_Y'] = ['Cur_CF1_Y'] - df['Des_CF1_Y']
-    err_series_y = df['Err_CF1_Y']
-    err_values_y = err_series_y.to_numpy()
-    diff_y = err_values_y.sum()
-    sum_y = rmse(diff_y)
-    rmse_y = math.sqrt(sum_y/len(df))
+    # since the drone going up and coming back down is not related to the desired cluster location,
+    # only values in a 0.2m radius of the desired cluster are accepted
+    df['Err_CF1_Y'] = df['Cur_CF1_Y'] - df['Des_CF1_Y']
+    df_y = df[df['Err_CF1_Y'].abs() <= 0.02]
 
-    df['Err_CF1_Z'] = ['Cur_CF1_Z'] - df['Des_CF1_Z']
-    err_series_z = df['Err_CF1_Z']
-    err_values_z = err_series_z.to_numpy()
-    diff_z = err_values_z.sum()
-    sum_z = rmse(diff_z)
+    err_values_y = df_y['Err_CF1_Y'].tolist()
+    squared_y = [y**2 for y in err_values_y]
+    sum_y = sum(squared_y)
+    rmse_y = math.sqrt(sum_y/len(err_values_y))
+
+    df['Err_CF1_Z'] = df['Cur_CF1_Z'] - df['Des_CF1_Z']
+    err_values_z = list(df['Err_CF1_Z'])
+    squared_z = [z**2 for z in err_values_z]
+    sum_z = sum(squared_z)
     rmse_z = math.sqrt(sum_z/len(df))
+
+
     print("x error: ", rmse_x)
     print("y error: ", rmse_y)
     print("z error: ", rmse_z)
@@ -455,12 +459,12 @@ def main():
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
     positions = (cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
 
-    # static_threeD_position(*positions)
+    static_threeD_position(*positions)
     # anim_threeD_Plot(*positions)
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     # cf2_tuning_static(cf2_path)
-    # cluster_accuracy()
+    cluster_accuracy()
 
 if __name__ == "__main__":
     main()
