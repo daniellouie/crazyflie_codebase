@@ -138,7 +138,7 @@ des_cf1_positions = data[['Des_CF1_X', 'Des_CF1_Z', 'Des_CF1_Y']].to_numpy()
 des_cf2_positions = data[['Des_CF2_X', 'Des_CF2_Z', 'Des_CF2_Y']].to_numpy()
 #-----------------------------------------------
 """
-def static_threeD_position(*positions):
+def static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions):
     # Plot 3D position data
     fig = plt.figure("3D Positions")
     ax = fig.add_subplot(111, projection="3d")
@@ -163,6 +163,7 @@ def static_threeD_position(*positions):
     ax.set_zlabel('Y Position')
     ax.legend()
     plt.title('3D Position Data')
+    plt.show()
 
 
 
@@ -211,7 +212,7 @@ def static_inv_plot(I_joc_path):
 #| Animation for 3D Graph |
 #--------------------------
 # 3 graph for the position of the cluster
-def anim_threeD_Plot(*positions):
+def anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions):
     fig = plt.figure("3D Positions Over Time")
     ax = fig.add_subplot(111, projection="3d")
 
@@ -420,6 +421,7 @@ def rmse(diff):
 
 # calculates error of x y and z for each drone in a cluster using RMSE within 0.2m of desired cluster location
 # currently hard-coded for simple motion of going up 1 m in the air, holding position, and coming back down
+# current goal is to have all errors < 1 cm
 def cluster_accuracy():
     file_path = FILE_INITIATION("file_path")
     df = pd.read_csv(file_path)
@@ -450,6 +452,37 @@ def cluster_accuracy():
     print("x error: ", rmse_x)
     print("y error: ", rmse_y)
     print("z error: ", rmse_z)
+    print("-------")
+
+    df['Err_CF2_X'] = df['Cur_CF2_X'] - df['Des_CF2_X']
+    err_values_x2 = list(df['Err_CF2_X'])
+    squared_x2 = [x**2 for x in err_values_x2]
+    sum_x2 = sum(squared_x2)
+    rmse_x2 = math.sqrt(sum_x2/len(df))
+    print("x error: ", rmse_x2)
+
+    # since the drone going up and coming back down is not related to the desired cluster location,
+    # only values in a 0.2m radius of the desired cluster are accepted
+    df['Err_CF2_Y'] = df['Cur_CF2_Y'] - df['Des_CF2_Y']
+    df_y2 = df[df['Err_CF2_Y'].abs() <= 0.5]
+
+    err_values_y2 = df_y2['Err_CF2_Y'].tolist()
+    #print(err_values_y2)
+    squared_y2 = [y**2 for y in err_values_y2]
+    sum_y2 = sum(squared_y2)
+    rmse_y2 = math.sqrt(sum_y2/len(err_values_y2))
+    print("y error: ", rmse_y2)
+
+    df['Err_CF2_Z'] = df['Cur_CF2_Z'] - df['Des_CF2_Z']
+    err_values_z2 = list(df['Err_CF2_Z'])
+    squared_z2 = [z**2 for z in err_values_z2]
+    sum_z2 = sum(squared_z2)
+    rmse_z2 = math.sqrt(sum_z2/len(df))
+
+    
+    
+    
+    print("z error: ", rmse_z2)
 
 def main():
     file_path = FILE_INITIATION("file_path")
@@ -457,10 +490,9 @@ def main():
     cf2_path = FILE_INITIATION("cf2_path")
 
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
-    positions = (cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
 
-    static_threeD_position(*positions)
-    # anim_threeD_Plot(*positions)
+    #static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     # cf2_tuning_static(cf2_path)
