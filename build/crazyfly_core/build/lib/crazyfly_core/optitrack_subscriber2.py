@@ -19,6 +19,7 @@ import csv
 from rclpy.logging import get_logger
 from datetime import datetime
 from .flightplots import FILE_INITIATION#, cf2_tuning_static
+import math
 
 CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
 
@@ -35,13 +36,13 @@ class OptiTrackSubscriber2(Node):
 
         self.subscription = self.create_subscription(
             PoseStamped,
-            '/vrpn_mocap/cf2/pose',
+            '/vrpn_mocap/cf1/pose',
             self.listener_callback,
             qos_profile
         
         )
         #message to send flight commands to crazyflie program
-        self.pub_commands = self.create_publisher(Float32MultiArray, '/cf2/commands', 10)
+        self.pub_commands = self.create_publisher(Float32MultiArray, '/cf1/commands', 10)
 
         #drone to drone communication for waypoint synchronization
         self.pub_threshold_met = self.create_publisher(Bool, '/threshold_met_cf2', 10)
@@ -56,7 +57,8 @@ class OptiTrackSubscriber2(Node):
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
         self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
-
+        self.target_pitch_deg = 0.0
+        self.target_roll_deg = 0.0
         
         #THIS IS FUTURE CODE FOR MULTIPLE DRONES POTENTIALLY 
         #self.multiple_drones = {'gary': [[1.5, 1.0, 1.5], [0.5,1.0,0.5]], 'patrick': [[], []]}
@@ -71,8 +73,11 @@ class OptiTrackSubscriber2(Node):
         self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
         self.current_orientation = 0.0
         self.target_orientation_quat = [0.0, 0.7, 0.0, 0.7]
+        
         #temp fix: need to rotate drone to face right for rigid body then reorient
-        self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
+        # self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
+        
+        self.target_orientation = 0.0
         self.k_p_rot = 0.25
         self.k_p_rot_sign = 1
         self.max_yawrate = 15
@@ -175,21 +180,36 @@ class OptiTrackSubscriber2(Node):
             self.orientation_quat[3] = msg.pose.orientation.w
 
             # calls rotational PID function (yawrate)
-            yawrate = self.calculate_yawrate()
+            yawrate_cmd = self.calculate_yawrate()
 
             # calls X axis PID function (pitch)
-            pitch = self.calculate_pitch()
+            pitch_cmd = self.calculate_pitch()
 
             # calls Y axis PID function (thrust)
             thrust = self.calculate_thrust()
 
             # Calls Z axis PID function (roll)
-            roll = self.calculate_roll()
+            roll_cmd = self.calculate_roll()
 
             # create message of type Float Array (all values need to be floats)
+
+            x, y, z, w = R.from_quat(self.orientation_quat).as_quat()
+            sin_half = np.linalg.norm([x,y,z])
+
+            # if sin_half < 1e-12:
+            #     self.yaw_meas = self.pitch_meas = self.roll_meas = 0.0
+            # else: 
+            #     phi   = 2.0 * np.arctan2(sin_half,  w)          # total angle  [rad]
+            #     axis  = np.array([x, y, z]) / sin_half          
+            #     self.pitch_meas = np.rad2deg(phi * axis[0])     
+            #     self.yaw_meas   = np.rad2deg(phi * axis[1])     
+            #     self.roll_meas  = np.rad2deg(phi * axis[2])
+
             msg = Float32MultiArray()
-            msg.data = [float(roll), float(pitch), float(yawrate), float(thrust), 
-                        float(self.position[0]), float(self.position[1]), float(self.position[2])]
+            msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
+                        float(self.position[0]), float(self.position[1]), float(self.position[2]),
+                        float(self.yaw_meas), float(self.pitch_meas), float(self.roll_meas) 
+                        ]
             self.pub_commands.publish(msg) #publish commands for drone controller
             
             # #This is a timer so the drones stay in one location for a few seconds 
@@ -244,7 +264,6 @@ class OptiTrackSubscriber2(Node):
         else:
             self.get_logger().warn(f"Received pose in unexpected frame: {msg.header.frame_id}")
             pass
-    
 
     #helps drone move from one position to the other 
     def is_within_threshold(self, position, target_position):
@@ -265,23 +284,52 @@ class OptiTrackSubscriber2(Node):
     # rotational control
     def calculate_yawrate(self):
         # (P term)
-        r = R.from_quat(self.orientation_quat)
-        pitch, yaw, roll = r.as_euler('xyz', degrees = True)
-        self.current_orientation = yaw
-        rot_error = self.target_orientation - self.current_orientation
+        q_cur = R.from_quat(self.orientation_quat)
+        half_angle = np.deg2rad(self.target_orientation)/2.0   #using half angle for p' = qpq*    target orientation is 0...
+        q_des = R.from_quat([0.0, np.sin(half_angle), 0.0, np.cos(half_angle)])   # x,y,z,w 
+        q_err = q_des * q_cur.inv()
+
+        y, w = q_err.as_quat()[1], q_err.as_quat()[3]
+        yaw_err = np.rad2deg(2* np.arctan2(y,w)) # second half angle multiplication for full angle
+        yaw_err = (yaw_err + 180) % 360 - 180
+        yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
+        
+        y_cur, w_cur = q_cur.as_quat()[1], q_cur.as_quat()[3]
+        norm = math.hypot(y_cur,w_cur)
+        if norm < 1e-9:
+            return 0.0
+        else:
+            angle_y = y_cur / norm
+            angle_w = w_cur / norm
+            self.yaw_meas = math.degrees(2.0 * math.atan2(angle_y, angle_w))
+            self.yaw_meas = (self.yaw_meas + 180) % 360 - 180
+
+
+        #################################################################################################
+        # NOTE: this is the previous code for the workaround
+
+        # r = R.from_quat(self.orientation_quat)
+        # pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
+        # self.pitch_meas = pitch_x
+        # self.yaw_meas = yaw_y
+        # self.roll_meas = roll_z
+        # self.current_orientation = self.yaw_meas
+        # rot_error = (self.target_orientation - self.yaw_meas + 180) % 360 - 180    # NOTE: logic is changed here 8/4/25
+        # yawrate_cmd = np.clip(self.k_p_rot * rot_error, self.min_yawrate, self.max_yawrate)
 
         # workaround logic to determine direction of rotation (bc of quaternions)
-        if abs(self.orientation_quat[1]) > 0.7: # this value is specific to a certain set up orientation
-            self.k_p_rot_sign = 1
-        else:
-            self.k_p_rot_sign = -1
-
-        yawrate = self.k_p_rot_sign * self.k_p_rot * rot_error
-        yawrate = max(self.min_yawrate, min(yawrate, self.max_yawrate))
-        return yawrate
+        # if abs(self.orientation_quat[1]) > 0.7: # this value is specific to a certain set up orientation
+        #     self.k_p_rot_sign = 1
+        # else:
+        #     self.k_p_rot_sign = -1
+        # yawrate = self.k_p_rot_sign * self.k_p_rot * rot_error
+        #yawrate = max(self.min_yawrate, min(yawrate, self.max_yawrate))
+        ########################################################################################################
+        return yawrate_cmd
     
     # X Axis control
     def calculate_pitch(self):
+        
         # (P term)
         self.cur_x_error = self.target_position[0] - self.position[0]
         if -0.01 <= self.cur_x_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
@@ -302,9 +350,33 @@ class OptiTrackSubscriber2(Node):
         # print(f"x_fd: {x_fd}")
         self.prev_x_error = self.cur_x_error
 
-        pitch = x_fp + x_fi + x_fd
-        pitch = max(self.min_pitch, min(pitch, self.max_pitch))
-        return pitch
+        desired_pitch = x_fp + x_fi + x_fd
+
+        # NEW QUATERNION LOGIC  
+        q_cur = R.from_quat(self.orientation_quat)
+        half_angle = np.deg2rad(desired_pitch)/2.0   #using half angle for p' = qpq*
+        q_des = R.from_quat([np.sin(half_angle), 0.0, 0.0, np.cos(half_angle)])   # x,y,z,w 
+        q_err = q_des * q_cur.inv()
+
+        x_value, w_value = q_err.as_quat()[0], q_err.as_quat()[3]
+        pitch_err = np.rad2deg(2.0*np.arctan2(x_value, w_value))
+        pitch_err = (pitch_err + 180) % 360 - 180
+        pitch_cmd = np.clip(desired_pitch + pitch_err, self.min_pitch, self.max_pitch)
+
+
+        x_cur, w_cur = q_cur.as_quat()[0], q_cur.as_quat()[3]
+        norm = math.hypot(x_cur,w_cur)
+        if norm < 1e-9:
+            return 0.0
+        else:
+            angle_x = x_cur / norm
+            angle_w = w_cur / norm
+            self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))
+            self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
+
+    
+        #pitch_cmd = max(self.min_pitch, min(pitch_cmd, self.max_pitch))   #NOTE: POSSIBLY USE CLIPPING???
+        return pitch_cmd
     
     # Y axis control 
     def calculate_thrust(self):
@@ -356,10 +428,32 @@ class OptiTrackSubscriber2(Node):
         z_fd = self.k_d_z * (z_error_dif) / self.t
         #print(f"z_fd: {z_fd}")
         self.prev_z_error = self.cur_z_error
+        desired_roll = z_fp + z_fi + z_fd
 
-        roll = z_fp + z_fi + z_fd
-        roll = max(self.min_roll, min(roll, self.max_roll))
-        return roll
+        #NEW QUATERNION LOGIC
+        q_cur = R.from_quat(self.orientation_quat)
+        half_angle = np.deg2rad(desired_roll)/2.0   #using half angle for p' = qpq*    target orientation is 0...
+        q_des = R.from_quat([0.0, 0.0, np.sin(half_angle), np.cos(half_angle)])   # x,y,z,w 
+        q_err = q_des * q_cur.inv()
+        
+        z_value, w_value = q_err.as_quat()[2], q_err.as_quat()[3]
+        roll_err = np.rad2deg(2.0 * np.arctan2(z_value, w_value))
+        roll_err = (roll_err + 180) % 360 - 180
+        roll_cmd = np.clip(desired_roll + roll_err, self.min_roll, self.max_roll)
+
+
+        z_cur, w_cur = q_cur.as_quat()[2], q_cur.as_quat()[3]
+        norm = math.hypot(z_cur,w_cur)
+        if norm < 1e-9:
+            return 0.0
+        else:
+            angle_z = z_cur / norm
+            angle_w = w_cur / norm
+            self.roll_meas = math.degrees(2.0 * math.atan2(angle_z, angle_w))
+            self.roll_meas = (self.roll_meas + 180) % 360 - 180
+
+        # roll_cmd = max(self.min_roll, min(roll_cmd, self.max_roll))     #NOTE: POSSIBLY USE CLIPPING????
+        return roll_cmd
    
     def get_position(self):
         return self.position

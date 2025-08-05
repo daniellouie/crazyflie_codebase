@@ -22,6 +22,7 @@ crazyfly_core/flightplots.py
 crazyfly_core/optitrack_subscriber2.py
 crazyfly_core/pid_controller_cf1.py
 crazyfly_core/pid_controller_cf2.py
+crazyfly_core/pose_logger.py
 crazyfly_core/unused_files/cf_distance.py
 crazyfly_core/unused_files/cf_driver.py
 crazyfly_core/unused_files/cf_pid_controller.py
