@@ -358,7 +358,7 @@ class OptiTrackSubscriber2(Node):
         q_des = R.from_quat([np.sin(half_angle), 0.0, 0.0, np.cos(half_angle)])   # x,y,z,w 
         q_err = q_des * q_cur.inv()
 
-        x_value, w_value = q_err.as_quat()[0], q_err.as_quat()[3]
+        x_value, w_value = q_cur.as_quat()[0], q_cur.as_quat()[3]
         pitch_err = np.rad2deg(2.0*np.arctan2(x_value, w_value))
         pitch_err = (pitch_err + 180) % 360 - 180
         pitch_cmd = np.clip(desired_pitch + pitch_err, self.min_pitch, self.max_pitch)

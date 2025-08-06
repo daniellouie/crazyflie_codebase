@@ -60,7 +60,7 @@ class MinimalSubscriber(Node):
         
 
         # limit flight time for testing
-        self.flight_duration = 4.0 #in seconds
+        self.flight_duration = 2.0 #in seconds
 
         # constant command values for testing
         self.const_thrust = 44000 
