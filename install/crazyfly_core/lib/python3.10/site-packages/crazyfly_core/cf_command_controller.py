@@ -60,7 +60,7 @@ class MinimalSubscriber(Node):
         
 
         # limit flight time for testing
-        self.flight_duration = 2.0 #in seconds
+        self.flight_duration = 5.0 #in seconds
 
         # constant command values for testing
         self.const_thrust = 44000 
@@ -237,10 +237,13 @@ class MinimalSubscriber(Node):
                 w.writerow([t, x, y, z])
         print(f"[FLIGHT] log written for cf2 to {path}")
 
+    def round_to_half(x: float) -> float:
+        return round(x * 2) / 2
+
     def save_data_optitrack(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        fname = f"optitrack_test_{time_s}.csv" #name of csv
-        path = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_test"), fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        fname = f"optitrack_data_raw_{time_s}.csv" #name of csv
+        path = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_raw"), fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data])
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
@@ -265,7 +268,7 @@ class MinimalSubscriber(Node):
         values_yaw = list(df['yaw'])
         values_pitch = list(df['pitch'])
         values_roll = list(df['roll'])
-
+        
         mean_yaw = statistics.mean(values_yaw)
         mean_pitch = statistics.mean(values_pitch)
         mean_roll = statistics.mean(values_roll)
@@ -283,15 +286,15 @@ class MinimalSubscriber(Node):
         self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  y {std_y}")
         self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  z {std_z}")
 
-        fname2 = f"optitrack_data_{time_s}.csv" #name of csv
-        path2 = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data"), fname2)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        fname2 = f"optitrack_data_stats_{time_s}.csv" #name of csv
+        path2 = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_stats"), fname2)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         with open(path2, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
                 ["x", "z", "y", "mean_x", "mean_y", "mean_z", "mean_yaw", "mean_pitch", "mean_roll", "std_x", "std_y", "std_z", "std_yaw", "std_pitch", "std_roll"
                 ])
             
-            w.writerow([round(x), round(z), round(y), mean_x, mean_y, mean_z, mean_yaw, mean_pitch, mean_roll, std_x, std_y, std_z, std_yaw, std_pitch, std_roll])
+            w.writerow([round(x * 2) / 2, round(z * 2) / 2, round(y * 2) / 2, mean_x, mean_y, mean_z, mean_yaw, mean_pitch, mean_roll, std_x, std_y, std_z, std_yaw, std_pitch, std_roll])
 
         # make new csv with mean, std, max, min, range
 
