@@ -1,0 +1,74 @@
+import os, glob, csv, math
+
+stats_dir = os.path.expanduser("~/crazyfly_ws/optitrack_data_stats")
+raw_dir   = os.path.expanduser("~/crazyfly_ws/optitrack_data_raw")
+
+stats_files = sorted(glob.glob(os.path.join(stats_dir, "optitrack_data_stats*.csv")))
+raw_files   = sorted(glob.glob(os.path.join(raw_dir,   "optitrack_data_raw*.csv")))
+
+if not stats_files or not raw_files or len(stats_files) != len(raw_files):
+    raise SystemExit("File count mismatch or none found. Check paths and naming.")
+
+AXES_POS = ("x", "y", "z")
+AXES_ANG = ("yaw", "pitch", "roll")
+AXES_ALL = AXES_POS + AXES_ANG
+
+def read_single_xyz(path):
+    """Return {'x': float|None, 'y': float|None, 'z': float|None} from first stats row."""
+    out = {k: None for k in AXES_POS}
+    with open(path, newline='') as f:
+        r = csv.DictReader(f)
+        row = next(r, None)
+        if not row:
+            return out
+        for k in AXES_POS:
+            val = row.get(k, "")
+            if val not in (None, ""):
+                try:
+                    out[k] = float(val)
+                except ValueError:
+                    pass
+    return out
+
+def read_series(path, axes):
+    """Return {axis: [floats]} for all requested axes from raw series file."""
+    out = {k: [] for k in axes}
+    with open(path, newline='') as f:
+        r = csv.DictReader(f)
+        for row in r:
+            for k in axes:
+                val = row.get(k, "")
+                if val not in (None, ""):
+                    try:
+                        out[k].append(float(val))
+                    except ValueError:
+                        pass
+    return out
+
+# Accumulators
+total_error  = {k: 0.0 for k in AXES_ALL}  # sum of (desired - raw)
+total_points = {k: 0   for k in AXES_ALL}
+
+for stats_file, raw_file in zip(stats_files, raw_files):
+    s = read_single_xyz(stats_file)            # desired for x,y,z (single values)
+    for k in AXES_ANG:                         # desired=0 for yaw/pitch/roll
+        s[k] = 0.0
+
+    r = read_series(raw_file, AXES_ALL)        # ~511 values per axis in raw
+
+    for k in AXES_ALL:
+        series = r[k]
+        desired = s.get(k, None)
+        if desired is None or not series:
+            continue
+        total_error[k]  += math.fsum(desired - rv for rv in series)
+        total_points[k] += len(series)
+
+mean_error = {
+    k: (total_error[k] / total_points[k]) if total_points[k] else None
+    for k in AXES_ALL
+}
+
+print("Total points:", total_points)
+print("Total summed error (desired - raw):", total_error)
+print("Mean error per axis:", mean_error)

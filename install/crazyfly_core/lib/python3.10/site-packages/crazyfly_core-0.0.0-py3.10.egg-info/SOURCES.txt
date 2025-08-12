@@ -10,6 +10,7 @@ setup.py
 ../../build/crazyfly_core/crazyfly_core.egg-info/top_level.txt
 ../../build/crazyfly_core/crazyfly_core.egg-info/zip-safe
 crazyfly_core/__init__.py
+crazyfly_core/cf_command_controller.py
 crazyfly_core/cf_command_controller2.py
 crazyfly_core/cluster.py
 crazyfly_core/clusterControllerClass.py

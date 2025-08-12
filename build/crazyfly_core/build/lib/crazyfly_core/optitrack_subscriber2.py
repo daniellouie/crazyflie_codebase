@@ -193,18 +193,6 @@ class OptiTrackSubscriber2(Node):
 
             # create message of type Float Array (all values need to be floats)
 
-            x, y, z, w = R.from_quat(self.orientation_quat).as_quat()
-            sin_half = np.linalg.norm([x,y,z])
-
-            # if sin_half < 1e-12:
-            #     self.yaw_meas = self.pitch_meas = self.roll_meas = 0.0
-            # else: 
-            #     phi   = 2.0 * np.arctan2(sin_half,  w)          # total angle  [rad]
-            #     axis  = np.array([x, y, z]) / sin_half          
-            #     self.pitch_meas = np.rad2deg(phi * axis[0])     
-            #     self.yaw_meas   = np.rad2deg(phi * axis[1])     
-            #     self.roll_meas  = np.rad2deg(phi * axis[2])
-
             msg = Float32MultiArray()
             msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
                         float(self.position[0]), float(self.position[1]), float(self.position[2]),
@@ -295,6 +283,7 @@ class OptiTrackSubscriber2(Node):
         yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
         
         y_cur, w_cur = q_cur.as_quat()[1], q_cur.as_quat()[3]
+        #self.get_logger().info(f"y_cur = {y_cur}........................w_cur = {w_cur}")    
         norm = math.hypot(y_cur,w_cur)
         if norm < 1e-9:
             return 0.0
@@ -305,7 +294,7 @@ class OptiTrackSubscriber2(Node):
             self.yaw_meas = (self.yaw_meas + 180) % 360 - 180
 
 
-        #################################################################################################
+        """#################################################################################################
         # NOTE: this is the previous code for the workaround
 
         # r = R.from_quat(self.orientation_quat)
@@ -324,7 +313,7 @@ class OptiTrackSubscriber2(Node):
         #     self.k_p_rot_sign = -1
         # yawrate = self.k_p_rot_sign * self.k_p_rot * rot_error
         #yawrate = max(self.min_yawrate, min(yawrate, self.max_yawrate))
-        ########################################################################################################
+        ########################################################################################################"""
         return yawrate_cmd
     
     # X Axis control
@@ -358,7 +347,7 @@ class OptiTrackSubscriber2(Node):
         q_des = R.from_quat([np.sin(half_angle), 0.0, 0.0, np.cos(half_angle)])   # x,y,z,w 
         q_err = q_des * q_cur.inv()
 
-        x_value, w_value = q_cur.as_quat()[0], q_cur.as_quat()[3]
+        x_value, w_value = q_err.as_quat()[0], q_err.as_quat()[3]
         pitch_err = np.rad2deg(2.0*np.arctan2(x_value, w_value))
         pitch_err = (pitch_err + 180) % 360 - 180
         pitch_cmd = np.clip(desired_pitch + pitch_err, self.min_pitch, self.max_pitch)
@@ -371,11 +360,9 @@ class OptiTrackSubscriber2(Node):
         else:
             angle_x = x_cur / norm
             angle_w = w_cur / norm
-            self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))
+            self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))   #NOTE: THISSSS IS WHERE THE 180 DEGREE ISSUES COME. CHANGE IF WE EVER NEED TO ROTATE 180 DEGREES
             self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
 
-    
-        #pitch_cmd = max(self.min_pitch, min(pitch_cmd, self.max_pitch))   #NOTE: POSSIBLY USE CLIPPING???
         return pitch_cmd
     
     # Y axis control 

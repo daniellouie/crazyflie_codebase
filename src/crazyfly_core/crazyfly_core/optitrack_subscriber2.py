@@ -283,6 +283,7 @@ class OptiTrackSubscriber2(Node):
         yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
         
         y_cur, w_cur = q_cur.as_quat()[1], q_cur.as_quat()[3]
+        #self.get_logger().info(f"y_cur = {y_cur}........................w_cur = {w_cur}")    
         norm = math.hypot(y_cur,w_cur)
         if norm < 1e-9:
             return 0.0
@@ -361,7 +362,6 @@ class OptiTrackSubscriber2(Node):
             angle_w = w_cur / norm
             self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))   #NOTE: THISSSS IS WHERE THE 180 DEGREE ISSUES COME. CHANGE IF WE EVER NEED TO ROTATE 180 DEGREES
             self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
-
 
         return pitch_cmd
     
