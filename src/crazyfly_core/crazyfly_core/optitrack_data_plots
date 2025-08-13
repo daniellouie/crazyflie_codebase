@@ -1,0 +1,96 @@
+import os
+import glob
+import csv
+import pathlib
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+
+# Base directories (relative to where you run the script)
+base = pathlib.Path.home() / "Documents/GitHub/crazyflie_codebase"
+print(f"[INFO] Base directory: {base}")
+stats_dir = base / "optitrack_data_stats"
+raw_dir   = base / "optitrack_data_raw"
+
+# Gather all true (x, z) values from stats files
+true_x, true_z = [], []
+stats_files = sorted(glob.glob(str(stats_dir / "optitrack_data_2025*.csv")))
+print(f"[INFO] Found {len(stats_files)} stats files")
+
+for file in stats_files:
+    with open(file, newline='') as f:
+        reader = csv.DictReader(f)
+        row = next(reader, None)
+        if row:
+            # make header access case-insensitive
+            row_l = {k.lower(): v for k, v in row.items()}
+            if 'x' in row_l and 'z' in row_l:
+                try:
+                    true_x.append(float(row_l['x']))
+                    true_z.append(float(row_l['z']))
+                except ValueError:
+                    pass
+
+# Gather all raw (x, z) values from raw files
+raw_x, raw_z = [], []
+raw_files = sorted(glob.glob(str(raw_dir / "optitrack_test_2025*.csv")))
+print(f"[INFO] Found {len(raw_files)} raw files")
+
+for file in raw_files:
+    with open(file, newline='') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            row_l = {k.lower(): v for k, v in row.items()}
+            if 'x' in row_l and 'z' in row_l:
+                try:
+                    raw_x.append(float(row_l['x']))
+                    raw_z.append(float(row_l['z']))
+                except ValueError:
+                    # skip rows with missing/invalid numbers
+                    pass
+
+# Sanity checks
+if not true_x or not true_z:
+    print("[WARN] No true (x,z) values parsed from stats files. Check headers and file pattern.")
+if not raw_x or not raw_z:
+    print("[WARN] No raw (x,z) values parsed from raw files. Check headers and file pattern.")
+
+# Only compute mean/std if we actually have data
+has_raw = len(raw_x) > 0 and len(raw_z) > 0
+if has_raw:
+    mean_x = float(np.mean(raw_x))
+    mean_z = float(np.mean(raw_z))
+    std_x = float(np.std(raw_x))
+    std_z = float(np.std(raw_z))
+else:
+    mean_x = mean_z = std_x = std_z = None
+
+# Plot if anything to show
+if (true_x and true_z) or has_raw:
+    plt.figure(figsize=(6, 10))
+
+    if true_x and true_z:
+        plt.scatter(true_x, true_z, c='red', marker='s', label='True Values (Grid)')
+
+    if has_raw:
+        plt.scatter(raw_x, raw_z, c='blue', alpha=0.5, label='Raw Data')
+        # Draw ellipse only if stds are valid and > 0
+        if std_x and std_z and std_x > 0 and std_z > 0:
+            ellipse = Ellipse((mean_x, mean_z), 4*std_x, 4*std_z,
+                              edgecolor='green', facecolor='none', lw=2, label='2 Std Ellipse')
+            plt.gca().add_patch(ellipse)
+        else:
+            print("[INFO] Skipping ellipse (insufficient spread in data).")
+
+    plt.title('OptiTrack Data: True vs Raw with 2 Std Ellipse')
+    plt.xlabel('X Position (m)')
+    plt.ylabel('Z Position (m)')
+    plt.axis('equal')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('optitrack_data_plot.png', dpi=300)
+    plt.show()
+else:
+    print(stats_files[:5])
+    print(raw_files[:5])
+    raise SystemExit("No data to plot. Fix your file paths/patterns first.")
