@@ -1,131 +1,42 @@
-# import os
-# import glob
-# import csv
-# import pathlib
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from matplotlib.patches import Ellipse
-
-# # Base directories (relative to where you run the script)
-# base = pathlib.Path.home() / "Documents/GitHub/crazyflie_codebase"
-# print(f"[INFO] Base directory: {base}")
-# stats_dir = base / "optitrack_data_stats"
-# raw_dir   = base / "optitrack_data_raw"
-
-# # Gather all true (x, z) values from stats files
-# true_x, true_z = [], []
-# stats_files = sorted(glob.glob(str(stats_dir / "optitrack_data_2025*.csv")))
-# print(f"[INFO] Found {len(stats_files)} stats files")
-
-# for file in stats_files:
-#     with open(file, newline='') as f:
-#         reader = csv.DictReader(f)
-#         row = next(reader, None)
-#         if row:
-#             # make header access case-insensitive
-#             row_l = {k.lower(): v for k, v in row.items()}
-#             if 'x' in row_l and 'z' in row_l:
-#                 try:
-#                     true_x.append(float(row_l['x']))
-#                     true_z.append(float(row_l['z']))
-#                 except ValueError:
-#                     pass
-
-# # Gather all raw (x, z) values from raw files
-# raw_x, raw_z = [], []
-# raw_files = sorted(glob.glob(str(raw_dir / "optitrack_test_2025*.csv")))
-# print(f"[INFO] Found {len(raw_files)} raw files")
-
-# for file in raw_files:
-#     with open(file, newline='') as f:
-#         reader = csv.DictReader(f)
-#         for row in reader:
-#             row_l = {k.lower(): v for k, v in row.items()}
-#             if 'x' in row_l and 'z' in row_l:
-#                 try:
-#                     raw_x.append(float(row_l['x']))
-#                     raw_z.append(float(row_l['z']))
-#                 except ValueError:
-#                     # skip rows with missing/invalid numbers
-#                     pass
-
-# # Sanity checks
-# if not true_x or not true_z:
-#     print("[WARN] No true (x,z) values parsed from stats files. Check headers and file pattern.")
-# if not raw_x or not raw_z:
-#     print("[WARN] No raw (x,z) values parsed from raw files. Check headers and file pattern.")
-
-# # Only compute mean/std if we actually have data
-# has_raw = len(raw_x) > 0 and len(raw_z) > 0
-# if has_raw:
-#     mean_x = float(np.mean(raw_x))
-#     mean_z = float(np.mean(raw_z))
-#     std_x = float(np.std(raw_x))
-#     std_z = float(np.std(raw_z))
-# else:
-#     mean_x = mean_z = std_x = std_z = None
-
-# # Plot if anything to show
-# if (true_x and true_z) or has_raw:
-#     plt.figure(figsize=(10, 10))
-
-#     if true_x and true_z:
-#         plt.scatter(true_x, true_z, c='red', marker='s', label='True Values (Grid)')
-
-#     if has_raw:
-#         plt.scatter(raw_x, raw_z, c='blue', alpha=0.5, label='Raw Data')
-#         # Draw ellipse only if stds are valid and > 0
-#         if std_x and std_z and std_x > 0 and std_z > 0:
-#             ellipse = Ellipse((mean_x, mean_z), 4*std_x, 4*std_z,
-#                               edgecolor='green', facecolor='none', lw=2, label='2 Std Ellipse')
-#             plt.gca().add_patch(ellipse)
-#         else:
-#             print("[INFO] Skipping ellipse (insufficient spread in data).")
-
-#     plt.title('OptiTrack Data: True vs Raw with 2 Std Ellipse')
-#     plt.xlabel('X Position (m)')
-#     plt.ylabel('Z Position (m)')
-#     plt.axis('equal')
-#     plt.grid(True)
-#     plt.legend()
-#     plt.savefig('optitrack_data_plot.png', dpi=300)
-#     plt.show()
-# else:
-#     print(stats_files[:5])
-#     print(raw_files[:5])
-#     raise SystemExit("No data to plot. Fix your file paths/patterns first.")
-
-import csv, glob, re
+import csv, re
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 from pathlib import Path
 
-# ---- Paths (adjust only this block if needed) ----
+# ---------- Paths ----------
 base = Path.home() / "Documents/GitHub/crazyflie_codebase"
 stats_dir = base / "optitrack_data_stats"
 raw_dir   = base / "optitrack_data_raw"
 
-# ---- Helpers ----
+# ---------- Config ----------
+Y_LEVELS = [0.0, 0.5, 1.0, 1.3]  # one figure per y
+Y_TOL = 0.15                     # tolerance to bucket a y value
+K = 2.0                          # k-sigma ellipse size (2σ)
+
+# ---------- Helpers ----------
 ts_re = re.compile(r'(\d{4}-\d{2}-\d{2}_\d{2}:\d{2}:\d{2})')
-
 def ts(name: str):
-    m = ts_re.search(name)
-    return m.group(1) if m else None
+    m = ts_re.search(name); return m.group(1) if m else None
 
-def first_row_csv(path):
-    with open(path, newline='') as f:
+def first_row_csv(path: Path):
+    import csv
+    with path.open(newline='') as f:
         row = next(csv.DictReader(f), None)
         return {k.strip().lower(): (v.strip() if v is not None else v) for k, v in row.items()} if row else None
 
-def iter_rows_csv(path):
-    with open(path, newline='') as f:
+def iter_rows_csv(path: Path):
+    with path.open(newline='') as f:
         for row in csv.DictReader(f):
             yield {k.strip().lower(): (v.strip() if v is not None else v) for k, v in row.items()}
 
-# ---- Find and pair files by timestamp ----
-stats_files = list(stats_dir.glob("optitrack_data_*.csv"))
-raw_files   = list(raw_dir.glob("optitrack_test_*.csv"))
+def y_bucket(y):
+    nearest = min(Y_LEVELS, key=lambda v: abs(v - y))
+    return nearest if abs(nearest - y) <= Y_TOL else None
+
+# ---------- Pair files by timestamp ----------
+stats_files = list(stats_dir.glob("optitrack_data_2025*.csv"))
+raw_files   = list(raw_dir.glob("optitrack_test_2025*.csv"))
 
 pairs = {}
 for p in stats_files:
@@ -135,25 +46,26 @@ for p in raw_files:
     t = ts(p.name)
     if t: pairs.setdefault(t, {})["raw"] = p
 
-print(f"[INFO] candidate sessions: {len(pairs)}")
 pairs = {t: pr for t, pr in pairs.items() if "stats" in pr and "raw" in pr}
-print(f"[INFO] paired sessions:    {len(pairs)}")
+print(f"[INFO] Paired sessions: {len(pairs)}")
 
-# ---- Collect for plotting ----
-true_pts = []
-all_raw_x, all_raw_z = [], []
-ellipses = []  # (center_x, center_z, width, height, angle_deg, (true_x,true_z), (mean_x,mean_z))
+# ---------- Group data by y level ----------
+groups = {y: {"true": [], "raw_x": [], "raw_z": [], "ells": []} for y in Y_LEVELS}
+all_x, all_z = [], []
 
-K = 2.0  # k-sigma ellipse (2σ)
 for t, pr in sorted(pairs.items()):
-    # True position from stats (first row)
     sr = first_row_csv(pr["stats"])
-    if not sr or "x" not in sr or "z" not in sr:
+    if not sr or not {"x","y","z"} <= set(sr.keys()):
         continue
-    tx, tz = float(sr["x"]), float(sr["z"])
-    true_pts.append((tx, tz))
+    try:
+        tx, ty, tz = float(sr["x"]), float(sr["y"]), float(sr["z"])
+    except ValueError:
+        continue
 
-    # Raw samples for this session
+    yk = y_bucket(ty)
+    if yk is None:
+        continue
+
     xs, zs = [], []
     for r in iter_rows_csv(pr["raw"]):
         if "x" in r and "z" in r:
@@ -162,57 +74,65 @@ for t, pr in sorted(pairs.items()):
                 zs.append(float(r["z"]))
             except ValueError:
                 pass
-
-    if len(xs) < 2:  # need at least two samples to form covariance
+    if len(xs) < 2:
         continue
 
     xs, zs = np.array(xs), np.array(zs)
-    all_raw_x.extend(xs.tolist())
-    all_raw_z.extend(zs.tolist())
-
-    # Error cloud relative to true point
     dx, dz = xs - tx, zs - tz
 
-    # Covariance -> principal axes (correctly tilted ellipse)
+    # covariance -> tilted ellipse
     cov = np.cov(np.vstack([dx, dz]))
-    vals, vecs = np.linalg.eigh(cov)          # eigenvalues ascending
-    order = np.argsort(vals)[::-1]            # sort descending
+    vals, vecs = np.linalg.eigh(cov)
+    order = np.argsort(vals)[::-1]
     vals, vecs = vals[order], vecs[:, order]
-
-    # Std along principal axes
-    s1, s2 = np.sqrt(np.maximum(vals[0], 0.0)), np.sqrt(np.maximum(vals[1], 0.0))
-    # Full width/height = 2 * (K * std) = 2Kσ
+    s1, s2 = np.sqrt(max(vals[0], 0.0)), np.sqrt(max(vals[1], 0.0))
     width, height = 2*K*s1, 2*K*s2
-
-    # Orientation
     angle = np.degrees(np.arctan2(vecs[1, 0], vecs[0, 0]))
 
-    # Center at measurement mean (or use (tx, tz) to center at the true point)
-    mx, mz = float(np.mean(xs)), float(np.mean(zs))
-    center = (mx, mz)  # change to (tx, tz) to center on the grid point
+    mx, mz = float(np.mean(xs)), float(np.mean(zs))  # center at measurement mean
+    center = (mx, mz)  # change to (tx, tz) to center on the true grid point
 
-    ellipses.append((center[0], center[1], width, height, angle, (tx, tz), (mx, mz)))
+    groups[yk]["true"].append((tx, tz))
+    groups[yk]["raw_x"].extend(xs.tolist())
+    groups[yk]["raw_z"].extend(zs.tolist())
+    groups[yk]["ells"].append((center[0], center[1], width, height, angle, (tx, tz), (mx, mz)))
 
-# ---- Plot ----
-plt.figure(figsize=(9, 9))
-if true_pts:
-    plt.scatter([p[0] for p in true_pts], [p[1] for p in true_pts],
-                c='red', marker='s', s=25, label='True Grid')
+    all_x.extend(xs.tolist()); all_z.extend(zs.tolist())
 
-if all_raw_x:
-    plt.scatter(all_raw_x, all_raw_z, s=6, alpha=0.15, label='Raw Samples')
+# ---------- Global axis limits (same scale across pages) ----------
+if all_x and all_z:
+    xmin, xmax = min(all_x), max(all_x)
+    zmin, zmax = min(all_z), max(all_z)
+    pad_x = 0.05 * max(1e-9, xmax - xmin)
+    pad_z = 0.05 * max(1e-9, zmax - zmin)
+    XLIM = (xmin - pad_x, xmax + pad_x)
+    ZLIM = (zmin - pad_z, zmax + pad_z)
+else:
+    XLIM = ZLIM = None
 
-ax = plt.gca()
-for cx, cz, w, h, ang, (tx, tz), (mx, mz) in ellipses:
-    ell = Ellipse((cx, cz), width=w, height=h, angle=ang,
-                  edgecolor='green', facecolor='none', lw=1.2, alpha=0.9)
-    ax.add_patch(ell)
-    # optional: show bias vector mean->true
-    ax.plot([tx, mx], [tz, mz], ls='--', lw=1, alpha=0.6)
+# ---------- One window per y (blocks until closed) ----------
+for y in Y_LEVELS:
+    g = groups[y]
+    fig, ax = plt.subplots(figsize=(9, 9))
 
-plt.title('Per-Point 2σ Error Ellipses (OptiTrack)')
-plt.xlabel('X (m)'); plt.ylabel('Z (m)')
-plt.axis('equal'); plt.grid(True); plt.legend()
-plt.tight_layout()
-plt.savefig('optitrack_per_point_ellipses.png', dpi=300)
-plt.show()
+    txs = [p[0] for p in g["true"]]
+    tzs = [p[1] for p in g["true"]]
+    if txs:
+        ax.scatter(txs, tzs, c='red', marker='s', s=25, label='True Grid')
+    if g["raw_x"]:
+        ax.scatter(g["raw_x"], g["raw_z"], s=6, alpha=0.15, label='Raw Samples')
+
+    for cx, cz, w, h, ang, (tx, tz), (mx, mz) in g["ells"]:
+        ell = Ellipse((cx, cz), width=w, height=h, angle=ang,
+                      edgecolor='green', facecolor='none', lw=1.2, alpha=0.9)
+        ax.add_patch(ell)
+        ax.plot([tx, mx], [tz, mz], ls='--', lw=1, alpha=0.6)  # bias vector (mean→true)
+
+    ax.set_title(f"Per-Point 2σ Error Ellipses — y = {y} m (points: {len(g['ells'])})")
+    ax.set_xlabel("X (m)"); ax.set_ylabel("Z (m)")
+    ax.grid(True); ax.set_aspect('equal', adjustable='box')
+    if XLIM: ax.set_xlim(XLIM)
+    if ZLIM: ax.set_ylim(ZLIM)
+
+    plt.show()       # <-- blocks until you close the window
+    plt.close(fig)   # free memory before next page
