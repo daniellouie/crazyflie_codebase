@@ -56,7 +56,7 @@ class OptiTrackSubscriber2(Node):
         
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
-        self.target_positions = [[2.0, 1.0, 1.0]] #set single position (x,y,z)
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -70,9 +70,10 @@ class OptiTrackSubscriber2(Node):
         self.t = 0.01 #average time between signals in seconds
 
         # Values for rotational (yaw) PID
-        self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
+        self.orientation_quat = [0.0, 0.0, 0.0, 1.0] #current orientation in quaternions
         self.current_orientation = 0.0
-        self.target_orientation_quat = [0.0, 0.7, 0.0, 0.7]
+        self.target_orientation_quat = [0.0, 0.0, 0.0, 1.0]
+
         
         #temp fix: need to rotate drone to face right for rigid body then reorient
         # self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
@@ -95,17 +96,25 @@ class OptiTrackSubscriber2(Node):
         self.k_d_y       = 12000      # D-gain
 
         # values for horizontal X (pitch) PID  ── *UNCHANGED YET*
-        self.k_p_x       = 2
-        self.k_i_x       = 0.6
-        self.k_d_x       = 4.1
+        # self.k_p_x       = 2.0
+        # self.k_i_x       = 0.6
+        # self.k_d_x       = 4.1
         self.max_pitch   = 3.0 - 1    # (your original expression)
         self.min_pitch   = -3.0
+        
+        self.k_p_x       = 3.0 #was 1.6  1.2          8/15/25
+        self.k_i_x       = 0.4    # 0.6
+        self.k_d_x       = 0.4 #was 4.1   3.5     2.5
 
-        # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
-        self.k_p_z       = 1.6 # was 2
-        self.k_i_z       = 0.6
-        self.k_d_z       = 4.1
-        # ───────────────────────────────────────────────────────────────────────────
+
+        # # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
+        # self.k_p_z       = 1.6 # was 2
+        # self.k_i_z       = 0.6
+        # self.k_d_z       = 4.1
+        self.k_p_z       = 4.0 # was 2
+        self.k_i_z       = 0.4   # 0.6 
+        self.k_d_z       = 0.4 #was 4.1   3.0 
+        # # ───────────────────────────────────────────────────────────────────────────
 
 
         #-----------------------------------------------------------------
@@ -134,6 +143,18 @@ class OptiTrackSubscriber2(Node):
 
         self.startTimer = False
         self.startTime = time.time()
+
+
+    def normalize_quat(self, q):
+            x,y,z,w = q
+            norm = math.sqrt(x**2 + y**2 + z**2 + w**2)
+            if norm < 1e-9:
+                return [0.0, 0.0, 0.0, 1.0]
+            return [x/norm,y/norm,z/norm, w/norm]
+        
+    def set_target_orientation_quat(self, q):
+        self.target_orientation_quat = self.normaliz_quat(q)
+
 
     def save_pid(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
@@ -275,6 +296,7 @@ class OptiTrackSubscriber2(Node):
         q_cur = R.from_quat(self.orientation_quat)
         half_angle = np.deg2rad(self.target_orientation)/2.0   #using half angle for p' = qpq*    target orientation is 0...
         q_des = R.from_quat([0.0, np.sin(half_angle), 0.0, np.cos(half_angle)])   # x,y,z,w 
+        # q_des = R.from_quat([0.0, 0.0, 0.0, 1.0])
         q_err = q_des * q_cur.inv()
 
         y, w = q_err.as_quat()[1], q_err.as_quat()[3]
@@ -282,6 +304,7 @@ class OptiTrackSubscriber2(Node):
         yaw_err = (yaw_err + 180) % 360 - 180
         yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
         
+        #####################   READING QUATERNION      ################## 
         y_cur, w_cur = q_cur.as_quat()[1], q_cur.as_quat()[3]
         #self.get_logger().info(f"y_cur = {y_cur}........................w_cur = {w_cur}")    
         norm = math.hypot(y_cur,w_cur)
@@ -292,8 +315,9 @@ class OptiTrackSubscriber2(Node):
             angle_w = w_cur / norm
             self.yaw_meas = math.degrees(2.0 * math.atan2(angle_y, angle_w))
             self.yaw_meas = (self.yaw_meas + 180) % 360 - 180
+        #################################################################
 
-
+        # self.get_logger.info()(f"CMMMMMMMMDDDDD {yawrate_cmd}")
         """#################################################################################################
         # NOTE: this is the previous code for the workaround
 

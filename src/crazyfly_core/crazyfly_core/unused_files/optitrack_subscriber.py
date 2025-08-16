@@ -47,8 +47,8 @@ class OptiTrackSubscriber(Node):
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
         #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
         #self.target_positions = [[.10, 1.0, 1.0],[1.0, 1.0, 2.0],[1.0, 1.0, 1.0]] #set single position
-        self.target_positions = [[1.0, 0.75, 1.0],[1.0, 0.75, 2.0]] #set single position (x,y,z)
-        # self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 0.75, 1.0],[1.0, 0.75, 2.0]] #set single position (x,y,z)
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
 
         
         
@@ -60,7 +60,7 @@ class OptiTrackSubscriber(Node):
         self.threshold = 0.15  # [m] Threshold for reaching the target
         # Controls variables
         self.t = 0.01 #average time between signals in seconds
-
+        
         # Values for rotational (yaw) P controller
         self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
         self.current_orientation = 0.0
@@ -70,7 +70,7 @@ class OptiTrackSubscriber(Node):
         self.k_p_rot = 0.25
         self.k_p_rot_sign = 1
         self.max_yawrate = 15
-        self.min_yawrate = -15
+        self.min_yawrate = -15 
 
         # values for vertical Y (thrust) PID
         self.hover = 44000 #originally 46500     
@@ -114,7 +114,7 @@ class OptiTrackSubscriber(Node):
         self.startTime = time.time()
 
     def listener_callback(self, msg):
-        print(f"Received pose: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
+        # print(f"Received pose: {msg.pose.position.x}, {msg.pose.position.y}, {msg.pose.position.z}")
         # need this conditional to avoid QoS error
         if msg.header.frame_id == "world":
             # store the current x,y,x position of the drone (in meters)

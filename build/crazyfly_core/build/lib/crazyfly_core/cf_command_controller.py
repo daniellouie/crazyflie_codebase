@@ -23,7 +23,7 @@ import statistics
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning")
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
-link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
+link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
 # test
 
@@ -58,10 +58,10 @@ class MinimalSubscriber(Node):
         self.x_position1, self.y_position1, self.z_position1 = 0.0, 0.0, 0.0
         self.cf2_position = []
        
-
+        """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 5.0 #in seconds
-
+        self.flight_duration = 15.0 #in seconds
+        """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
         self.const_roll = 0 #-3,3 range
@@ -125,9 +125,9 @@ class MinimalSubscriber(Node):
             self.cur_y_data.append(self.y_position1)
             self.cur_z_data.append(self.z_position1)
 
-            self.cur_yaw_data.append(self.yaw_meas)
-            self.cur_pitch_data.append(self.pitch_meas)
-            self.cur_roll_data.append(self.roll_meas)
+            # self.cur_yaw_data.append(self.yaw_meas)
+            # self.cur_pitch_data.append(self.pitch_meas)
+            # self.cur_roll_data.append(self.roll_meas)
 
             self.thrust_data.append(self.thrust1)
             self.tracking_time.append(datetime.now().strftime("%Y%m%d_%H%M%S"))
@@ -222,8 +222,8 @@ class MinimalSubscriber(Node):
 
     def save_data(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        #fname = f"cf2_tuning_{time_s}.csv" #name of csv
-        fname = f"optitrack_test_{time_s}.csv"
+        fname = f"cf2_tuning_{time_s}.csv" #name of csv
+        #fname = f"optitrack_test_{time_s}.csv"
         path = os.path.join(CF2_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
         with open(path, "w", newline="") as file:
@@ -235,7 +235,7 @@ class MinimalSubscriber(Node):
            
             for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
                 w.writerow([t, x, y, z])
-        print(f"[FLIGHT] log written for cf2 to {path}")
+        self.get_logger().info(f"[FLIGHT] log written for cf2 to {path}")
 
     def save_data_optitrack(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
@@ -378,8 +378,8 @@ def main(args=None):
     plt.show()
     print("Plotted")
 
-    #minimal_subscriber.save_data()
-    minimal_subscriber.save_data_optitrack()
+    minimal_subscriber.save_data()
+    #minimal_subscriber.save_data_optitrack()
     #cf2_tuning_static()
    
 

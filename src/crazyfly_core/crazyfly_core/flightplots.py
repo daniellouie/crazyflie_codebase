@@ -286,6 +286,7 @@ def anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions
 
     num_frames = min(len(p) for p, _ in datasets.values())
     ani = FuncAnimation(fig, update, frames=num_frames, interval=100, blit=False)
+    plt.show()
 
 #--------------------------
 #| Animation for 2D Graph |
@@ -495,11 +496,11 @@ def main():
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
     #static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     # cf2_tuning_static(cf2_path)
-    cluster_accuracy()
+    #cluster_accuracy()
 
 if __name__ == "__main__":
     main()
