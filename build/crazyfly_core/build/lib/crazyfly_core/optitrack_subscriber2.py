@@ -21,7 +21,7 @@ from datetime import datetime
 from .flightplots import FILE_INITIATION#, cf2_tuning_static
 import math
 
-CF2_PID =  os.path.expanduser("~/crazyfly_ws/pid_tuning_values") 
+CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf2_pid_tuning_values") 
 
 class OptiTrackSubscriber2(Node):
     def __init__(self):
@@ -103,17 +103,17 @@ class OptiTrackSubscriber2(Node):
         self.min_pitch   = -3.0
         
         self.k_p_x       = 3.0 #was 1.6  1.2          8/15/25
-        self.k_i_x       = 0.4    # 0.6
-        self.k_d_x       = 0.4 #was 4.1   3.5     2.5
+        self.k_i_x       = 0.1    # 0.6
+        self.k_d_x       = 0.1 #was 4.1   3.5     2.5
 
 
         # # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
         # self.k_p_z       = 1.6 # was 2
         # self.k_i_z       = 0.6
         # self.k_d_z       = 4.1
-        self.k_p_z       = 4.0 # was 2
-        self.k_i_z       = 0.4   # 0.6 
-        self.k_d_z       = 0.4 #was 4.1   3.0 
+        self.k_p_z       = 1.0 # was 2
+        self.k_i_z       = 0.1  # 0.6 
+        self.k_d_z       = 0.1 #was 4.1   3.0 
         # # ───────────────────────────────────────────────────────────────────────────
 
 
@@ -202,6 +202,7 @@ class OptiTrackSubscriber2(Node):
 
             # calls rotational PID function (yawrate)
             yawrate_cmd = self.calculate_yawrate()
+            # self.get_logger().info(f"yawrate_cmd = {yawrate_cmd:.2f}")
 
             # calls X axis PID function (pitch)
             pitch_cmd = self.calculate_pitch()
@@ -220,6 +221,7 @@ class OptiTrackSubscriber2(Node):
                         float(self.yaw_meas), float(self.pitch_meas), float(self.roll_meas) 
                         ]
             self.pub_commands.publish(msg) #publish commands for drone controller
+            # self.get_logger.info()(f"yawrate_cmd--------------------: {msg.data[2]}")
             
             # #This is a timer so the drones stay in one location for a few seconds 
             # if self.is_within_threshold(self.position, self.target_position) and not self.startTimer:
@@ -294,19 +296,9 @@ class OptiTrackSubscriber2(Node):
     def calculate_yawrate(self):
         # (P term)
         q_cur = R.from_quat(self.orientation_quat)
-        half_angle = np.deg2rad(self.target_orientation)/2.0   #using half angle for p' = qpq*    target orientation is 0...
-        q_des = R.from_quat([0.0, np.sin(half_angle), 0.0, np.cos(half_angle)])   # x,y,z,w 
-        # q_des = R.from_quat([0.0, 0.0, 0.0, 1.0])
-        q_err = q_des * q_cur.inv()
 
-        y, w = q_err.as_quat()[1], q_err.as_quat()[3]
-        yaw_err = np.rad2deg(2* np.arctan2(y,w)) # second half angle multiplication for full angle
-        yaw_err = (yaw_err + 180) % 360 - 180
-        yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
-        
         #####################   READING QUATERNION      ################## 
         y_cur, w_cur = q_cur.as_quat()[1], q_cur.as_quat()[3]
-        #self.get_logger().info(f"y_cur = {y_cur}........................w_cur = {w_cur}")    
         norm = math.hypot(y_cur,w_cur)
         if norm < 1e-9:
             return 0.0
@@ -315,6 +307,18 @@ class OptiTrackSubscriber2(Node):
             angle_w = w_cur / norm
             self.yaw_meas = math.degrees(2.0 * math.atan2(angle_y, angle_w))
             self.yaw_meas = (self.yaw_meas + 180) % 360 - 180
+        
+        half_angle = np.deg2rad(self.target_orientation)/2.0   #using half angle for p' = qpq*    target orientation is 0...
+        q_des = R.from_quat([0.0, np.sin(half_angle), 0.0, np.cos(half_angle)])   # x,y,z,w 
+        # q_des = R.from_quat([0.0, 0.0, 0.0, 1.0])
+        q_err = q_des * q_cur.inv()
+        y, w = q_err.as_quat()[1], q_err.as_quat()[3]
+        yaw_err = np.rad2deg(2* np.arctan2(y,w)) # second half angle multiplication for full angle
+        yaw_err = (yaw_err + 180) % 360 - 180
+        yawrate_cmd = np.clip(self.k_p_rot * yaw_err, self.min_yawrate, self.max_yawrate)
+        
+      
+        
         #################################################################
 
         # self.get_logger.info()(f"CMMMMMMMMDDDDD {yawrate_cmd}")

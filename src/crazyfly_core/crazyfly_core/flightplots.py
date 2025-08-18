@@ -20,7 +20,7 @@ def FILE_INITIATION(i):
     WORKSPACE = pathlib.Path.home() / "crazyfly_ws"   # <— fixed
     DATA_DIR      = WORKSPACE / "cluster_data"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
-    CF2_TUNING    = WORKSPACE / "cf2_tuning"
+    CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
 
 
     # DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here

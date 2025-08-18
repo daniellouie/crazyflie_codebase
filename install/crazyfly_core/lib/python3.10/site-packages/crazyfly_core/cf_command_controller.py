@@ -21,7 +21,7 @@ from rclpy.logging import get_logger
 import pandas as pd
 import statistics
 
-CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning")
+CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning_flight_data")
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
