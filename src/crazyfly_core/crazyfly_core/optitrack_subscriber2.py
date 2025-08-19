@@ -67,7 +67,11 @@ class OptiTrackSubscriber2(Node):
         self.target_position = self.target_positions[self.current_target_index]
         self.threshold = 0.15  # [m] Threshold for reaching the target
         # Controls variables
-        self.t = 0.01 #average time between signals in seconds
+        
+        #self.t = 0.01 #average time between signals in seconds
+        #-----------------------------------
+        #changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
+        self.t = time.perf_counter()
 
         # Values for rotational (yaw) PID
         self.orientation_quat = [0.0, 0.0, 0.0, 1.0] #current orientation in quaternions
@@ -99,21 +103,21 @@ class OptiTrackSubscriber2(Node):
         # self.k_p_x       = 2.0
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
-        self.max_pitch   = 3.0 - 1    # (your original expression)
+        self.max_pitch   = 3.0    # (your original expression)
         self.min_pitch   = -3.0
         
-        self.k_p_x       = 3.0 #was 1.6  1.2          8/15/25
-        self.k_i_x       = 0.1    # 0.6
-        self.k_d_x       = 0.1 #was 4.1   3.5     2.5
+        self.k_p_x       = 1.2 #was 1.6  1.2          8/15/25
+        self.k_i_x       = 0.6   # 0.6
+        self.k_d_x       = 4.1 #was 4.1   3.5     2.5
 
 
         # # values for horizontal Z (roll) PID  ── *UNCHANGED YET*
-        # self.k_p_z       = 1.6 # was 2
-        # self.k_i_z       = 0.6
-        # self.k_d_z       = 4.1
-        self.k_p_z       = 1.0 # was 2
-        self.k_i_z       = 0.1  # 0.6 
-        self.k_d_z       = 0.1 #was 4.1   3.0 
+        self.k_p_z       = 1.2 # was 2
+        self.k_i_z       = 0.6
+        self.k_d_z       = 4.1
+        # self.k_p_z       = 0 # was 2
+        # self.k_i_z       = 0  # 0.6 
+        # self.k_d_z       = 0 #was 4.1   3.0 
         # # ───────────────────────────────────────────────────────────────────────────
 
 
@@ -343,7 +347,7 @@ class OptiTrackSubscriber2(Node):
         #yawrate = max(self.min_yawrate, min(yawrate, self.max_yawrate))
         ########################################################################################################"""
         return yawrate_cmd
-    
+
     # X Axis control
     def calculate_pitch(self):
         
@@ -354,7 +358,11 @@ class OptiTrackSubscriber2(Node):
         x_fp = self.k_p_x * self.cur_x_error
         # print(f"x_fp: {x_fp}")
         
+        self.t = time.perf_counter() - self.t
+        self.get_logger.info()(f"self_t=============================== {self.t}")
+        
         # I term
+        #future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t
         future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t
         if abs(future_int_x_error * self.k_i_x) < self.int_x_max:
             self.int_x_error = future_int_x_error
@@ -405,6 +413,8 @@ class OptiTrackSubscriber2(Node):
         y_fp = self.k_p_y * self.cur_y_error
         #print(f"y_fp: {y_fp}")
 
+        self.t = time.perf_counter() - self.t
+
         #calculate what k_i would be
         future_int_y_error = self.int_y_error + 0.5 * (self.prev_y_error + self.cur_y_error) * self.t
         #if the calculated value is within range, update int_y_error
@@ -430,6 +440,8 @@ class OptiTrackSubscriber2(Node):
         self.cur_z_error = self.target_position[2] - self.position[2]
         z_fp = self.k_p_z * self.cur_z_error
         #print(f"z_fp: {z_fp}")
+
+        self.t = time.perf_counter() - self.t
 
         # I term
         future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t
