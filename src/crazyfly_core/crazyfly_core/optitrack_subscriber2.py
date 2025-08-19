@@ -344,7 +344,7 @@ class OptiTrackSubscriber2(Node):
         ########################################################################################################"""
         return yawrate_cmd
     
-    # X Axis control
+    """# X Axis control
     def calculate_pitch(self):
         
         # (P term)
@@ -391,8 +391,62 @@ class OptiTrackSubscriber2(Node):
             self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))   #NOTE: THISSSS IS WHERE THE 180 DEGREE ISSUES COME. CHANGE IF WE EVER NEED TO ROTATE 180 DEGREES
             self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
 
-        return pitch_cmd
+        return pitch_cmd"""
     
+    # FIXED Z axis control 8/19/25
+    def calculate_pitch(self):
+    
+        # set to zero if within margin
+        self.cur_z_error = self.target_position[2] - self.position[2]
+        if -0.01 <= self.cur_z_error <= 0.01:
+            self.cur_z_error = 0
+        
+        ######. PID terms for Z-axis position-to-attitude controller  ######
+
+        # (P term)
+        z_fp = self.k_p_z * self.cur_z_error # (deg/m) 
+        
+        # (I term))
+        future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t #units of m*s 
+        if abs(future_int_z_error * self.k_i_z) < self.int_z_max:
+            self.int_z_error = future_int_z_error 
+        z_fi = self.k_i_z * self.int_z_error # (to be in degrees Ki_z must be in deg/m*s))
+        
+        # (D term)
+        z_error_dif = self.cur_z_error - self.prev_z_error #m
+        z_fd = self.k_d_z * (z_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
+        self.prev_z_error = self.cur_z_error # (deg*s/m)
+        
+        desired_pitch_angle = z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
+        
+        # Desired orientation in quaternion 
+        half_angle = np.deg2rad(desired_pitch_angle) / 2.0
+        q_desired = R.from_quat([np.sin(half_angle), 0.0, 0.0, np.cos(half_angle)])  # (x,y,z,w)
+        # Current orientation in quaternion
+        q_current = R.from_quat(self.orientation_quat)
+        # orientation error quaternion
+        q_error = q_desired * q_current.inv()
+        
+        # Convert quaternion back to angle
+        pitch_error_quat = q_error.as_quat()  
+        x_component = pitch_error_quat[0]
+        w_component = pitch_error_quat[3]
+        pitch_error_angle = np.rad2deg(2.0 * np.arctan2(x_component, w_component))
+        pitch_error_angle = (pitch_error_angle + 180) % 360 - 180
+        
+        pitch_cmd = np.clip(pitch_error_angle, self.min_pitch, self.max_pitch)
+        
+        ##### current pitch for measurement #####
+        x_cur, w_cur = q_current.as_quat()[0], q_current.as_quat()[3]
+        norm = math.hypot(x_cur, w_cur)
+        if norm > 1e-9:
+            angle_x = x_cur / norm
+            angle_w = w_cur / norm
+            self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))
+            self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
+        #########################################
+        return pitch_cmd
+
     # Y axis control 
     def calculate_thrust(self):
         # P term:
@@ -425,7 +479,7 @@ class OptiTrackSubscriber2(Node):
         thrust = int(max(self.min_thrust, min(thrust, self.max_thrust)))
         return thrust
     
-    def calculate_roll(self):
+    """def calculate_roll(self):
         # P term
         self.cur_z_error = self.target_position[2] - self.position[2]
         z_fp = self.k_p_z * self.cur_z_error
@@ -468,23 +522,66 @@ class OptiTrackSubscriber2(Node):
             self.roll_meas = (self.roll_meas + 180) % 360 - 180
 
         # roll_cmd = max(self.min_roll, min(roll_cmd, self.max_roll))     #NOTE: POSSIBLY USE CLIPPING????
+        return roll_cmd"""
+     # X axis control 
+    
+    # FIXED X-axis control. 08/19/25
+    def calculate_roll(self):
+
+        # set to zero if within margin
+        self.cur_x_error = self.target_position[0] - self.position[0]
+        if -0.01 <= self.cur_x_error <= 0.01:
+            self.cur_x_error = 0
+        
+        ######. PID terms for X-axis position-to-attitude controller  ######
+
+        # (P term)
+        x_fp = self.k_p_x * self.cur_x_error # (deg/m) 
+        
+        # (I term))
+        future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t #units of m*s 
+        if abs(future_int_x_error * self.k_i_x) < self.int_x_max:
+            self.int_x_error = future_int_x_error 
+        x_fi = self.k_i_x * self.int_x_error # (to be in degrees Ki_x must be in deg/m*s))
+        
+        # (D term)
+        x_error_dif = self.cur_x_error - self.prev_x_error #m
+        x_fd = self.k_d_x * (x_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
+        self.prev_x_error = self.cur_x_error # (deg*s/m)
+        
+        desired_roll_angle = x_fp + x_fi + x_fd # desired roll angle in DEGREESSSS
+        
+        # Desired orientation in quaternion 
+        half_angle = np.deg2rad(desired_roll_angle) / 2.0
+        q_desired = R.from_quat([0.0, 0.0, np.sin(half_angle), np.cos(half_angle)])  # (x,y,z,w)
+        # Current orientation in quaternion
+        q_current = R.from_quat(self.orientation_quat)
+        # orientation error quaternion
+        q_error = q_desired * q_current.inv()
+        
+        # Convert quaternion back to angle
+        roll_error_quat = q_error.as_quat()  
+        z_component = roll_error_quat[2]
+        w_component = roll_error_quat[3]
+        roll_error_angle = np.rad2deg(2.0 * np.arctan2(z_component, w_component))
+        roll_error_angle = (roll_error_angle + 180) % 360 - 180
+        
+        roll_cmd = np.clip(roll_error_angle, self.min_roll, self.max_roll)
+        
+        ##### current roll for measurement #####
+        z_cur, w_cur = q_current.as_quat()[2], q_current.as_quat()[3]
+        norm = math.hypot(z_cur, w_cur)
+        if norm > 1e-9:
+            angle_z = z_cur / norm
+            angle_w = w_cur / norm
+            self.roll_meas = math.degrees(2.0 * math.atan2(angle_z, angle_w))
+            self.roll_meas = (self.roll_meas + 180) % 360 - 180
+        #########################################
         return roll_cmd
-   
+        
     def get_position(self):
         return self.position
     
-# def main(args=None):
-#     rclpy.init(args=args)
-
-#     optitrack_subscriber2 = OptiTrackSubscriber2()
-#     optitrack_subscriber2.save_pid()
-
-#     rclpy.spin(optitrack_subscriber2)
-
-#     #cf2_tuning_static() #graphing 2d cf2 by itself from flightplots
-#     optitrack_subscriber2.destroy_node()
-#     rclpy.shutdown()
-#     #cf2_tuning_static()
 def main(args=None):
     rclpy.init(args=args)
     optitrack_subscriber2 = OptiTrackSubscriber2()
