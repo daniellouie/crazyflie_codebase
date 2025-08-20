@@ -52,7 +52,7 @@ class MinimalSubscriber(Node):
 
 
         # Flight variables for both drones
-        self.roll1, self.pitch1, self.yawrate1, self.thrust1 = 0.0, 0.0, 0.0, 0
+        self.roll1, self.pitch1, self.yawrate1, self.thrust1 = 0.0, 0.0, 0.0, 0.0
        
         # Position variables
         self.x_position1, self.y_position1, self.z_position1 = 0.0, 0.0, 0.0
