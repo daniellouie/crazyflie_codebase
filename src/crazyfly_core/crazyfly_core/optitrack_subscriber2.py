@@ -109,7 +109,11 @@ class OptiTrackSubscriber2(Node):
         self.current_orientation = 0.0
         self.target_orientation_quat = [0.0, 0.0, 0.0, 1.0]
 
-        
+        # Setting up relative drone orientation to be zero
+        self.drone_rel_zero_orient = False
+        self.q0_identity = [0.0, 0.0, 0.0, 1.0] #identity quaternion
+
+
         #temp fix: need to rotate drone to face right for rigid body then reorient
         # self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
         
@@ -250,6 +254,17 @@ class OptiTrackSubscriber2(Node):
             self.orientation_quat[1] = msg.pose.orientation.y
             self.orientation_quat[2] = msg.pose.orientation.z
             self.orientation_quat[3] = msg.pose.orientation.w
+
+            # Grab world orientation quaternion (for relative drone orientation)
+            q_world = R.from_quat(self.orientation_quat)
+
+            # if orientation not zero, set to zero
+            if not self.drone_rel_zero_orient:
+                self.q0_identity = q_world.inv() 
+                self.drone_rel_zero_orient = True
+            
+            q_rel = q_world * self.q0_identity # relative orientation quaternion
+            self.orientation_quat = list(q_rel.as_quat()) # convert to list
 
             # calls rotational PID function (yawrate)
             yawrate_cmd = self.calculate_yawrate()
