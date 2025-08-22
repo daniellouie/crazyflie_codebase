@@ -100,7 +100,7 @@ class MinimalSubscriber(Node):
     # this function is called each time a 'command' message is received
     def listener_callback(self, msg):
         # ensure commands for all axis are recieved
-        if len(msg.data) >= 10:
+        if len(msg.data) >= 7:
             self.roll1 = msg.data[0]
             self.pitch1 = msg.data[1]
             self.yawrate1 = msg.data[2]
@@ -109,13 +109,6 @@ class MinimalSubscriber(Node):
             self.x_position1 = msg.data[4]
             self.y_position1 = msg.data[5]
             self.z_position1 = msg.data[6]
-
-            # NEW for grabbing yaw, pitch, roll for optitrack testing
-            self.yaw_meas =  msg.data[7]
-            self.pitch_meas = msg.data[8]
-            self.roll_meas = msg.data[9]
-            #print(f"Received: Roll = {self.roll}, Pitch = {self.pitch}, Yawrate = {self.yawrate}, Thrust = {self.thrust}")
-            #print(f"x: {self.x_position}, y: {self.y_position}, z: {self.z_position}")
 
             # record data for graphing
             current_time = time.time()

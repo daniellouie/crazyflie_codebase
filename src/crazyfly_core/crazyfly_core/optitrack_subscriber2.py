@@ -100,24 +100,21 @@ class OptiTrackSubscriber2(Node):
         self.current_orientation = 0.0
         self.target_orientation_quat = [0.0, 0.0, 0.0, 1.0]
 
-
-        #temp fix: need to rotate drone to face 180 degrees for rigid body then reorient
-        
         self.target_orientation = 0.0
         self.k_p_rot = 1.0
         self.k_p_rot_sign = 1
 
-        # ───────────────────────────  CONSTANTS BLOCK  ────────────────────────────
+        # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
         # --
-        # Y constants
+                # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
         self.hover       = 41600      # trim thrust to hold level hover
         self.max_thrust  = 56000
         self.min_thrust  = 42000
 
         self.k_p_y       = 34000+3400      # P-gain
-        self.k_i_y       = 800        # I-gain
-        self.k_d_y       = 12000      # D-gain
+        self.k_i_y       = 800             # I-gain
+        self.k_d_y       = 12000           # D-gain
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -127,9 +124,9 @@ class OptiTrackSubscriber2(Node):
         self.prev_y_error = 0.0
         self.int_y_error = 0.0
         self.int_y_max = 5000 # maximum added thrust from integral component
-        # --
+        
 
-        # --
+                # ----------------------         X constants         ---------------------- #
         # X constants
         # values for horizontal X (roll) PID
         # self.k_p_x       = 2.0
@@ -137,9 +134,9 @@ class OptiTrackSubscriber2(Node):
         # self.k_d_x       = 4.1
         
         # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
-        self.k_p_x       = 3.4         
-        self.k_i_x       = 0.2   
-        self.k_d_x       = 3.4
+        self.k_p_x       = 2.65      
+        self.k_i_x       = 0.37  
+        self.k_d_x       = 3.75     # 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -151,16 +148,13 @@ class OptiTrackSubscriber2(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
         # --
 
-        # --
-        # Z Constants
-        # values for horizontal Z (pitch) PID (negative values because 180 rotation)
+       
+                # ----------------------         Z constants         ---------------------- #
+        # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
         self.k_p_z       = -1.2 
-        self.k_i_z       = -0.04
-        self.k_d_z       = -1.95
-        # self.k_p_z       = 0 # was 2
-        # self.k_i_z       = 0  # 0.6 
-        # self.k_d_z       = 0 #was 4.1   3.0
-
+        self.k_i_z       = -0.03
+        self.k_d_z       = -2.05
+        
         self.max_roll = 3.0
         self.min_roll = -3.0 
 
@@ -168,7 +162,7 @@ class OptiTrackSubscriber2(Node):
         self.cur_z_error = 0.0
         self.prev_z_error = 0.0
         self.int_z_error = 0.0
-        self.int_z_max = 3.5
+        self.int_z_max = 4.0
         # --
         # ────────────────────────────────────────────────────────────────────────
 
@@ -241,10 +235,10 @@ class OptiTrackSubscriber2(Node):
             # Grab world orientation quaternion (for relative drone orientation)
             q_world = R.from_quat(self.orientation_quat)
 
-            # if orientation not zero, set to zero
-            if not self.drone_rel_zero_orient:
-                self.q0_identity = q_world.inv() 
-                self.drone_rel_zero_orient = True
+            # # if orientation not zero, set to zero
+            # if not self.drone_rel_zero_orient:
+            #     self.q0_identity = q_world.inv() 
+            #     self.drone_rel_zero_orient = True
             
             
 
