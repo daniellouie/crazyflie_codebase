@@ -1,33 +1,55 @@
 # optitrack_subscriber2.py for second drone 
+
+''' This file tunes the individual drone, cf2'''
+
+
+## Last Update: Aug 22, 2025
+
+## What was changed:
+# Gains for CF2 were finalized.
+# We also moved 3 files to unused (PID)
+
+## Changes left to make:
+# Delete all unused comments to improve readability
+
+
+
+# 0)  IMPORT RELEVANT LIBRARIES
+
 import rclpy
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from rclpy.time import Time
 from rclpy.duration import Duration
-
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import UInt16
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Bool
-
 import matplotlib.pyplot as plt
 import time
-
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-
 import os
 import csv
 from rclpy.logging import get_logger
 from datetime import datetime
-from .flightplots import FILE_INITIATION#, cf2_tuning_static
+from .flightplots import FILE_INITIATION
 import math
-
 from math import atan2, degrees
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
+
+# 1) Pointing CF2 towards relevant path
+
+
 CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf2_pid_tuning_values") 
+
+
+# 2) Creates the class of OptiTrackSubsciber
+
+''' This publishes to cf2_tuning_flight_data '''
+
 
 class OptiTrackSubscriber2(Node):
     def __init__(self):
@@ -47,10 +69,11 @@ class OptiTrackSubscriber2(Node):
             qos_profile
         
         )
-        #message to send flight commands to crazyflie program
+
+        # message to send flight commands to crazyflie program
         self.pub_commands = self.create_publisher(Float32MultiArray, '/cf1/commands', 10)
 
-        #drone to drone communication for waypoint synchronization
+        # drone to drone communication for waypoint synchronization
         self.pub_threshold_met = self.create_publisher(Bool, '/threshold_met_cf2', 10)
         self.sub_threshold_met = self.create_subscription(Bool, '/threshold_met_cf1', self.cf1_threshold_met_callback, 10)  
         self.threshold_met = False
@@ -58,101 +81,99 @@ class OptiTrackSubscriber2(Node):
 
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
-        #self.position = [[2.0, 1.0, 1.0]] #trying out stationary position
-        
-        #self.target_positions = [[1.5, 1.0, 1.5], [0.5,1.0,0.5],[1.0,0.5,1.0]] #set multiple the points 
-        # self.target_positions = [[2.0, 0.75, 1.0],[2.0, 0.75, 2.0]] #set single position (x,y,z)
+
         self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
-        #THIS IS FUTURE CODE FOR MULTIPLE DRONES POTENTIALLY 
-        #self.multiple_drones = {'gary': [[1.5, 1.0, 1.5], [0.5,1.0,0.5]], 'patrick': [[], []]}
-        
+        # Controls variables
         self.current_target_index = 0 
         self.target_position = self.target_positions[self.current_target_index]
         self.threshold = 0.15  # [m] Threshold for reaching the target
-        # Controls variables
         
+        # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
         self.last_cb_time = self.get_clock().now()
-        #-----------------------------------
-        #changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
-        # self.t = time.perf_counter()
 
         # Values for rotational (yaw) PID
         self.orientation_quat = [0.0, 0.0, 0.0, 1.0] #current orientation in quaternions
         self.current_orientation = 0.0
         self.target_orientation_quat = [0.0, 0.0, 0.0, 1.0]
 
-        
-        #temp fix: need to rotate drone to face right for rigid body then reorient
-        # self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
+        # Setting up relative drone orientation to be zero
+        self.drone_rel_zero_orient = False
+        self.q0_identity = [0.0, 0.0, 0.0, 1.0] #identity quaternion
+
+
+        #temp fix: need to rotate drone to face 180 degrees for rigid body then reorient
         
         self.target_orientation = 0.0
         self.k_p_rot = 1.0
         self.k_p_rot_sign = 1
-        self.max_yawrate = 15
-        self.min_yawrate = -15
-
-        #-----------------------------------------------------------------
 
         # ───────────────────────────  CONSTANTS BLOCK  ────────────────────────────
+        # --
+        # Y constants
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
         self.hover       = 41600      # trim thrust to hold level hover
         self.max_thrust  = 56000
         self.min_thrust  = 42000
+
         self.k_p_y       = 34000+3400      # P-gain
         self.k_i_y       = 800        # I-gain
         self.k_d_y       = 12000      # D-gain
 
-        # values for horizontal X (roll) PID  ── *UNCHANGED YET*
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.1
-        self.max_pitch   = 4.0    # (your original expression)
-        self.min_pitch   = -4.0
-        
-        self.k_p_x       = 3.4   # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations         
-        self.k_i_x       = 0.2   
-        self.k_d_x       = 3.4
+        self.max_yawrate = 15
+        self.min_yawrate = -15
 
-
-        # # values for horizontal Z (pitch) PID  ── *UNCHANGED YET*   (negative values because 180 rotation so roll pitch is 
-        # alligned on the right axis, but roll is now 180 rotation)
-        self.k_p_z       = -1.2 
-        self.k_i_z       = -0.04
-        self.k_d_z       = -1.95
-        # self.k_p_z       = 0 # was 2
-        # self.k_i_z       = 0  # 0.6 
-        # self.k_d_z       = 0 #was 4.1   3.0 
-        # # ───────────────────────────────────────────────────────────────────────────
-
-
-        #-----------------------------------------------------------------
-        
         # NEVER CHANGES
         self.cur_y_error = 0.0
         self.prev_y_error = 0.0
         self.int_y_error = 0.0
         self.int_y_max = 5000 # maximum added thrust from integral component
+        # --
+
+        # --
+        # X constants
+        # values for horizontal X (roll) PID
+        # self.k_p_x       = 2.0
+        # self.k_i_x       = 0.6
+        # self.k_d_x       = 4.1
+        
+        # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
+        self.k_p_x       = 3.4         
+        self.k_i_x       = 0.2   
+        self.k_d_x       = 3.4
+
+        self.max_pitch   = 4.0
+        self.min_pitch   = -4.0
 
         # NEVER CHANGES
         self.cur_x_error = 0.0
         self.prev_x_error = 0.0
         self.int_x_error = 0.0
         self.int_x_max = 3.0 # maximum added pitch from integral component
+        # --
 
-        # NEVER CHANGES
-        # was originally -3 and 3, increased to see if threshold was too small
+        # values for horizontal Z (pitch) PID (negative values because 180 rotation)
+        # alligned on the right axis, but roll is now 180 rotation
+        self.k_p_z       = -1.2 
+        self.k_i_z       = -0.04
+        self.k_d_z       = -1.95
+        # self.k_p_z       = 0 # was 2
+        # self.k_i_z       = 0  # 0.6 
+        # self.k_d_z       = 0 #was 4.1   3.0
+
         self.max_roll = 3.0
-        self.min_roll = -3.0
+        self.min_roll = -3.0 
 
         # NEVER CHANGES
         self.cur_z_error = 0.0
         self.prev_z_error = 0.0
         self.int_z_error = 0.0
         self.int_z_max = 3.5
+
+        # ────────────────────────────────────────────────────────────────────────
 
         self.startTimer = False
         self.startTime = time.time()
@@ -226,6 +247,17 @@ class OptiTrackSubscriber2(Node):
             self.orientation_quat[1] = msg.pose.orientation.y
             self.orientation_quat[2] = msg.pose.orientation.z
             self.orientation_quat[3] = msg.pose.orientation.w
+
+            # Grab world orientation quaternion (for relative drone orientation)
+            q_world = R.from_quat(self.orientation_quat)
+
+            # if orientation not zero, set to zero
+            if not self.drone_rel_zero_orient:
+                self.q0_identity = q_world.inv() 
+                self.drone_rel_zero_orient = True
+            
+            q_rel = q_world * self.q0_identity # relative orientation quaternion
+            self.orientation_quat = list(q_rel.as_quat()) # convert to list
 
             # calls rotational PID function (yawrate)
             yawrate_cmd = self.calculate_yawrate()
