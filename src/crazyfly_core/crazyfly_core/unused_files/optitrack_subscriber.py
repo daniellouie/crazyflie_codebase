@@ -1,4 +1,8 @@
 # opti_track_subscriber.py
+
+
+''' This file tunes the individual drone, known as cf1 '''
+
 import rclpy
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
@@ -60,7 +64,7 @@ class OptiTrackSubscriber(Node):
         self.threshold = 0.15  # [m] Threshold for reaching the target
         # Controls variables
         self.t = 0.01 #average time between signals in seconds
-        
+
         # Values for rotational (yaw) P controller
         self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
         self.current_orientation = 0.0

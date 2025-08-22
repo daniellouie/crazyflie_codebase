@@ -8,6 +8,8 @@ import time
 import numpy as np
 from matplotlib.animation import FuncAnimation
 import math
+import glob
+
 # --------------------------------------------------------------------------------------------------------------------------------
 # ------------------------------        AUTOREADER FOR POSITION & INVERSE JACOBIAN DATA    --------------- 07/04/25 -------------
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -488,6 +490,113 @@ def cluster_accuracy():
     print("y error: ", f"{rmse_y2:.6f}", "m")
     print("z error: ", f"{rmse_z2:.6f}", "m")
 
+def cf2_xyz_time_plots():
+    """
+    Load the latest CF2 tuning CSV and plot Y, X, Z vs time
+    in a 2x2 layout matching the sample (bottom-right left blank).
+    No parameters; everything is resolved internally.
+    """
+    # --- locate data (file or directory) ---
+    cf2_path = FILE_INITIATION("cf2_path")
+
+    # if os.path.isdir(cf2_path):
+    #     # Pick newest cf2_tuning_*.csv in the folder
+    #     candidates = sorted(
+    #         glob.glob(os.path.join(cf2_path, "cf2_tuning_*.csv")),
+    #         key=os.path.getmtime
+    #     )
+    #     if not candidates:
+    #         raise FileNotFoundError(f"No cf2_tuning_*.csv files found in {cf2_path}")
+    #     csv_path = candidates[-1]
+    # else:
+    #     # FILE_INITIATION returned a specific file path
+    #     csv_path = cf2_path
+    #     if not os.path.isfile(csv_path):
+    #         raise FileNotFoundError(f"Path is not a file: {csv_path}")
+
+    # --- load and sanitize ---
+    data = pd.read_csv(cf2_path)
+    print(data)
+
+    # Ensure numeric columns
+    for c in ("x", "y", "z"):
+        if c in data.columns:
+            data[c] = pd.to_numeric(data[c], errors="coerce")
+        else:
+            raise KeyError(f"CSV missing required column '{c}'")
+
+    # Build time axis:
+    # Prefer a numeric time column if present; else parse 'time_s' (YYYYMMDD_HHMMSS);
+    # if that’s too coarse (repeats), fall back to uniform dt.
+    dt_guess = 0.01  # seconds (matches your previous average sample period)
+    t = None
+
+    # 1) any numeric time column?
+    for col in ("t", "elapsed_s"):
+        if col in data.columns and np.issubdtype(data[col].dtype, np.number):
+            t = data[col].to_numpy()
+            break
+
+    # 2) try to parse 'time_s'
+    if t is None and "time_s" in data.columns:
+        try:
+            ts = pd.to_datetime(data["time_s"], format="%Y%m%d_%H%M%S")
+            t = (ts - ts.iloc[0]).dt.total_seconds().to_numpy()
+            # if resolution too coarse (all values equal), use index * dt
+            if len(t) > 1 and np.allclose(t, t[0]):
+                t = np.arange(len(data)) * dt_guess
+        except Exception:
+            t = np.arange(len(data)) * dt_guess
+
+    # 3) final fallback
+    if t is None:
+        t = np.arange(len(data)) * dt_guess
+
+    # Drop rows with NaNs in plotted columns (keep time array consistent)
+    valid = ~(data[["x", "y", "z"]].isna().any(axis=1))
+    t = t[valid.to_numpy()]
+    x = data.loc[valid, "x"].to_numpy()
+    y = data.loc[valid, "y"].to_numpy()
+    z = data.loc[valid, "z"].to_numpy()
+
+    # --- plotting to match your style ---
+    fig = plt.figure()
+    # Y (top-left)
+    ax1 = plt.subplot(2, 2, 1)
+    ax1.plot(t, y, "r-", label="Y Position")
+    ax1.set_xlabel("Time(s)")
+    ax1.set_ylabel("Y Position (m)")
+    ax1.set_title("Y Position Over Time")
+    ax1.set_ylim(bottom=0)
+    ax1.legend()
+
+    # X (top-right)
+    ax2 = plt.subplot(2, 2, 2)
+    ax2.plot(t, x, "r-", label="X Position")
+    ax2.set_xlabel("Time(s)")
+    ax2.set_ylabel("X Position (m)")
+    ax2.set_title("X Position Over Time")
+    ax2.set_ylim(bottom=0)
+    ax2.legend()
+
+    # Z (bottom-left)
+    ax3 = plt.subplot(2, 2, 3)
+    ax3.plot(t, z, "r-", label="Z Position")
+    ax3.set_xlabel("Time(s)")
+    ax3.set_ylabel("Z Position (m)")
+    ax3.set_title("Z Position Over Time")
+    ax3.set_ylim(bottom=0)
+    ax3.legend()
+
+    # Bottom-right blank (to mirror your original 2x2 grid)
+    ax4 = plt.subplot(2, 2, 4)
+    ax4.axis("off")
+
+    plt.tight_layout()
+    plt.show()
+    #print(f"Plotted: {os.path.basename(csv_path)}")
+
+
 def main():
     file_path = FILE_INITIATION("file_path")
     I_joc_path = FILE_INITIATION("I_joc_path")
@@ -496,11 +605,12 @@ def main():
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
     #static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    #anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    # cf2_tuning_static(cf2_path)
+    #cf2_tuning_static(cf2_path)
     #cluster_accuracy()
+    cf2_xyz_time_plots()
 
 if __name__ == "__main__":
     main()
