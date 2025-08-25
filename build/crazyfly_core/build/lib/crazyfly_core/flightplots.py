@@ -53,7 +53,7 @@ def FILE_INITIATION(i):
     file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
-    cf1_path = cf1_files[-1]
+    cf1_path = cf1_files[-7]
 
     print(f"[flightplots] LATEST FLIGHT: {file_path}")
     print(f"[I_joc] LATEST INPUTS {I_joc_path}")

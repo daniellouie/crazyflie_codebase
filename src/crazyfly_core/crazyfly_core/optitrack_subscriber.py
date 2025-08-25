@@ -51,7 +51,7 @@ CF1_PID =  os.path.expanduser("~/crazyfly_ws/cf1_pid_tuning_values")
 ''' This publishes to cf2_tuning_flight_data '''
 
 
-class OptiTrackSubscriber2(Node):
+class OptiTrackSubscriber(Node):
     def __init__(self):
         super().__init__('opti_track_subscriber2')
 
@@ -82,7 +82,7 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
+        self.target_positions = [1.0, 1.0, 1.0] #set single position (x,y,z)
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -128,7 +128,7 @@ class OptiTrackSubscriber2(Node):
 
                 # ----------------------         X constants         ---------------------- #
         # X constants
-        # values for horizontal X (roll) PID
+        # # values for horizontal X (roll) PID
         # self.k_p_x       = 2.0
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
@@ -188,7 +188,7 @@ class OptiTrackSubscriber2(Node):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
         cf1_path = FILE_INITIATION("cf1_path")
         cf1_tuning_name = os.path.basename(cf1_path)
-        fname = f"cf1_pid_{cf1_tuning_name[11:30]}.csv" #name of csv
+        fname = f"cf1_pid_{time_s}.csv"
         path = os.path.join(CF1_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         logger = get_logger("cf_pid_logger")
         logger.info(f"---------------------------------PID WRITE TO {path}")
@@ -472,15 +472,15 @@ class OptiTrackSubscriber2(Node):
     
 def main(args=None):
     rclpy.init(args=args)
-    optitrack_subscriber2 = OptiTrackSubscriber2()
+    optitrack_subscriber = OptiTrackSubscriber()
 
     try:
-        optitrack_subscriber2.save_pid()
-        rclpy.spin(optitrack_subscriber2)
+        optitrack_subscriber.save_pid()
+        rclpy.spin(optitrack_subscriber)
     except KeyboardInterrupt:
         print("Shutting down due to keyboard interrupt")
     finally:
-        optitrack_subscriber2.destroy_node()
+        optitrack_subscriber.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':
