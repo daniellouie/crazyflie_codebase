@@ -22,8 +22,10 @@ import pandas as pd
 import statistics
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning_flight_data")
+CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
+
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
-link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
+link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
 
 # test
 
@@ -56,11 +58,11 @@ class MinimalSubscriber(Node):
        
         # Position variables
         self.x_position1, self.y_position1, self.z_position1 = 0.0, 0.0, 0.0
-        self.cf2_position = []
+        self.cf1_position = []
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 30.0 #in seconds
+        self.flight_duration = 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -213,12 +215,31 @@ class MinimalSubscriber(Node):
             w.writerows(self.cluster_dot)  #cluster values
         print(f"[Cluster] log written to {path}")'''
 
+    # def save_data(self):
+    #     time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+    #     fname = f"cf2_tuning_{time_s}.csv" #name of csv
+    #     #fname = f"optitrack_test_{time_s}.csv"
+    #     path = os.path.join(CF2_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+    #     self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
+    #     with open(path, "w", newline="") as file:
+    #         w = csv.writer(file)
+    #         w.writerow(       # header row
+    #             ["time_s",
+    #             "x","y","z",
+    #             ])
+           
+    #         for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
+    #             w.writerow([t, x, y, z])
+    #     self.get_logger().info(f"[FLIGHT] log written for cf2 to {path}")
+
+
+
     def save_data(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        fname = f"cf2_tuning_{time_s}.csv" #name of csv
+        fname = f"cf1_tuning_{time_s}.csv" #name of csv
         #fname = f"optitrack_test_{time_s}.csv"
-        path = os.path.join(CF2_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
+        path = os.path.join(CF1_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
@@ -234,7 +255,7 @@ class MinimalSubscriber(Node):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
         fname = f"optitrack_test_cf2_{time_s}.csv" #name of csv
         path = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_raw"), fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data])
+        self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data])
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
@@ -288,33 +309,33 @@ class MinimalSubscriber(Node):
 
         # make new csv with mean, std, max, min, range
 
-        # plt.figure()
-        # plt.subplot(2,2,1)
-        # plt.plot(path['time_s'], path['x'], 'r-', label='X Position')
-        # plt.xlabel('Time(s)')
-        # plt.ylabel('X Position (m)')
-        # plt.title('X Position Over Time')
-        # plt.ylim(bottom=0)
-        # plt.legend()
+        plt.figure()
+        plt.subplot(2,2,1)
+        plt.plot(path['time_s'], path['x'], 'r-', label='X Position')
+        plt.xlabel('Time(s)')
+        plt.ylabel('X Position (m)')
+        plt.title('X Position Over Time')
+        plt.ylim(bottom=0)
+        plt.legend()
 
 
-        # plt.subplot(2,2,2)
-        # plt.plot(path['time_s'], path['y'], 'r-', label='Y Position')
-        # plt.xlabel('Time(s)')
-        # plt.ylabel('Y Position (m)')
-        # plt.title('Y Position Over Time')
-        # plt.ylim(bottom=0)
-        # plt.legend()
+        plt.subplot(2,2,2)
+        plt.plot(path['time_s'], path['y'], 'r-', label='Y Position')
+        plt.xlabel('Time(s)')
+        plt.ylabel('Y Position (m)')
+        plt.title('Y Position Over Time')
+        plt.ylim(bottom=0)
+        plt.legend()
 
 
-        # plt.subplot(2,2,3)
-        # plt.plot(path['time_s'], path['z'], 'r-', label='Z Position')
-        # plt.xlabel('Time(s)')
-        # plt.ylabel('Z Position (m)')
-        # plt.title('Z Position Over Time')
-        # plt.ylim(bottom=0)
-        # plt.legend()
-        # plt.show()
+        plt.subplot(2,2,3)
+        plt.plot(path['time_s'], path['z'], 'r-', label='Z Position')
+        plt.xlabel('Time(s)')
+        plt.ylabel('Z Position (m)')
+        plt.title('Z Position Over Time')
+        plt.ylim(bottom=0)
+        plt.legend()
+        plt.show()
 
 
 

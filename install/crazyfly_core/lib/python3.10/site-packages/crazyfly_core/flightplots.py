@@ -23,6 +23,7 @@ def FILE_INITIATION(i):
     DATA_DIR      = WORKSPACE / "cluster_data"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
+    CF1_TUNING = WORKSPACE / "cf1_tuning_flight_data"
 
 
     # DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
@@ -32,10 +33,12 @@ def FILE_INITIATION(i):
     PATTERN     = "cluster_data_*.csv"                             # matches all cluster logs
     FILE_PATTERN = "cluster_dot_*.csv"
     FILE_PATTERN2 = "cf2_tuning_*.csv"
+    FILE_PATTERN3 = "cf1_tuning_*.csv"  
 
     csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
     I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
     cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
+    cf1_files = sorted(CF1_TUNING.glob(FILE_PATTERN3))
 
     # ERROR STATEMENT
     if not csv_files:
@@ -44,16 +47,21 @@ def FILE_INITIATION(i):
         raise FileNotFoundError(f"No file matching {FILE_PATTERN} in {INV_DATA_DIR}")
     if not cf2_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
+    if not cf1_files:
+        raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
 
     file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
+    cf1_path = cf1_files[-1]
 
     print(f"[flightplots] LATEST FLIGHT: {file_path}")
     print(f"[I_joc] LATEST INPUTS {I_joc_path}")
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
+    if i == "cf2_path":
+        return cf1_path
     if i == "cf2_path":
         return cf2_path
     if i == "I_joc_path":
