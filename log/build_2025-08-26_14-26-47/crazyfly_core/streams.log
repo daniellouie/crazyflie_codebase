@@ -1,0 +1,33 @@
+[1.448s] Invoking command in '/home/rsl/crazyfly_ws/src/crazyfly_core': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data
+[1.760s] running egg_info
+[1.768s] writing ../../build/crazyfly_core/crazyfly_core.egg-info/PKG-INFO
+[1.769s] writing dependency_links to ../../build/crazyfly_core/crazyfly_core.egg-info/dependency_links.txt
+[1.769s] writing entry points to ../../build/crazyfly_core/crazyfly_core.egg-info/entry_points.txt
+[1.769s] writing requirements to ../../build/crazyfly_core/crazyfly_core.egg-info/requires.txt
+[1.769s] writing top-level names to ../../build/crazyfly_core/crazyfly_core.egg-info/top_level.txt
+[1.771s] reading manifest file '../../build/crazyfly_core/crazyfly_core.egg-info/SOURCES.txt'
+[1.771s] adding license file 'LICENSE'
+[1.772s] writing manifest file '../../build/crazyfly_core/crazyfly_core.egg-info/SOURCES.txt'
+[1.772s] running build
+[1.772s] running build_py
+[1.774s] running install
+[1.775s] running install_lib
+[1.777s] running install_data
+[1.778s] running install_egg_info
+[1.779s] removing '/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core-0.0.0-py3.10.egg-info' (and everything under it)
+[1.780s] Copying ../../build/crazyfly_core/crazyfly_core.egg-info to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages/crazyfly_core-0.0.0-py3.10.egg-info
+[1.781s] running install_scripts
+[1.803s] Installing cf_command_controller script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.803s] Installing cf_command_controller2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.804s] Installing cf_driver script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.804s] Installing cf_thrust_controller script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.805s] Installing clusterController script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.806s] Installing clusterControllerClass script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.806s] Installing clusterControllerClass_new script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.806s] Installing fake_thrust_pub script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.806s] Installing optitrack_subscriber script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.806s] Installing optitrack_subscriber2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.807s] Installing pid_controller_cf1 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.807s] Installing pid_controller_cf2 script to /home/rsl/crazyfly_ws/install/crazyfly_core/lib/crazyfly_core
+[1.807s] writing list of installed files to '/home/rsl/crazyfly_ws/build/crazyfly_core/install.log'
+[1.856s] Invoked command in '/home/rsl/crazyfly_ws/src/crazyfly_core' returned '0': PYTHONPATH=/home/rsl/crazyfly_ws/build/crazyfly_core/prefix_override:/home/rsl/crazyfly_ws/install/crazyfly_core/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../../build/crazyfly_core build --build-base /home/rsl/crazyfly_ws/build/crazyfly_core/build install --record /home/rsl/crazyfly_ws/build/crazyfly_core/install.log --single-version-externally-managed install_data

@@ -1,6 +1,6 @@
-# optitrack_subscriber2.py for second drone 
+# optitrack_subscriber.py for first drone 
 
-''' This file tunes the individual drone, cf2'''
+''' This file tunes the individual drone, cf1'''
 
 
 ## Last Update: Aug 22, 2025
@@ -48,7 +48,7 @@ CF1_PID =  os.path.expanduser("~/crazyfly_ws/cf1_pid_tuning_values")
 
 # 2) Creates the class of OptiTrackSubsciber
 
-''' This publishes to cf2_tuning_flight_data '''
+''' This publishes to cf1_tuning_flight_data '''
 
 
 class OptiTrackSubscriber(Node):
@@ -82,7 +82,7 @@ class OptiTrackSubscriber(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [1.0, 1.0, 1.0] #set single position (x,y,z)
+        self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -129,14 +129,14 @@ class OptiTrackSubscriber(Node):
                 # ----------------------         X constants         ---------------------- #
         # X constants
         # # values for horizontal X (roll) PID
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.1
+        self.k_p_x       = 2.0
+        self.k_i_x       = 0.6
+        self.k_d_x       = 4.6
         
         # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
-        self.k_p_x       = 1.55 # 2.5 oscillated by 1 m, 2.0 oscillated by <1m, 2.3 oscillated by >1m, 1.8 oscillated by 0.7m    
-        self.k_i_x       = 0.1
-        self.k_d_x       = 2.95   # 3.75
+        # self.k_p_x       = 1.55 # 2.5 oscillated by 1 m, 2.0 oscillated by <1m, 2.3 oscillated by >1m, 1.8 oscillated by 0.7m    
+        # self.k_i_x       = 0.1
+        # self.k_d_x       = 2.95   # 3.75
 
         # last semi-working values: p: 2.3, i: 0.6, d: 4.1
 
@@ -188,7 +188,6 @@ class OptiTrackSubscriber(Node):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
         cf1_path = FILE_INITIATION("cf1_path")
         cf1_tuning_name = os.path.basename(cf1_path)
-        #fname = f"cf1_pid_{cf1_tuning_name[11:30]}.csv" #name of csv
         fname = f"cf1_pid_{time_s}.csv"
         path = os.path.join(CF1_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         logger = get_logger("cf_pid_logger")
@@ -222,6 +221,7 @@ class OptiTrackSubscriber(Node):
             dt = self.dt                     # fall back to last dt if crazy
         self.dt = dt
         self.t = dt
+        #self.get_logger().info(f"TTTTTTTTTTTTT {self.t}")
 
         # need this conditional to avoid QoS error
         if msg.header.frame_id == "world":
@@ -338,7 +338,7 @@ class OptiTrackSubscriber(Node):
             self.cur_z_error = 0
 
         # (P term)
-        z_fp = self.k_p_z * self.cur_z_error # (deg/m) 
+        z_fp = self.k_p_z * self.cur_z_error # (deg/m * m) 
 
         # (I term))
         future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t #units of m*s 

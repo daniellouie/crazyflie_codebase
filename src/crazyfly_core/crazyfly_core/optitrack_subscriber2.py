@@ -82,7 +82,7 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
+        self.target_positions = [1.0, 1.0, 1.0] #set single position (x,y,z)
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -94,6 +94,7 @@ class OptiTrackSubscriber2(Node):
         # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
         self.last_cb_time = self.get_clock().now()
+        self.dt = 0.1
 
         # Values for rotational (yaw) PID
         self.orientation_quat = [0.0, 0.0, 0.0, 1.0] #current orientation in quaternions
@@ -115,6 +116,7 @@ class OptiTrackSubscriber2(Node):
         self.k_p_y       = 34000+3400      # P-gain
         self.k_i_y       = 800             # I-gain
         self.k_d_y       = 12000           # D-gain
+        
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -133,10 +135,9 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
         
-        # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
-        self.k_p_x       = 2.65      
-        self.k_i_x       = 0.37  
-        self.k_d_x       = 3.75     # 3.75
+        self.k_p_x       = 1.0     
+        self.k_i_x       = 0.5 
+        self.k_d_x       = 2.5
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -152,9 +153,13 @@ class OptiTrackSubscriber2(Node):
                 # ----------------------         Z constants         ---------------------- #
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
         self.k_p_z       = -1.2 
-        self.k_i_z       = -0.03
-        self.k_d_z       = -2.05
-        
+        self.k_i_z       = -0.4
+        self.k_d_z       = -2.5
+
+        # self.k_p_z = 2
+        # self.k_i_z = 0.6
+        # self.k_d_z = 4.1
+
         self.max_roll = 3.0
         self.min_roll = -3.0 
 
@@ -188,8 +193,8 @@ class OptiTrackSubscriber2(Node):
         #fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
         fname = f"cf2_pid_{time_s}.csv"
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        logger = get_logger("cf_pid_logger")
-        logger.info(f"---------------------------------PID WRITE TO {path}")
+        # logger = get_logger("cf_pid_logger")
+        # logger.info(f"---------------------------------PID WRITE TO {path}")
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow([
@@ -209,16 +214,16 @@ class OptiTrackSubscriber2(Node):
 
     def listener_callback(self, msg):
 
-        # Overwriting self.t to be real frequency time for ID terms
-        now = self.get_clock().now()
-        dt = (now - self.last_cb_time).nanoseconds * 1e-9  # seconds
-        self.last_cb_time = now
+        # # Overwriting self.t to be real frequency time for ID terms
+        # now = self.get_clock().now()
+        # dt = (now - self.last_cb_time).nanoseconds * 1e-9  # seconds
+        # self.last_cb_time = now
 
-        # Clamp dt to keep the controller sane on the first sample or hiccups
-        if not (1e-4 <= dt <= 0.1):          # expected ~100 Hz -> 0.01 s
-            dt = self.dt                     # fall back to last dt if crazy
-        self.dt = dt
-        self.t = dt
+        # # Clamp dt to keep the controller sane on the first sample or hiccups
+        # if not (1e-4 <= dt <= 0.1):          # expected ~100 Hz -> 0.01 s
+        #     dt = self.dt                     # fall back to last dt if crazy
+        # self.dt = dt
+        # self.t = dt
 
         # need this conditional to avoid QoS error
         if msg.header.frame_id == "world":
@@ -348,7 +353,7 @@ class OptiTrackSubscriber2(Node):
         z_fd = self.k_d_z * (z_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
         self.prev_z_error = self.cur_z_error # (deg*s/m)
         
-        desired_pitch_angle = z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
+        desired_pitch_angle = 0 + z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
         
         # Desired orientation in quaternion 
         half_angle = np.deg2rad(desired_pitch_angle) / 2.0

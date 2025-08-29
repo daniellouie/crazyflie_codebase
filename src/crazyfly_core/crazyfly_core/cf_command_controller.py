@@ -22,10 +22,21 @@ import pandas as pd
 import statistics
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning_flight_data")
-CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
+#CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
+CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_dynamic_hover")
 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
-link_uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E8')
+#      ----------     NOTE: CHANGE "address" last value to:          ----------
+#      ----------                                       cf1: 8       ----------
+#      ----------                                       cf2: 7       ----------
+address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
+# address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
+if address[-1] == '8':
+    CF_PATH = CF1_PATH
+else:
+    CF_PATH = CF2_PATH
+
+link_uri = uri_helper.uri_from_env(default=address)
 
 # test
 
@@ -59,10 +70,21 @@ class MinimalSubscriber(Node):
         # Position variables
         self.x_position1, self.y_position1, self.z_position1 = 0.0, 0.0, 0.0
         self.cf1_position = []
+
+        self.cf1_command_values = []
+        self.cf1_command_roll = []
+        self.cf1_command_pitch = []
+        self.cf1_command_thrust = []
+        self.cf1_command_yaw = []
+
+
+
+        self.cf2_command_values = []
+
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 3.0 #in seconds
+        self.flight_duration = 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -76,9 +98,6 @@ class MinimalSubscriber(Node):
 
         #send initial command of zeros (needed for crazyflie protocol)
         self._cf1.commander.send_setpoint(0, 0, 0, 0)
-   
-
-        print(f'Connecting to {link_uri}')
        
 
         # Graphing and data collection
@@ -90,6 +109,11 @@ class MinimalSubscriber(Node):
         self.cur_yaw_data = []
         self.cur_pitch_data = []
         self.cur_roll_data = []
+
+        self.command_roll_data = []
+        self.command_pitch_data = []
+        self.command_yaw_data = []
+        self.command_thrust_data = []
 
         self.tracking_time = []
 
@@ -103,10 +127,10 @@ class MinimalSubscriber(Node):
     def listener_callback(self, msg):
         # ensure commands for all axis are recieved
         if len(msg.data) >= 7:
-            self.roll1 = msg.data[0]
-            self.pitch1 = msg.data[1]
+            self.roll1 =    msg.data[0]
+            self.pitch1 =   msg.data[1]
             self.yawrate1 = msg.data[2]
-            self.thrust1 = int(msg.data[3]) #thrust needs to be an int
+            self.thrust1 =  int(msg.data[3]) #thrust needs to be an int
 
             self.x_position1 = msg.data[4]
             self.y_position1 = msg.data[5]
@@ -119,6 +143,11 @@ class MinimalSubscriber(Node):
             self.cur_x_data.append(self.x_position1)
             self.cur_y_data.append(self.y_position1)
             self.cur_z_data.append(self.z_position1)
+
+            self.cf1_command_roll.append(self.roll1)       
+            self.cf1_command_pitch.append(self.pitch1)
+            self.cf1_command_thrust.append(self.thrust1)
+            self.cf1_command_yaw.append(self.yawrate1)
 
             # self.cur_yaw_data.append(self.yaw_meas)
             # self.cur_pitch_data.append(self.pitch_meas)
@@ -176,8 +205,8 @@ class MinimalSubscriber(Node):
 
 
         # ramp down thrust until reaching threshold to cut power, ideally on the ground
-        while rampdown_thrust1 > 42500:
-            if rampdown_thrust1 > 42500:
+        while rampdown_thrust1 > 42000:
+            if rampdown_thrust1 > 42000:
                 rampdown_thrust1 -= 150
             print(f"running ramp down: {rampdown_thrust1}")
             self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, rampdown_thrust1)
@@ -215,30 +244,16 @@ class MinimalSubscriber(Node):
             w.writerows(self.cluster_dot)  #cluster values
         print(f"[Cluster] log written to {path}")'''
 
-    # def save_data(self):
-    #     time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-    #     fname = f"cf2_tuning_{time_s}.csv" #name of csv
-    #     #fname = f"optitrack_test_{time_s}.csv"
-    #     path = os.path.join(CF2_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-    #     self.cf2_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
-    #     with open(path, "w", newline="") as file:
-    #         w = csv.writer(file)
-    #         w.writerow(       # header row
-    #             ["time_s",
-    #             "x","y","z",
-    #             ])
-           
-    #         for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
-    #             w.writerow([t, x, y, z])
-    #     self.get_logger().info(f"[FLIGHT] log written for cf2 to {path}")
-
 
 
     def save_data(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        fname = f"cf1_tuning_{time_s}.csv" #name of csv
+        if address[-1] == '8':
+            fname = f"cf1_tuning_{time_s}.csv" #name of csv
+        else:
+            fname = f"cf2_tuning_{time_s}.csv" #name of csv    
         #fname = f"optitrack_test_{time_s}.csv"
-        path = os.path.join(CF1_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+        path = os.path.join(CF_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
@@ -249,93 +264,118 @@ class MinimalSubscriber(Node):
            
             for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
                 w.writerow([t, x, y, z])
-        self.get_logger().info(f"[FLIGHT] log written for cf2 to {path}")
 
-    def save_data_optitrack(self):
+
+
+    #----- Saving Command Values & Thrust Values to Optimize Tuning -----#
+    def save_command_values(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        fname = f"optitrack_test_cf2_{time_s}.csv" #name of csv
-        path = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_raw"), fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data])
+        fname = f"cf1_commands_{time_s}.csv" #name of csv
+        if address[-1] == '8':
+            CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf1_command_values")  # if radio signal ends in 7 (cf2)
+            self.cf1_command_values.append([time_s, self.cf1_command_roll, self.cf1_command_pitch, self.cf1_command_yaw, self.cf1_command_thrust]) #msg.data order = roll, pitch, yaw, thrust
+        else:
+            CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf2_command_values") # else its cf2
+            self.cf2_command_values.append([time_s, self.roll1, self.pitch1, self.yawrate1, self.thrust1]) #msg.data order = roll, pitch, yaw, thrust
+        path = os.path.join(CF_COMMAND_PATH, fname)
+        #self.get_logger().info("path: " + path)
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
-                ["time_s",
-                "x","y","z", "yaw", "pitch", "roll"
+                ["time_s","roll_command","pitch_command","yaw_command", "thrust_command"
                 ])
+            for (t, roll, pitch, yaw, thrust) in zip(self.tracking_time, self.cf1_command_roll, self.cf1_command_pitch, self.cf1_command_yaw, self.cf1_command_thrust):
+                w.writerow([t, roll, pitch, yaw, thrust])
+        #print(self.cf1_command_values)
+    #---------------------------------------------------------------------#
+
+
+# function to save optitrack data for accuracy tracking
+    """# def save_data_optitrack(self):
+    #     time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+    #     fname = f"optitrack_test_cf2_{time_s}.csv" #name of csv
+    #     path = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_raw"), fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+    #     self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data])
+    #     with open(path, "w", newline="") as file:
+    #         w = csv.writer(file)
+    #         w.writerow(       # header row
+    #             ["time_s",
+    #             "x","y","z", "yaw", "pitch", "roll"
+    #             ])
            
-            for (t, x, y, z, yaw, pitch, roll) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data):
-                w.writerow([t, x, y, z, yaw, pitch, roll])
-        df = pd.read_csv(path)
-        values_x = list(df['x'])
-        values_y = list(df['y'])
-        values_z = list(df['z'])
-        mean_x = statistics.mean(values_x)
-        mean_y = statistics.mean(values_y)
-        mean_z = statistics.mean(values_z)
-        std_x = statistics.stdev(values_x)
-        std_y = statistics.stdev(values_y)
-        std_z = statistics.stdev(values_z)
+    #         for (t, x, y, z, yaw, pitch, roll) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data, self.cur_yaw_data, self.cur_pitch_data, self.cur_roll_data):
+    #             w.writerow([t, x, y, z, yaw, pitch, roll])
+    #     df = pd.read_csv(path)
+    #     values_x = list(df['x'])
+    #     values_y = list(df['y'])
+    #     values_z = list(df['z'])
+    #     mean_x = statistics.mean(values_x)
+    #     mean_y = statistics.mean(values_y)
+    #     mean_z = statistics.mean(values_z)
+    #     std_x = statistics.stdev(values_x)
+    #     std_y = statistics.stdev(values_y)
+    #     std_z = statistics.stdev(values_z)
 
-        values_yaw = list(df['yaw'])
-        values_pitch = list(df['pitch'])
-        values_roll = list(df['roll'])
+    #     values_yaw = list(df['yaw'])
+    #     values_pitch = list(df['pitch'])
+    #     values_roll = list(df['roll'])
 
-        mean_yaw = statistics.mean(values_yaw)
-        mean_pitch = statistics.mean(values_pitch)
-        mean_roll = statistics.mean(values_roll)
+    #     mean_yaw = statistics.mean(values_yaw)
+    #     mean_pitch = statistics.mean(values_pitch)
+    #     mean_roll = statistics.mean(values_roll)
 
-        std_yaw = statistics.stdev(values_yaw)
-        std_pitch = statistics.stdev(values_pitch)
-        std_roll = statistics.stdev(values_roll)
+    #     std_yaw = statistics.stdev(values_yaw)
+    #     std_pitch = statistics.stdev(values_pitch)
+    #     std_roll = statistics.stdev(values_roll)
 
 
 
-        self.get_logger().info(f"MEAAAAAAAN OF  x {mean_x}")
-        self.get_logger().info(f"MEAAAAAAAN OF  y {mean_y}")
-        self.get_logger().info(f"MEAAAAAAAN OF  z {mean_z}")
-        self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  x {std_x}")
-        self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  y {std_y}")
-        self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  z {std_z}")
+    #     self.get_logger().info(f"MEAAAAAAAN OF  x {mean_x}")
+    #     self.get_logger().info(f"MEAAAAAAAN OF  y {mean_y}")
+    #     self.get_logger().info(f"MEAAAAAAAN OF  z {mean_z}")
+    #     self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  x {std_x}")
+    #     self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  y {std_y}")
+    #     self.get_logger().info(f"SSSSSSSSTANDARD DEVIATION OF  z {std_z}")
 
-        fname2 = f"optitrack_data_cf2_{time_s}.csv" #name of csv
-        path2 = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_stats"), fname2)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        with open(path2, "w", newline="") as file:
-            w = csv.writer(file)
-            w.writerow(       # header row
-                ["x", "z", "y", "mean_x", "mean_y", "mean_z", "mean_yaw", "mean_pitch", "mean_roll", "std_x", "std_y", "std_z", "std_yaw", "std_pitch", "std_roll"
-                ])
+    #     fname2 = f"optitrack_data_cf2_{time_s}.csv" #name of csv
+    #     path2 = os.path.join(os.path.expanduser("~/crazyfly_ws/optitrack_data_stats"), fname2)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
+    #     with open(path2, "w", newline="") as file:
+    #         w = csv.writer(file)
+    #         w.writerow(       # header row
+    #             ["x", "z", "y", "mean_x", "mean_y", "mean_z", "mean_yaw", "mean_pitch", "mean_roll", "std_x", "std_y", "std_z", "std_yaw", "std_pitch", "std_roll"
+    #             ])
            
-            w.writerow([round(x*2)/2, round(z*2)/2, round(y*2)/2, mean_x, mean_y, mean_z, mean_yaw, mean_pitch, mean_roll, std_x, std_y, std_z, std_yaw, std_pitch, std_roll])
+    #         w.writerow([round(x*2)/2, round(z*2)/2, round(y*2)/2, mean_x, mean_y, mean_z, mean_yaw, mean_pitch, mean_roll, std_x, std_y, std_z, std_yaw, std_pitch, std_roll])
 
-        # make new csv with mean, std, max, min, range
+    #     # make new csv with mean, std, max, min, range
 
-        plt.figure()
-        plt.subplot(2,2,1)
-        plt.plot(path['time_s'], path['x'], 'r-', label='X Position')
-        plt.xlabel('Time(s)')
-        plt.ylabel('X Position (m)')
-        plt.title('X Position Over Time')
-        plt.ylim(bottom=0)
-        plt.legend()
-
-
-        plt.subplot(2,2,2)
-        plt.plot(path['time_s'], path['y'], 'r-', label='Y Position')
-        plt.xlabel('Time(s)')
-        plt.ylabel('Y Position (m)')
-        plt.title('Y Position Over Time')
-        plt.ylim(bottom=0)
-        plt.legend()
+    #     plt.figure()
+    #     plt.subplot(2,2,1)
+    #     plt.plot(path['time_s'], path['x'], 'r-', label='X Position')
+    #     plt.xlabel('Time(s)')
+    #     plt.ylabel('X Position (m)')
+    #     plt.title('X Position Over Time')
+    #     plt.ylim(bottom=0)
+    #     plt.legend()
 
 
-        plt.subplot(2,2,3)
-        plt.plot(path['time_s'], path['z'], 'r-', label='Z Position')
-        plt.xlabel('Time(s)')
-        plt.ylabel('Z Position (m)')
-        plt.title('Z Position Over Time')
-        plt.ylim(bottom=0)
-        plt.legend()
-        plt.show()
+    #     plt.subplot(2,2,2)
+    #     plt.plot(path['time_s'], path['y'], 'r-', label='Y Position')
+    #     plt.xlabel('Time(s)')
+    #     plt.ylabel('Y Position (m)')
+    #     plt.title('Y Position Over Time')
+    #     plt.ylim(bottom=0)
+    #     plt.legend()
+
+
+    #     plt.subplot(2,2,3)
+    #     plt.plot(path['time_s'], path['z'], 'r-', label='Z Position')
+    #     plt.xlabel('Time(s)')
+    #     plt.ylabel('Z Position (m)')
+    #     plt.title('Z Position Over Time')
+    #     plt.ylim(bottom=0)
+    #     plt.legend()
+    #     plt.show()"""
 
 
 
@@ -354,7 +394,6 @@ def main(args=None):
     # Plotting Graph one
     # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
     plt.figure()
-    # plt.title('cf1 graphs')
     plt.subplot(2,2,1)
     plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_y_data, 'r-', label='Y Position')
     plt.xlabel('Time(s)')
@@ -395,11 +434,12 @@ def main(args=None):
     minimal_subscriber.save_data()
     #minimal_subscriber.save_data_optitrack()
     #cf2_tuning_static()
+    minimal_subscriber.save_command_values()    # this saves commanded values for optimizing flights 
+    
    
 
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
-
 
 
 

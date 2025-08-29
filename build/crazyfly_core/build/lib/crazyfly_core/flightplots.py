@@ -24,6 +24,7 @@ def FILE_INITIATION(i):
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF1_TUNING = WORKSPACE / "cf1_tuning_flight_data"
+    CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf1_command_values"
 
 
     # DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
@@ -34,11 +35,13 @@ def FILE_INITIATION(i):
     FILE_PATTERN = "cluster_dot_*.csv"
     FILE_PATTERN2 = "cf2_tuning_*.csv"
     FILE_PATTERN3 = "cf1_tuning_*.csv"  
+    FILE_PATTERN_CF1_CMD = "cf1_commands_*.csv"
 
     csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
     I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
     cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
     cf1_files = sorted(CF1_TUNING.glob(FILE_PATTERN3))
+    cf1_cmd_files = sorted(CF1_COMMANDS.glob(FILE_PATTERN_CF1_CMD))
 
     # ERROR STATEMENT
     if not csv_files:
@@ -48,18 +51,22 @@ def FILE_INITIATION(i):
     if not cf2_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
     if not cf1_files:
-        raise FileNotFoundError(f"No file matching {FILE_PATTERN2} in {CF2_TUNING}")
+        raise FileNotFoundError(f"No file matching {FILE_PATTERN3} in {CF1_TUNING}")
+    if not cf1_cmd_files:
+        raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
 
     file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
-    cf1_path = cf1_files[-7]
+    cf1_path = cf1_files[-1]
+    cf1_cmd_path = cf1_cmd_files[-1]
 
-    print(f"[flightplots] LATEST FLIGHT: {file_path}")
-    print(f"[I_joc] LATEST INPUTS {I_joc_path}")
+    # print(f"[flightplots] LATEST FLIGHT: {file_path}")
+    # print(f"[I_joc] LATEST INPUTS {I_joc_path}")
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
+    print(f"FPASFPAJDF {cf1_cmd_files}")
     if i == "cf2_path":
         return cf1_path
     if i == "cf2_path":
@@ -68,6 +75,8 @@ def FILE_INITIATION(i):
         return I_joc_path
     if i == "file_path":
         return file_path
+    if i == "cf1_cmd_path":
+        return cf1_cmd_files
     else:
         return cf2_path
 
@@ -553,6 +562,9 @@ def cf2_xyz_time_plots():
             # if resolution too coarse (all values equal), use index * dt
             if len(t) > 1 and np.allclose(t, t[0]):
                 t = np.arange(len(data)) * dt_guess
+            # remove this (maybe)
+            else:
+                t = np.arange(len(data)) * dt_guess
         except Exception:
             t = np.arange(len(data)) * dt_guess
 
@@ -604,6 +616,9 @@ def cf2_xyz_time_plots():
     plt.show()
     #print(f"Plotted: {os.path.basename(csv_path)}")
 
+    def plotting_cf_command():
+        dfa
+
 
 def main():
     file_path = FILE_INITIATION("file_path")
@@ -617,8 +632,8 @@ def main():
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     #cf2_tuning_static(cf2_path)
-    #cluster_accuracy()
-    cf2_xyz_time_plots()
+    cluster_accuracy()
+    #cf2_xyz_time_plots()
 
 if __name__ == "__main__":
     main()
