@@ -73,6 +73,8 @@ class OptiTrackSubscriber(Node):
         # message to send flight commands to crazyflie program
         self.pub_commands = self.create_publisher(Float32MultiArray, '/cf1/commands', 10)
 
+        self.pub_controller_pid_details = self.create_publisher(Float32MultiArray, 'cf1/controller_pid_details', 10)
+
         # drone to drone communication for waypoint synchronization
         self.pub_threshold_met = self.create_publisher(Bool, '/threshold_met_cf2', 10)
         self.sub_threshold_met = self.create_subscription(Bool, '/threshold_met_cf1', self.cf1_threshold_met_callback, 10)  
@@ -252,13 +254,13 @@ class OptiTrackSubscriber(Node):
             # self.get_logger().info(f"yawrate_cmd = {yawrate_cmd:.2f}")
 
             # calls X axis PID function (pitch)
-            pitch_cmd = self.calculate_pitch()
+            pitch_cmd, pitch_pid_details = self.calculate_pitch()
 
             # calls Y axis PID function (thrust)
-            thrust = self.calculate_thrust()
+            thrust, thrust_pid_details = self.calculate_thrust()
 
             # Calls Z axis PID function (roll)
-            roll_cmd = self.calculate_roll()
+            roll_cmd, roll_pid_details = self.calculate_roll()
 
             # create message of type Float Array (all values need to be floats)
 
@@ -267,6 +269,11 @@ class OptiTrackSubscriber(Node):
                         float(self.position[0]), float(self.position[1]), float(self.position[2])]
             # print(msg.data)
             self.pub_commands.publish(msg) #publish commands for drone controller
+
+            msg = Float32MultiArray()
+            msg.data = [float(pitch_pid_details[0]), float(pitch_pid_details[1]), float(pitch_pid_details[2]),
+                        float(roll_pid_details[0]), float(roll_pid_details[1]), float(roll_pid_details[2]),
+                        float(thrust_pid_details[0]), float(thrust_pid_details[1]), float(thrust_pid_details[2])]
 
             #new threshold logic
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
@@ -385,7 +392,7 @@ class OptiTrackSubscriber(Node):
             self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
         #########################################
         # return pitch_cmd
-        return desired_pitch_angle
+        return desired_pitch_angle, [z_fp, z_fi, z_fd]
 
     # Y axis control 
     def calculate_thrust(self):
@@ -416,7 +423,7 @@ class OptiTrackSubscriber(Node):
         thrust = self.hover + y_fp + y_fi + y_fd
         # Clamp thrust to valid range 
         thrust = int(max(self.min_thrust, min(thrust, self.max_thrust)))
-        return thrust
+        return thrust, [y_fp, y_fi, y_fd]
     
     # FIXED X-axis control. 08/19/25
     def calculate_roll(self):
@@ -471,7 +478,7 @@ class OptiTrackSubscriber(Node):
         
         # return roll_cmd
 
-        return desired_roll_angle
+        return desired_roll_angle, [x_fp, x_fi, x_fd]
 
     def get_position(self):
         return self.position

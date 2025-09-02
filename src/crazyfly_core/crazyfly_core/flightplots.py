@@ -127,6 +127,7 @@ timestamps = data['Timestamp'].to_numpy()
 line1 = data[col1].to_numpy()
 line2 = data[col2].to_numpy()
 line3 = data[col3].to_numpy()
+Cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
 # Plot the time series for columns 2 (Cur_CF1_X) and 8 (Cur_Cluster_X)
 plt.figure(figsize=(12, 6))
@@ -557,14 +558,17 @@ def cf2_xyz_time_plots():
     # 2) try to parse 'time_s'
     if t is None and "time_s" in data.columns:
         try:
-            ts = pd.to_datetime(data["time_s"], format="%Y%m%d_%H%M%S")
+            ts = pd.to_datetime(data["time_s"], format="%Y%m%d_%H%M%S.%f")
             t = (ts - ts.iloc[0]).dt.total_seconds().to_numpy()
+            '''
+            caleb: i think adding microseconds should eliminate the need for this
             # if resolution too coarse (all values equal), use index * dt
             if len(t) > 1 and np.allclose(t, t[0]):
                 t = np.arange(len(data)) * dt_guess
             # remove this (maybe)
             else:
                 t = np.arange(len(data)) * dt_guess
+            '''
         except Exception:
             t = np.arange(len(data)) * dt_guess
 
