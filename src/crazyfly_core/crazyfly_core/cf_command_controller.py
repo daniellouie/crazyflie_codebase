@@ -109,9 +109,9 @@ class MinimalSubscriber(Node):
         self.y_log = []
         self.z_log = []
 
-        self.cur_yaw_data = []
-        self.cur_pitch_data = []
-        self.cur_roll_data = []
+        self.yaw_log = []
+        self.pitch_log = []
+        self.roll_log = []
 
         self.error_x_log = []
         self.error_y_log = []
@@ -310,14 +310,15 @@ class MinimalSubscriber(Node):
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
-                ["time_s","x","y","z","x_err","y_err","z_err","roll_command","pitch_command","yaw_command","thrust_command","roll_cmd_p",
-                 "roll_cmd_i","roll_cmd_d","pitch_cmd_p","pitch_cmd_i","pitch_cmd_d","thrust_cmd_p","thrust_cmd_i",
+                ["time_s","x","y","z","x_error","y_error","z_error","roll_command","pitch_command","yaw_command","thrust_command",
+                 "pitch_cmd_p","pitch_cmd_i","pitch_cmd_d","roll_cmd_p","roll_cmd_i","roll_cmd_d","thrust_cmd_p","thrust_cmd_i",
                  "thrust_cmd_d"
                 ])
             for i in range(len(self.x_log)):
                 w.writerow([self.tracking_time[i], self.x_log[i], self.y_log[i], self.z_log[i],
                             self.error_x_log[i], self.error_y_log[i]], self.error_z_log[i],
-                            self.command_pitch_log[i], self.command_roll_log[i], self.command_thrust_log[i],
+                            self.yaw_log[i], self.pitch_log, self.roll_log[i],
+                            self.command_yawrate_log[i], self.command_pitch_log[i], self.command_roll_log[i], self.command_thrust_log[i],
                             self.command_pitch_p_log[i], self.command_pitch_i_log[i], self.command_pitch_d_log[i],
                             self.command_roll_p_log[i], self.command_roll_i_log[i], self.command_roll_d_log[i],
                             self.command_thrust_p_log[i], self.command_thrust_i_log[i], self.command_thrust_d_log[i])

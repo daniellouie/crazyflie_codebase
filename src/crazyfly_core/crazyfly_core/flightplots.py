@@ -515,7 +515,7 @@ def cf2_xyz_time_plots():
     No parameters; everything is resolved internally.
     """
     # --- locate data (file or directory) ---
-    cf2_path = FILE_INITIATION("cf1_path")
+    path = FILE_INITIATION("cf1_path")
 
     # if os.path.isdir(cf2_path):
     #     # Pick newest cf2_tuning_*.csv in the folder
@@ -533,7 +533,7 @@ def cf2_xyz_time_plots():
     #         raise FileNotFoundError(f"Path is not a file: {csv_path}")
 
     # --- load and sanitize ---
-    data = pd.read_csv(cf2_path)
+    data = pd.read_csv(path)
     print(data)
 
     # Ensure numeric columns
@@ -583,38 +583,89 @@ def cf2_xyz_time_plots():
     y = data.loc[valid, "y"].to_numpy()
     z = data.loc[valid, "z"].to_numpy()
 
+    error_x = data.loc[valid, "error_x"].to_numpy()
+    error_y = data.loc[valid, "error_y"].to_numpy()
+    error_z = data.loc[valid, "error_z"].to_numpy()
+
+    yaw = data.loc[valid, "yaw"].to_numpy()
+    pitch = data.loc[valid, "pitch"].to_numpy()
+    roll = data.loc[valid, "roll"].to_numpy()
+
+    command_yawrate = data.loc[valid, "yawrate_command"]
+    command_pitch = data.loc[valid, "pitch_command"]
+    command_roll = data.loc[valid, "roll_command"]
+    command_thrust = data.loc[valid, "thrust_command"]
+    min_thrust = 42000
+    max_thrust = 55000
+
+    pitch_cmd_p = data.loc[valid, "pitch_cmd_p"]
+    pitch_cmd_i = data.loc[valid, "pitch_cmd_i"]
+    pitch_cmd_d = data.loc[valid, "pitch_cmd_d"]
+    roll_cmd_p = data.loc[valid, "roll_cmd_p"]
+    roll_cmd_i = data.loc[valid, "roll_cmd_i"]
+    roll_cmd_d = data.loc[valid, "roll_cmd_d"]
+    thrust_cmd_p = data.loc[valid, "thrust_cmd_p"]
+    thrust_cmd_i = data.loc[valid, "thrust_cmd_i"]
+    thrust_cmd_d = data.loc[valid, "thrust_cmd_d"]
+
     # --- plotting to match your style ---
-    fig = plt.figure()
+    fig, axes = plt.subplots(2, 3)
     # Y (top-left)
-    ax1 = plt.subplot(2, 2, 1)
-    ax1.plot(t, y, "r-", label="Y Position")
-    ax1.set_xlabel("Time(s)")
-    ax1.set_ylabel("Y Position (m)")
-    ax1.set_title("Y Position Over Time")
-    ax1.set_ylim(bottom=0)
-    ax1.legend()
+    axes[0][0].plot(t, y, "r-", label="Y Position", marker=".", markersize=5)
+    axes[0][0].plot(t, error_y, "b-", label="Y Error", marker=".", markersize=5)
+    axes[0][0].plot(t, (command_thrust-min_thrust)/(max_thrust-min_thrust), "k-", label="Normalized Thrust Cmd")
+    axes[0][0].set_xlabel("Time(s)")
+    axes[0][0].set_ylabel("Y Position (m)")
+    axes[0][0].set_title("Y Position Over Time")
+    axes[0][0].set_ylim(bottom=0)
+    axes[0][0].legend()
 
-    # X (top-right)
-    ax2 = plt.subplot(2, 2, 2)
-    ax2.plot(t, x, "r-", label="X Position")
-    ax2.set_xlabel("Time(s)")
-    ax2.set_ylabel("X Position (m)")
-    ax2.set_title("X Position Over Time")
-    ax2.set_ylim(bottom=0)
-    ax2.legend()
+    # X (top-middle)
+    axes[0][1].plot(t, x, "r-", label="X Position")
+    axes[0][1].plot(t, error_x, "b-", label="X Error", marker=".", markersize=5)
+    axes[0][1].set_xlabel("Time(s)")
+    axes[0][1].set_ylabel("X Position (m)")
+    axes[0][1].set_title("X Position Over Time")
+    axes[0][1].set_ylim(bottom=0)
+    axes[0][1].legend()
 
-    # Z (bottom-left)
-    ax3 = plt.subplot(2, 2, 3)
-    ax3.plot(t, z, "r-", label="Z Position")
-    ax3.set_xlabel("Time(s)")
-    ax3.set_ylabel("Z Position (m)")
-    ax3.set_title("Z Position Over Time")
-    ax3.set_ylim(bottom=0)
-    ax3.legend()
+    # Z (top-right)
+    axes[0][2].plot(t, z, "r-", label="Z Position")
+    axes[0][2].plot(t, error_z, "r-", label="Z Error", marker=".", markersize=5)
+    axes[0][2].set_xlabel("Time(s)")
+    axes[0][2].set_ylabel("Z Position (m)")
+    axes[0][2].set_title("Z Position Over Time")
+    axes[0][2].set_ylim(bottom=0)
+    axes[0][2].legend()
 
-    # Bottom-right blank (to mirror your original 2x2 grid)
-    ax4 = plt.subplot(2, 2, 4)
-    ax4.axis("off")
+    # yaw (bottom left)
+    axes[1][0].plot(t, yaw, "r-", label="Yaw", marker=".", markersize=5)
+    axes[1][0].plot(t, command_yawrate, "k-", label="Yaw rate cmd", marker=".", markersize=5)
+    axes[1][0].set_xlabel("Time(s)")
+    axes[1][0].set_ylabel("Yaw (deg)")
+    axes[1][0].set_title("Yaw and Commanded Yaw Rate")
+    axes[1][0].legend()
+
+    # pitch (bottom middle)
+    axes[1][1].plot(t, pitch, "r-", label="Pitch", marker=".", markersize=5)
+    axes[1][1].plot(t, command_pitch, "k-", label="Pitch cmd", marker=".", markersize=5)
+    axes[1][1].plot(t, pitch_cmd_p, "--", color='0.5')
+    axes[1][1].plot(t, pitch_cmd_i, "-.", color='0.5')
+    axes[1][1].plot(t, pitch_cmd_d, ":", color='0.5')
+    axes[1][1].set_xlabel("Time(s)")
+    axes[1][1].set_ylabel("Pitch (deg)")
+    axes[1][1].set_title("Pitch and Commanded Pitch")
+    axes[1][1].legend()
+
+    axes[1][2].plot(t, yaw, "r-", label="Roll", marker=".", markersize=5)
+    axes[1][2].plot(t, command_roll, "k-", label="Roll cmd", marker=".", markersize=5)
+    axes[1][2].plot(t, roll_cmd_p, "--", color='0.5')
+    axes[1][2].plot(t, roll_cmd_i, "-.", color='0.5')
+    axes[1][2].plot(t, roll_cmd_d, ":", color='0.5')
+    axes[1][2].set_xlabel("Time(s)")
+    axes[1][2].set_ylabel("Roll (deg)")
+    axes[1][2].set_title("Roll and Commanded Roll")
+    axes[1][2].legend()
 
     plt.tight_layout()
     plt.show()
