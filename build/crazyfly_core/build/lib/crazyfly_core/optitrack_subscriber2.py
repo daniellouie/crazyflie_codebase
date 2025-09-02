@@ -82,7 +82,8 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [1.0, 1.0, 1.0] #set single position (x,y,z)
+        self.target_positions = [2.0, 1.0, 3.0] #set single position (x,y,z)
+        #self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -113,7 +114,7 @@ class OptiTrackSubscriber2(Node):
         self.max_thrust  = 56000
         self.min_thrust  = 42000
 
-        self.k_p_y       = 34000+3400      # P-gain
+        self.k_p_y       = 30000 #+3800      # P-gain
         self.k_i_y       = 800             # I-gain
         self.k_d_y       = 12000           # D-gain
         
@@ -135,9 +136,9 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
         
-        self.k_p_x       = 1.0     
+        self.k_p_x       = 0.75    
         self.k_i_x       = 0.5 
-        self.k_d_x       = 2.5
+        self.k_d_x       = 3.55
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -154,7 +155,7 @@ class OptiTrackSubscriber2(Node):
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
         self.k_p_z       = -1.2 
         self.k_i_z       = -0.4
-        self.k_d_z       = -2.5
+        self.k_d_z       = -2.6
 
         # self.k_p_z = 2
         # self.k_i_z = 0.6
@@ -269,6 +270,30 @@ class OptiTrackSubscriber2(Node):
             # print(msg.data)
             self.pub_commands.publish(msg) #publish commands for drone controller
 
+
+
+            """ if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
+                print(f"start time: {self.startTimer}")
+                if not self.startTimer: #if the timer for hovering has not started, start it
+                    print("cf1 timer started")
+                    self.startTimer = True
+                    self.startTime = time.time()
+                elif time.time() - self.startTime >= 4: #if the drone has been at the desired position for 3 seconds
+                    print("drone has been in threshold for 3 seconds")
+                    if not self.threshold_met:
+                        self.threshold_met = True
+                        self.publish_threshold_met()
+                        print("ISUDHFISDFHIUSDHFIUSDHFIUSDFHcf: Threshold met")
+                    if self.threshold_met:
+                        self.current_target_index += 1
+                        print("current index: ", self.current_target_index)
+                        print(f"LENGNGNGNTH OF TARGET_POSITIONS: {self.target_positions}")
+                        if self.current_target_index < len(self.target_positions):  #if there is another target position, move to it
+                            self.target_position = self.target_positions[self.current_target_index]
+                            self.get_logger().info(f"cf2:Moving to next target position {self.target_position}") 
+                            print(f"cf2: moving to next position: {self.target_position}")
+                    else:
+                        print("Waiting for cf1 to reach threshold.")"""
             #new threshold logic
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
                 if not self.startTimer: #if the timer for hovering has not started, start it
