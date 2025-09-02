@@ -82,14 +82,15 @@ class OptiTrackSubscriber(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
+        #self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
+        self.target_positions = [[1.0, 1.0, 1.0] ,[1.0, 1.0, 2.0]]
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
         # Controls variables
         self.current_target_index = 0 
         self.target_position = self.target_positions[self.current_target_index]
-        self.threshold = 0.15  # [m] Threshold for reaching the target
+        self.threshold = 0.25  # [m] Threshold for reaching the target
         
         # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
@@ -333,7 +334,7 @@ class OptiTrackSubscriber(Node):
     def calculate_pitch(self):
     
         # set to zero if within margin
-        self.cur_z_error = self.target_positions[2] - self.position[2]
+        self.cur_z_error = self.target_position[2] - self.position[2]
         if -0.01 <= self.cur_z_error <= 0.01:
             self.cur_z_error = 0
 
@@ -352,6 +353,10 @@ class OptiTrackSubscriber(Node):
         self.prev_z_error = self.cur_z_error # (deg*s/m)
         
         desired_pitch_angle = z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
+        print(f"z_fp: {z_fp}, z_fi: {z_fi}, z_fd: {z_fd}")
+        print("Z error: ", self.cur_z_error)
+        print("time: ", datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
+
         
         # Desired orientation in quaternion 
         half_angle = np.deg2rad(desired_pitch_angle) / 2.0
@@ -385,7 +390,7 @@ class OptiTrackSubscriber(Node):
     # Y axis control 
     def calculate_thrust(self):
         # P term:
-        self.cur_y_error = self.target_positions[1]- self.position[1]
+        self.cur_y_error = self.target_position[1]- self.position[1]
 
         # I term:
         if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
@@ -417,7 +422,7 @@ class OptiTrackSubscriber(Node):
     def calculate_roll(self):
 
         # set to zero if within margin
-        self.cur_x_error = self.target_positions[0] - self.position[0]
+        self.cur_x_error = self.target_position[0] - self.position[0]
         if -0.01 <= self.cur_x_error <= 0.01:
             self.cur_x_error = 0
 

@@ -23,7 +23,7 @@ import statistics
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf2_tuning_flight_data")
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
-CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_dynamic_hover")
+CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_multiple_waypoint")
 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 #      ----------     NOTE: CHANGE "address" last value to:          ----------
@@ -84,7 +84,7 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 20.0 #in seconds
+        self.flight_duration = 25.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000

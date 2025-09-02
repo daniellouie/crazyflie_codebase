@@ -632,8 +632,8 @@ def main():
     # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     #cf2_tuning_static(cf2_path)
-    cluster_accuracy()
-    #cf2_xyz_time_plots()
+    #cluster_accuracy()
+    cf2_xyz_time_plots()
 
 if __name__ == "__main__":
     main()
