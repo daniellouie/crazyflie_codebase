@@ -23,7 +23,7 @@ def FILE_INITIATION(i):
     DATA_DIR      = WORKSPACE / "cluster_data"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
-    CF1_TUNING = WORKSPACE / "cf1_tuning_flight_data"
+    CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
     CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf1_command_values"
 
 
@@ -66,8 +66,8 @@ def FILE_INITIATION(i):
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
-    print(f"FPASFPAJDF {cf1_cmd_files}")
-    if i == "cf2_path":
+    
+    if i == "cf1_path":
         return cf1_path
     if i == "cf2_path":
         return cf2_path
@@ -514,7 +514,7 @@ def cf2_xyz_time_plots():
     No parameters; everything is resolved internally.
     """
     # --- locate data (file or directory) ---
-    cf2_path = FILE_INITIATION("cf2_path")
+    cf2_path = FILE_INITIATION("cf1_path")
 
     # if os.path.isdir(cf2_path):
     #     # Pick newest cf2_tuning_*.csv in the folder

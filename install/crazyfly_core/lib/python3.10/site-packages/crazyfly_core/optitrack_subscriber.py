@@ -90,7 +90,7 @@ class OptiTrackSubscriber(Node):
         # Controls variables
         self.current_target_index = 0 
         self.target_position = self.target_positions[self.current_target_index]
-        self.threshold = 0.25  # [m] Threshold for reaching the target
+        self.threshold = 0.15  # [m] Threshold for reaching the target
         
         # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
@@ -269,24 +269,32 @@ class OptiTrackSubscriber(Node):
             self.pub_commands.publish(msg) #publish commands for drone controller
 
             #new threshold logic
+            #print(f"within threshold: {self.is_within_threshold(self.position, self.target_position)}")
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
+                print(f"start time: {self.startTimer}")
                 if not self.startTimer: #if the timer for hovering has not started, start it
                     print("cf1 timer started")
                     self.startTimer = True
                     self.startTime = time.time()
-                elif time.time() - self.startTime >= 3: #if the drone has been at the desired position for 3 seconds
+                elif time.time() - self.startTime >= 4: #if the drone has been at the desired position for 3 seconds
+                    print("drone has been in threshold for 3 seconds")
                     if not self.threshold_met:
                         self.threshold_met = True
                         self.publish_threshold_met()
-                        print("cf: Threshold met")
-                    if self.cf1_threshold_met and self.cf1_threshold_met:
+                        print("ISUDHFISDFHIUSDHFIUSDHFIUSDFHcf: Threshold met")
+                    if self.threshold_met:
                         self.current_target_index += 1
-                        if self.current_target_index < len(self.target_positions):  #if these is another target position, move to it
+                        print("current index: ", self.current_target_index)
+                        print(f"LENGNGNGNTH OF TARGET_POSITIONS: {self.target_positions}")
+                        if self.current_target_index < len(self.target_positions):  #if there is another target position, move to it
                             self.target_position = self.target_positions[self.current_target_index]
                             self.get_logger().info(f"cf2:Moving to next target position {self.target_position}") 
                             print(f"cf2: moving to next position: {self.target_position}")
                     else:
                         print("Waiting for cf1 to reach threshold.")
+            else:
+                self.startTimer = False # resets the timer if drone leaves threshold
+                self.threshold_met = False
 
         # error handling for unexpected pose message
         else:
@@ -339,7 +347,7 @@ class OptiTrackSubscriber(Node):
             self.cur_z_error = 0
 
         # (P term)
-        z_fp = self.k_p_z * self.cur_z_error # (deg/m * m) 
+        z_fp = self.k_p_z * self.cur_z_error # (deg/m * m)
 
         # (I term))
         future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t #units of m*s 
@@ -353,9 +361,9 @@ class OptiTrackSubscriber(Node):
         self.prev_z_error = self.cur_z_error # (deg*s/m)
         
         desired_pitch_angle = z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
-        print(f"z_fp: {z_fp}, z_fi: {z_fi}, z_fd: {z_fd}")
-        print("Z error: ", self.cur_z_error)
-        print("time: ", datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
+        # print(f"z_fp: {z_fp}, z_fi: {z_fi}, z_fd: {z_fd}")
+        # print("Z error: ", self.cur_z_error)
+        # print("time: ", datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
 
         
         # Desired orientation in quaternion 

@@ -66,7 +66,7 @@ def FILE_INITIATION(i):
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
-    print(f"FPASFPAJDF {cf1_cmd_files}")
+    
     if i == "cf1_path":
         return cf1_path
     if i == "cf2_path":
