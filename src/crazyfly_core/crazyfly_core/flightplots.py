@@ -24,7 +24,7 @@ def FILE_INITIATION(i):
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
-    CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf1_command_values"
+    CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf2_command_values"
 
 
     # DATA_DIR    = WORKSPACE / "cluster_data"# <— save_data_to_csv() writes here
@@ -35,7 +35,7 @@ def FILE_INITIATION(i):
     FILE_PATTERN = "cluster_dot_*.csv"
     FILE_PATTERN2 = "cf2_tuning_*.csv"
     FILE_PATTERN3 = "cf1_tuning_*.csv"  
-    FILE_PATTERN_CF1_CMD = "cf1_commands_*.csv"
+    FILE_PATTERN_CF1_CMD = "cf1_all_values_*.csv"
 
     csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
     I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
@@ -66,7 +66,7 @@ def FILE_INITIATION(i):
     #temporary fix
     #return cf2_path
     #return file_path, I_joc_path, cf2_path
-    print(f"FPASFPAJDF {cf1_cmd_files}")
+    # print(f"FPASFPAJDF {cf1_cmd_files}")
     if i == "cf1_path":
         return cf1_path
     if i == "cf2_path":
@@ -76,7 +76,7 @@ def FILE_INITIATION(i):
     if i == "file_path":
         return file_path
     if i == "cf1_cmd_path":
-        return cf1_cmd_files
+        return cf1_cmd_path
     else:
         return cf2_path
 
@@ -508,14 +508,14 @@ def cluster_accuracy():
     print("y error: ", f"{rmse_y2:.6f}", "m")
     print("z error: ", f"{rmse_z2:.6f}", "m")
 
-def cf2_xyz_time_plots():
+def plot_pos_err_cmd():
     """
     Load the latest CF2 tuning CSV and plot Y, X, Z vs time
     in a 2x2 layout matching the sample (bottom-right left blank).
     No parameters; everything is resolved internally.
     """
     # --- locate data (file or directory) ---
-    path = FILE_INITIATION("cf1_path")
+    path = FILE_INITIATION("cf1_cmd_path")
 
     # if os.path.isdir(cf2_path):
     #     # Pick newest cf2_tuning_*.csv in the folder
@@ -583,59 +583,59 @@ def cf2_xyz_time_plots():
     y = data.loc[valid, "y"].to_numpy()
     z = data.loc[valid, "z"].to_numpy()
 
-    error_x = data.loc[valid, "error_x"].to_numpy()
-    error_y = data.loc[valid, "error_y"].to_numpy()
-    error_z = data.loc[valid, "error_z"].to_numpy()
+    error_x = data.loc[valid, "x_error"].to_numpy()
+    error_y = data.loc[valid, "y_error"].to_numpy()
+    error_z = data.loc[valid, "z_error"].to_numpy()
 
     yaw = data.loc[valid, "yaw"].to_numpy()
     pitch = data.loc[valid, "pitch"].to_numpy()
     roll = data.loc[valid, "roll"].to_numpy()
 
-    command_yawrate = data.loc[valid, "yawrate_command"]
-    command_pitch = data.loc[valid, "pitch_command"]
-    command_roll = data.loc[valid, "roll_command"]
-    command_thrust = data.loc[valid, "thrust_command"]
+    command_yawrate = data.loc[valid, "yaw_command"].to_numpy()
+    command_pitch = data.loc[valid, "pitch_command"].to_numpy()
+    command_roll = data.loc[valid, "roll_command"].to_numpy()
+    command_thrust = data.loc[valid, "thrust_command"].to_numpy()
     min_thrust = 42000
     max_thrust = 55000
 
-    pitch_cmd_p = data.loc[valid, "pitch_cmd_p"]
-    pitch_cmd_i = data.loc[valid, "pitch_cmd_i"]
-    pitch_cmd_d = data.loc[valid, "pitch_cmd_d"]
-    roll_cmd_p = data.loc[valid, "roll_cmd_p"]
-    roll_cmd_i = data.loc[valid, "roll_cmd_i"]
-    roll_cmd_d = data.loc[valid, "roll_cmd_d"]
-    thrust_cmd_p = data.loc[valid, "thrust_cmd_p"]
-    thrust_cmd_i = data.loc[valid, "thrust_cmd_i"]
-    thrust_cmd_d = data.loc[valid, "thrust_cmd_d"]
+    pitch_cmd_p = data.loc[valid, "pitch_cmd_p"].to_numpy()
+    pitch_cmd_i = data.loc[valid, "pitch_cmd_i"].to_numpy()
+    pitch_cmd_d = data.loc[valid, "pitch_cmd_d"].to_numpy()
+    roll_cmd_p = data.loc[valid, "roll_cmd_p"].to_numpy()
+    roll_cmd_i = data.loc[valid, "roll_cmd_i"].to_numpy()
+    roll_cmd_d = data.loc[valid, "roll_cmd_d"].to_numpy()
+    thrust_cmd_p = data.loc[valid, "thrust_cmd_p"].to_numpy()
+    thrust_cmd_i = data.loc[valid, "thrust_cmd_i"].to_numpy()
+    thrust_cmd_d = data.loc[valid, "thrust_cmd_d"].to_numpy()
 
     # --- plotting to match your style ---
-    fig, axes = plt.subplots(2, 3)
+    fig, axes = plt.subplots(2, 3, sharex=True)
     # Y (top-left)
     axes[0][0].plot(t, y, "r-", label="Y Position", marker=".", markersize=5)
     axes[0][0].plot(t, error_y, "b-", label="Y Error", marker=".", markersize=5)
-    axes[0][0].plot(t, (command_thrust-min_thrust)/(max_thrust-min_thrust), "k-", label="Normalized Thrust Cmd")
+    axes[0][0].plot(t, (command_thrust-min_thrust)/(max_thrust-min_thrust), "k-", marker=".", markersize=5, label="Normalized Thrust Cmd")
+    axes[0][0].plot(t, (thrust_cmd_p)/(max_thrust-min_thrust),"--", color='0.1', label="Normalized p term")
+    axes[0][0].plot(t, (thrust_cmd_i)/(max_thrust-min_thrust), "-.", color='0.4',label="Normalized i term")
+    axes[0][0].plot(t, (thrust_cmd_d)/(max_thrust-min_thrust), ":", color='0.7', label="Normalized d term")
     axes[0][0].set_xlabel("Time(s)")
     axes[0][0].set_ylabel("Y Position (m)")
     axes[0][0].set_title("Y Position Over Time")
-    axes[0][0].set_ylim(bottom=0)
     axes[0][0].legend()
 
-    # X (top-middle)
-    axes[0][1].plot(t, x, "r-", label="X Position")
-    axes[0][1].plot(t, error_x, "b-", label="X Error", marker=".", markersize=5)
+    # Z (top-right)
+    axes[0][1].plot(t, z, "r-", label="Z Position", marker=".", markersize=5)
+    axes[0][1].plot(t, error_z, "b-", label="Z Error", marker=".", markersize=5)
     axes[0][1].set_xlabel("Time(s)")
-    axes[0][1].set_ylabel("X Position (m)")
-    axes[0][1].set_title("X Position Over Time")
-    axes[0][1].set_ylim(bottom=0)
+    axes[0][1].set_ylabel("Z Position (m)")
+    axes[0][1].set_title("Z Position Over Time")
     axes[0][1].legend()
 
-    # Z (top-right)
-    axes[0][2].plot(t, z, "r-", label="Z Position")
-    axes[0][2].plot(t, error_z, "r-", label="Z Error", marker=".", markersize=5)
+    # X (top-middle)
+    axes[0][2].plot(t, x, "r-", label="X Position", marker=".", markersize=5)
+    axes[0][2].plot(t, error_x, "b-", label="X Error", marker=".", markersize=5)
     axes[0][2].set_xlabel("Time(s)")
-    axes[0][2].set_ylabel("Z Position (m)")
-    axes[0][2].set_title("Z Position Over Time")
-    axes[0][2].set_ylim(bottom=0)
+    axes[0][2].set_ylabel("X Position (m)")
+    axes[0][2].set_title("X Position Over Time")
     axes[0][2].legend()
 
     # yaw (bottom left)
@@ -649,9 +649,9 @@ def cf2_xyz_time_plots():
     # pitch (bottom middle)
     axes[1][1].plot(t, pitch, "r-", label="Pitch", marker=".", markersize=5)
     axes[1][1].plot(t, command_pitch, "k-", label="Pitch cmd", marker=".", markersize=5)
-    axes[1][1].plot(t, pitch_cmd_p, "--", color='0.5')
-    axes[1][1].plot(t, pitch_cmd_i, "-.", color='0.5')
-    axes[1][1].plot(t, pitch_cmd_d, ":", color='0.5')
+    axes[1][1].plot(t, pitch_cmd_p, "--", color='0.1', label='p term')
+    axes[1][1].plot(t, pitch_cmd_i, "-.", color='0.4', label='i term')
+    axes[1][1].plot(t, pitch_cmd_d, ":", color='0.7', label='d term')
     axes[1][1].set_xlabel("Time(s)")
     axes[1][1].set_ylabel("Pitch (deg)")
     axes[1][1].set_title("Pitch and Commanded Pitch")
@@ -659,20 +659,17 @@ def cf2_xyz_time_plots():
 
     axes[1][2].plot(t, yaw, "r-", label="Roll", marker=".", markersize=5)
     axes[1][2].plot(t, command_roll, "k-", label="Roll cmd", marker=".", markersize=5)
-    axes[1][2].plot(t, roll_cmd_p, "--", color='0.5')
-    axes[1][2].plot(t, roll_cmd_i, "-.", color='0.5')
-    axes[1][2].plot(t, roll_cmd_d, ":", color='0.5')
+    axes[1][2].plot(t, roll_cmd_p, "--", color='0.1', label="p term")
+    axes[1][2].plot(t, roll_cmd_i, "-.", color='0.4', label="i term")
+    axes[1][2].plot(t, roll_cmd_d, ":", color='0.7', label="d term")
     axes[1][2].set_xlabel("Time(s)")
     axes[1][2].set_ylabel("Roll (deg)")
     axes[1][2].set_title("Roll and Commanded Roll")
     axes[1][2].legend()
 
-    plt.tight_layout()
+    plt.subplots_adjust(hspace=0.18, wspace=0.235, left=0.044)
     plt.show()
     #print(f"Plotted: {os.path.basename(csv_path)}")
-
-    def plotting_cf_command():
-        dfa
 
 
 def main():
@@ -688,7 +685,7 @@ def main():
     # anim_2d_plot(I_joc_path, file_path, df)
     #cf2_tuning_static(cf2_path)
     #cluster_accuracy()
-    cf2_xyz_time_plots()
+    plot_pos_err_cmd()
 
 if __name__ == "__main__":
     main()

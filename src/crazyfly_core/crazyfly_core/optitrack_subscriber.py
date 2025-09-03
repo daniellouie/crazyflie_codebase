@@ -84,8 +84,8 @@ class OptiTrackSubscriber(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        #self.target_positions = [1.0, 1.0, 3.0] #set single position (x,y,z)
-        self.target_positions = [[1.0, 1.0, 1.0] ,[1.0, 1.0, 2.0]]
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 1.0, 1.0] ,[1.0, 1.0, 2.0]]
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -264,9 +264,17 @@ class OptiTrackSubscriber(Node):
 
             # create message of type Float Array (all values need to be floats)
 
+            # TODO another quick fix. this is recalculating what is done in in calculate_yawrate
+            r = R.from_quat(self.orientation_quat)
+            pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
+
             msg = Float32MultiArray()
             msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
-                        float(self.position[0]), float(self.position[1]), float(self.position[2])]
+                        float(self.position[0]), float(self.position[1]), float(self.position[2]),
+                        float(yaw_y), float(pitch_x), float(roll_z),
+                        float(self.target_position[0]-self.position[0]), float(self.target_position[1]-self.position[1]),
+                        float(self.target_position[2]-self.position[2])]
+            
             # print(msg.data)
             self.pub_commands.publish(msg) #publish commands for drone controller
 
@@ -274,6 +282,7 @@ class OptiTrackSubscriber(Node):
             msg.data = [float(pitch_pid_details[0]), float(pitch_pid_details[1]), float(pitch_pid_details[2]),
                         float(roll_pid_details[0]), float(roll_pid_details[1]), float(roll_pid_details[2]),
                         float(thrust_pid_details[0]), float(thrust_pid_details[1]), float(thrust_pid_details[2])]
+            self.pub_controller_pid_details.publish(msg)
 
             #new threshold logic
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
@@ -360,9 +369,9 @@ class OptiTrackSubscriber(Node):
         self.prev_z_error = self.cur_z_error # (deg*s/m)
         
         desired_pitch_angle = z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
-        print(f"z_fp: {z_fp}, z_fi: {z_fi}, z_fd: {z_fd}")
-        print("Z error: ", self.cur_z_error)
-        print("time: ", datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
+        # print(f"z_fp: {z_fp}, z_fi: {z_fi}, z_fd: {z_fd}")
+        # print("Z error: ", self.cur_z_error)
+        # print("time: ", datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
 
         
         # Desired orientation in quaternion 
@@ -381,7 +390,10 @@ class OptiTrackSubscriber(Node):
         pitch_error_angle = (pitch_error_angle + 180) % 360 - 180
         
         pitch_cmd = np.clip(pitch_error_angle, self.min_pitch, self.max_pitch)
-        
+           # TODO BUG BAD HACK NOTE
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # doing this so  that i can calculate error quickly
+        self.target_position = [1.0, 1.0, 1.0]
         ##### current pitch for measurement #####
         x_cur, w_cur = q_current.as_quat()[0], q_current.as_quat()[3]
         norm = math.hypot(x_cur, w_cur)

@@ -29,8 +29,8 @@ CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_mul
 #      ----------     NOTE: CHANGE "address" last value to:          ----------
 #      ----------                                       cf1: 8       ----------
 #      ----------                                       cf2: 7       ----------
-address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
-# address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
+# address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
+address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
 if address[-1] == '8':
     CF_PATH = CF1_PATH
 else:
@@ -46,13 +46,14 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('cf_driver')
-        self.subscriptions = []
-        self.subscriptions.append(self.create_subscription(
+
+        self.subscriptionss = []
+        self.subscriptionss.append(self.create_subscription(
             Float32MultiArray,
             '/cf1/commands',
             self.listener_callback,
             10))
-        self.subscriptions.append(self.create_subscription(
+        self.subscriptionss.append(self.create_subscription(
             Float32MultiArray,
             '/cf1/controller_pid_details',
             self.controller_pid_details_callback,
@@ -87,7 +88,7 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 25.0 #in seconds
+        self.flight_duration = 10.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -161,7 +162,15 @@ class MinimalSubscriber(Node):
             self.y_log.append(self.y_position1)
             self.z_log.append(self.z_position1)
 
-            self.command_roll_log.append(self.roll1)       
+            self.yaw_log.append(msg.data[7])
+            self.pitch_log.append(msg.data[8])
+            self.roll_log.append(msg.data[9])
+
+            self.error_x_log.append(msg.data[10])
+            self.error_y_log.append(msg.data[11])
+            self.error_z_log.append(msg.data[12])
+
+            self.command_roll_log.append(self.roll1)
             self.command_pitch_log.append(self.pitch1)
             self.command_thrust_log.append(self.thrust1)
             self.command_yawrate_log.append(self.yawrate1)
@@ -197,15 +206,15 @@ class MinimalSubscriber(Node):
         #self._cf.commander.send_setpoint(self.const_roll, self.const_pitch, self.const_yawrate, self.const_thrust)
 
     def controller_pid_details_callback(self, msg):
-        self.command_pitch_p_log = msg[0]
-        self.command_pitch_i_log = msg[1]
-        self.command_pitch_d_log = msg[2]
-        self.command_roll_p_log = msg[3]
-        self.command_roll_i_log = msg[4]
-        self.command_roll_d_log = msg[5]
-        self.command_thrust_p_log = msg[6]
-        self.command_thrust_i_log = msg[7]
-        self.command_thrust_d_log = msg[8]
+        self.command_pitch_p_log.append(msg.data[0])
+        self.command_pitch_i_log.append(msg.data[1])
+        self.command_pitch_d_log.append(msg.data[2])
+        self.command_roll_p_log.append(msg.data[3])
+        self.command_roll_i_log.append(msg.data[4])
+        self.command_roll_d_log.append(msg.data[5])
+        self.command_thrust_p_log.append(msg.data[6])
+        self.command_thrust_i_log.append(msg.data[7])
+        self.command_thrust_d_log.append(msg.data[8])
 
     # Unused function that uses Threading
     def _send_thrust_command(self):
@@ -306,22 +315,24 @@ class MinimalSubscriber(Node):
             CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf2_command_values") # else its cf2
             # self.cf2_command_values.append([time_s, self.roll1, self.pitch1, self.yawrate1, self.thrust1]) #msg.data order = roll, pitch, yaw, thrust
         path = os.path.join(CF_COMMAND_PATH, fname)
+        self.get_logger().info(path)
         #self.get_logger().info("path: " + path)
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
-                ["time_s","x","y","z","x_error","y_error","z_error","roll_command","pitch_command","yaw_command","thrust_command",
+                ["time_s","x","y","z","x_error","y_error","z_error","yaw","pitch","roll",
+                 "roll_command","pitch_command","yaw_command","thrust_command",
                  "pitch_cmd_p","pitch_cmd_i","pitch_cmd_d","roll_cmd_p","roll_cmd_i","roll_cmd_d","thrust_cmd_p","thrust_cmd_i",
                  "thrust_cmd_d"
                 ])
             for i in range(len(self.x_log)):
                 w.writerow([self.tracking_time[i], self.x_log[i], self.y_log[i], self.z_log[i],
-                            self.error_x_log[i], self.error_y_log[i]], self.error_z_log[i],
-                            self.yaw_log[i], self.pitch_log, self.roll_log[i],
+                            self.error_x_log[i], self.error_y_log[i], self.error_z_log[i],
+                            self.yaw_log[i], self.pitch_log[i], self.roll_log[i],
                             self.command_yawrate_log[i], self.command_pitch_log[i], self.command_roll_log[i], self.command_thrust_log[i],
                             self.command_pitch_p_log[i], self.command_pitch_i_log[i], self.command_pitch_d_log[i],
                             self.command_roll_p_log[i], self.command_roll_i_log[i], self.command_roll_d_log[i],
-                            self.command_thrust_p_log[i], self.command_thrust_i_log[i], self.command_thrust_d_log[i])
+                            self.command_thrust_p_log[i], self.command_thrust_i_log[i], self.command_thrust_d_log[i]])
     #---------------------------------------------------------------------#
 
 
@@ -469,6 +480,8 @@ def main(args=None):
     minimal_subscriber.save_data()
     #minimal_subscriber.save_data_optitrack()
     #cf2_tuning_static()
+
+    print("\n\n\n**********************Hello****************\n\n\n")
     minimal_subscriber.save_all_values()    # this saves commanded values for optimizing flights 
     
    
