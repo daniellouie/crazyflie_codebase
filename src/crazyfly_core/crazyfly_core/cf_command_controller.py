@@ -88,7 +88,7 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 20.0 #in seconds
+        self.flight_duration = 20 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -321,7 +321,7 @@ class MinimalSubscriber(Node):
             w = csv.writer(file)
             w.writerow(       # header row
                 ["time_s","x","y","z","x_error","y_error","z_error","yaw","pitch","roll",
-                 "roll_command","pitch_command","yaw_command","thrust_command",
+                 "yaw_command","pitch_command","roll_command","thrust_command",
                  "pitch_cmd_p","pitch_cmd_i","pitch_cmd_d","roll_cmd_p","roll_cmd_i","roll_cmd_d","thrust_cmd_p","thrust_cmd_i",
                  "thrust_cmd_d"
                 ])

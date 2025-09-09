@@ -106,7 +106,14 @@ class OptiTrackSubscriber2(Node):
         self.k_p_rot = 1.0
         self.k_p_rot_sign = 1
 
+        # CF2 GAINS
+
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
+
+        # temp feedforward
+        self.pitch_feedforward = -0.25
+        self.roll_feedforward = -0.5 # -1.2 # -1.9
+
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
@@ -136,9 +143,14 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
         
+        # commented out 9/3
+        # self.k_p_x       = 0.75    
+        # self.k_i_x       = 0.5 
+        # self.k_d_x       = 3.55
+
         self.k_p_x       = 0.75    
-        self.k_i_x       = 0.5 
-        self.k_d_x       = 3.55
+        self.k_i_x       = 0.25
+        self.k_d_x       = 3.0 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -154,7 +166,7 @@ class OptiTrackSubscriber2(Node):
                 # ----------------------         Z constants         ---------------------- #
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
         self.k_p_z       = -1.2 
-        self.k_i_z       = -0.4
+        self.k_i_z       = -0.1
         self.k_d_z       = -2.6
 
         # self.k_p_z = 2

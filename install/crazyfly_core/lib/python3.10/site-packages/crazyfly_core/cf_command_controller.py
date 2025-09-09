@@ -29,8 +29,8 @@ CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_mul
 #      ----------     NOTE: CHANGE "address" last value to:          ----------
 #      ----------                                       cf1: 8       ----------
 #      ----------                                       cf2: 7       ----------
-address = 'radio://0/80/2M/E7E7E7E7E7'  # cf1
-# address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
+# address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
+address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
 if address[-1] == '8':
     CF_PATH = CF1_PATH
 else:
@@ -46,12 +46,19 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('cf_driver')
-        self.subscription = self.create_subscription(
+
+        self.subscriptionss = []
+        self.subscriptionss.append(self.create_subscription(
             Float32MultiArray,
             '/cf1/commands',
             self.listener_callback,
-            10)
-        self.subscription  # prevent unused variable warning
+            10))
+        self.subscriptionss.append(self.create_subscription(
+            Float32MultiArray,
+            '/cf1/controller_pid_details',
+            self.controller_pid_details_callback,
+            10
+        ))
 
         cflib.crtp.init_drivers()
 
@@ -71,20 +78,17 @@ class MinimalSubscriber(Node):
         self.x_position1, self.y_position1, self.z_position1 = 0.0, 0.0, 0.0
         self.cf1_position = []
 
-        self.cf1_command_values = []
-        self.cf1_command_roll = []
-        self.cf1_command_pitch = []
-        self.cf1_command_thrust = []
-        self.cf1_command_yaw = []
-
-
+        self.command_roll_log = []
+        self.command_pitch_log = []
+        self.command_thrust_log = []
+        self.command_yawrate_log = []
 
         self.cf2_command_values = []
 
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 20.0 #in seconds
+        self.flight_duration = 20 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -102,18 +106,32 @@ class MinimalSubscriber(Node):
 
         # Graphing and data collection
         self.timestamp_data = []
-        self.cur_x_data = []
-        self.cur_y_data = []
-        self.cur_z_data = []
+        self.x_log = []
+        self.y_log = []
+        self.z_log = []
 
-        self.cur_yaw_data = []
-        self.cur_pitch_data = []
-        self.cur_roll_data = []
+        self.yaw_log = []
+        self.pitch_log = []
+        self.roll_log = []
 
-        self.command_roll_data = []
-        self.command_pitch_data = []
-        self.command_yaw_data = []
-        self.command_thrust_data = []
+        self.error_x_log = []
+        self.error_y_log = []
+        self.error_z_log = []
+
+        self.command_roll_log = []
+        self.command_pitch_log = []
+        self.command_yaw_log = []
+        self.command_thrust_log = []
+
+        self.command_pitch_p_log = []
+        self.command_pitch_i_log = []
+        self.command_pitch_d_log = []
+        self.command_roll_p_log = []
+        self.command_roll_i_log = []
+        self.command_roll_d_log = []
+        self.command_thrust_p_log = []
+        self.command_thrust_i_log = []
+        self.command_thrust_d_log = []
 
         self.tracking_time = []
 
@@ -140,21 +158,29 @@ class MinimalSubscriber(Node):
             current_time = time.time()
             elapsed_time = current_time - self.start_time
             self.timestamp_data.append(elapsed_time)
-            self.cur_x_data.append(self.x_position1)
-            self.cur_y_data.append(self.y_position1)
-            self.cur_z_data.append(self.z_position1)
+            self.x_log.append(self.x_position1)
+            self.y_log.append(self.y_position1)
+            self.z_log.append(self.z_position1)
 
-            self.cf1_command_roll.append(self.roll1)       
-            self.cf1_command_pitch.append(self.pitch1)
-            self.cf1_command_thrust.append(self.thrust1)
-            self.cf1_command_yaw.append(self.yawrate1)
+            self.yaw_log.append(msg.data[7])
+            self.pitch_log.append(msg.data[8])
+            self.roll_log.append(msg.data[9])
+
+            self.error_x_log.append(msg.data[10])
+            self.error_y_log.append(msg.data[11])
+            self.error_z_log.append(msg.data[12])
+
+            self.command_roll_log.append(self.roll1)
+            self.command_pitch_log.append(self.pitch1)
+            self.command_thrust_log.append(self.thrust1)
+            self.command_yawrate_log.append(self.yawrate1)
 
             # self.cur_yaw_data.append(self.yaw_meas)
             # self.cur_pitch_data.append(self.pitch_meas)
             # self.cur_roll_data.append(self.roll_meas)
 
             self.thrust_data.append(self.thrust1)
-            self.tracking_time.append(datetime.now().strftime("%Y%m%d_%H%M%S"))
+            self.tracking_time.append(datetime.now().strftime("%Y%m%d_%H%M%S.%f"))
 
             # self.y_fp_data.append(y_fp)
             # self.y_fp_data.append(y_fi)
@@ -178,6 +204,17 @@ class MinimalSubscriber(Node):
 
 
         #self._cf.commander.send_setpoint(self.const_roll, self.const_pitch, self.const_yawrate, self.const_thrust)
+
+    def controller_pid_details_callback(self, msg):
+        self.command_pitch_p_log.append(msg.data[0])
+        self.command_pitch_i_log.append(msg.data[1])
+        self.command_pitch_d_log.append(msg.data[2])
+        self.command_roll_p_log.append(msg.data[3])
+        self.command_roll_i_log.append(msg.data[4])
+        self.command_roll_d_log.append(msg.data[5])
+        self.command_thrust_p_log.append(msg.data[6])
+        self.command_thrust_i_log.append(msg.data[7])
+        self.command_thrust_d_log.append(msg.data[8])
 
     # Unused function that uses Threading
     def _send_thrust_command(self):
@@ -254,7 +291,7 @@ class MinimalSubscriber(Node):
             fname = f"cf2_tuning_{time_s}.csv" #name of csv    
         #fname = f"optitrack_test_{time_s}.csv"
         path = os.path.join(CF_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
-        self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S"), self.cur_x_data, self.cur_y_data, self.cur_z_data])
+        self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f"), self.x_log, self.y_log, self.z_log])
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
@@ -262,31 +299,40 @@ class MinimalSubscriber(Node):
                 "x","y","z",
                 ])
            
-            for (t, x, y, z) in zip(self.tracking_time, self.cur_x_data, self.cur_y_data, self.cur_z_data):
+            for (t, x, y, z) in zip(self.tracking_time, self.x_log, self.y_log, self.z_log):
                 w.writerow([t, x, y, z])
 
 
 
     #----- Saving Command Values & Thrust Values to Optimize Tuning -----#
-    def save_command_values(self):
+    def save_all_values(self):
         time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
-        fname = f"cf1_commands_{time_s}.csv" #name of csv
+        fname = f"cf1_all_values_{time_s}.csv" #name of csv
         if address[-1] == '8':
             CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf1_command_values")  # if radio signal ends in 7 (cf2)
-            self.cf1_command_values.append([time_s, self.cf1_command_roll, self.cf1_command_pitch, self.cf1_command_yaw, self.cf1_command_thrust]) #msg.data order = roll, pitch, yaw, thrust
+            # self.cf1_command_values.append([time_s, self.cf1_command_roll, self.cf1_command_pitch, self.cf1_command_yaw, self.cf1_command_thrust]) #msg.data order = roll, pitch, yaw, thrust
         else:
             CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf2_command_values") # else its cf2
-            self.cf2_command_values.append([time_s, self.roll1, self.pitch1, self.yawrate1, self.thrust1]) #msg.data order = roll, pitch, yaw, thrust
+            # self.cf2_command_values.append([time_s, self.roll1, self.pitch1, self.yawrate1, self.thrust1]) #msg.data order = roll, pitch, yaw, thrust
         path = os.path.join(CF_COMMAND_PATH, fname)
+        self.get_logger().info(path)
         #self.get_logger().info("path: " + path)
         with open(path, "w", newline="") as file:
             w = csv.writer(file)
             w.writerow(       # header row
-                ["time_s","roll_command","pitch_command","yaw_command", "thrust_command"
+                ["time_s","x","y","z","x_error","y_error","z_error","yaw","pitch","roll",
+                 "yaw_command","pitch_command","roll_command","thrust_command",
+                 "pitch_cmd_p","pitch_cmd_i","pitch_cmd_d","roll_cmd_p","roll_cmd_i","roll_cmd_d","thrust_cmd_p","thrust_cmd_i",
+                 "thrust_cmd_d"
                 ])
-            for (t, roll, pitch, yaw, thrust) in zip(self.tracking_time, self.cf1_command_roll, self.cf1_command_pitch, self.cf1_command_yaw, self.cf1_command_thrust):
-                w.writerow([t, roll, pitch, yaw, thrust])
-        #print(self.cf1_command_values)
+            for i in range(len(self.x_log)):
+                w.writerow([self.tracking_time[i], self.x_log[i], self.y_log[i], self.z_log[i],
+                            self.error_x_log[i], self.error_y_log[i], self.error_z_log[i],
+                            self.yaw_log[i], self.pitch_log[i], self.roll_log[i],
+                            self.command_yawrate_log[i], self.command_pitch_log[i], self.command_roll_log[i], self.command_thrust_log[i],
+                            self.command_pitch_p_log[i], self.command_pitch_i_log[i], self.command_pitch_d_log[i],
+                            self.command_roll_p_log[i], self.command_roll_i_log[i], self.command_roll_d_log[i],
+                            self.command_thrust_p_log[i], self.command_thrust_i_log[i], self.command_thrust_d_log[i]])
     #---------------------------------------------------------------------#
 
 
@@ -395,7 +441,7 @@ def main(args=None):
     # Currently plotting Y vs time, X vs time, Z vs time and Thrust vs time
     plt.figure()
     plt.subplot(2,2,1)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_y_data, 'r-', label='Y Position')
+    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.y_log, 'r-', label='Y Position')
     plt.xlabel('Time(s)')
     plt.ylabel('Y Position (m)')
     plt.title('Y Position Over Time')
@@ -404,7 +450,7 @@ def main(args=None):
 
 
     plt.subplot(2,2,2)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_x_data, 'r-', label='X Position')
+    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.x_log, 'r-', label='X Position')
     plt.xlabel('Time(s)')
     plt.ylabel('X Position (m)')
     plt.title('X Position Over Time')
@@ -413,7 +459,7 @@ def main(args=None):
 
 
     plt.subplot(2,2,3)
-    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.cur_z_data, 'r-', label='Z Position')
+    plt.plot(minimal_subscriber.timestamp_data, minimal_subscriber.z_log, 'r-', label='Z Position')
     plt.xlabel('Time(s)')
     plt.ylabel('Z Position (m)')
     plt.title('Z Position Over Time')
@@ -434,7 +480,9 @@ def main(args=None):
     minimal_subscriber.save_data()
     #minimal_subscriber.save_data_optitrack()
     #cf2_tuning_static()
-    minimal_subscriber.save_command_values()    # this saves commanded values for optimizing flights 
+
+    print("\n\n\n**********************Hello****************\n\n\n")
+    minimal_subscriber.save_all_values()    # this saves commanded values for optimizing flights 
     
    
 
