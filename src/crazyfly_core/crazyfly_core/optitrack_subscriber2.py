@@ -3,14 +3,14 @@
 ''' This file tunes the individual drone, cf2'''
 
 
-## Last Update: Aug 22, 2025
+## Last Update: Sept 9, 2025
 
 ## What was changed:
-# Gains for CF2 were finalized.
-# We also moved 3 files to unused (PID)
+# Gains for CF2 got updated
+# Logic for multiple waypoints was updated
 
 ## Changes left to make:
-# Delete all unused comments to improve readability
+# clean up tuning on cf2
 
 # big comments blobs were deleted, need to continue renaming variables and cleaning up code
 
@@ -84,7 +84,7 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [2.0, 1.0, 3.0] #set single position (x,y,z)
+        self.target_positions = [[2.0, 1.0, 3.0]] #set single position (x,y,z)
         #self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
@@ -113,8 +113,8 @@ class OptiTrackSubscriber2(Node):
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
 
         # temp feedforward
-        self.pitch_feedforward = -0.25
-        self.roll_feedforward = -0.5 # -1.2 # -1.9
+        self.pitch_feedforward = -0.5
+        self.roll_feedforward = -0.4 # -1.2 # -1.9
 
         # --
                 # ----------------------         Y constants         ---------------------- #
@@ -273,7 +273,7 @@ class OptiTrackSubscriber2(Node):
             # yaw_y = optitrack frame pitch
             # roll_z = opitrack frame yaw
             r = R.from_quat(self.orientation_quat)
-            pitch_x, yaw_y, roll_z = r.as_euler('xys', degrees = True)
+            pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
 
             # create message of type Float Array (all values need to be floats)
 
@@ -283,6 +283,10 @@ class OptiTrackSubscriber2(Node):
                         float(yaw_y), float(pitch_x), float(roll_z),
                         float(self.target_position[0]-self.position[0]), float(self.target_position[1]-self.position[1]),
                         float(self.target_position[2]-self.position[2])]
+
+            # msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
+            #             float(self.position[0]), float(self.position[1]), float(self.position[2]),
+            #             float(yaw_y), float(pitch_x), float(roll_z)]
             
             # print(msg.data)
             self.pub_commands.publish(msg) #publish commands for drone controller
@@ -293,30 +297,6 @@ class OptiTrackSubscriber2(Node):
                         float(thrust_pid_details[0]), float(thrust_pid_details[1]), float(thrust_pid_details[2])]
             self.pub_controller_pid_details.publish(msg)
 
-
-
-            """ if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
-                print(f"start time: {self.startTimer}")
-                if not self.startTimer: #if the timer for hovering has not started, start it
-                    print("cf1 timer started")
-                    self.startTimer = True
-                    self.startTime = time.time()
-                elif time.time() - self.startTime >= 4: #if the drone has been at the desired position for 3 seconds
-                    print("drone has been in threshold for 3 seconds")
-                    if not self.threshold_met:
-                        self.threshold_met = True
-                        self.publish_threshold_met()
-                        print("ISUDHFISDFHIUSDHFIUSDHFIUSDFHcf: Threshold met")
-                    if self.threshold_met:
-                        self.current_target_index += 1
-                        print("current index: ", self.current_target_index)
-                        print(f"LENGNGNGNTH OF TARGET_POSITIONS: {self.target_positions}")
-                        if self.current_target_index < len(self.target_positions):  #if there is another target position, move to it
-                            self.target_position = self.target_positions[self.current_target_index]
-                            self.get_logger().info(f"cf2:Moving to next target position {self.target_position}") 
-                            print(f"cf2: moving to next position: {self.target_position}")
-                    else:
-                        print("Waiting for cf1 to reach threshold.")"""
             #new threshold logic
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
                 if not self.startTimer: #if the timer for hovering has not started, start it
@@ -383,7 +363,7 @@ class OptiTrackSubscriber2(Node):
     def calculate_pitch(self):
     
         # set to zero if within margin
-        self.cur_z_error = self.target_positions[2] - self.position[2]
+        self.cur_z_error = self.target_position[2] - self.position[2]
         if -0.01 <= self.cur_z_error <= 0.01:
             self.cur_z_error = 0
 
@@ -404,12 +384,12 @@ class OptiTrackSubscriber2(Node):
         desired_pitch_angle = self.pitch_feedforward + z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
  
         # return pitch_cmd
-        return desired_pitch_angle
+        return desired_pitch_angle, [z_fp, z_fi, z_fd]
 
     # Y axis control 
     def calculate_thrust(self):
         # P term:
-        self.cur_y_error = self.target_positions[1]- self.position[1]
+        self.cur_y_error = self.target_position[1]- self.position[1]
 
         # I term:
         if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
@@ -435,13 +415,13 @@ class OptiTrackSubscriber2(Node):
         thrust = self.hover + y_fp + y_fi + y_fd
         # Clamp thrust to valid range 
         thrust = int(max(self.min_thrust, min(thrust, self.max_thrust)))
-        return thrust
+        return thrust, [y_fp, y_fi, y_fd]
     
     # FIXED X-axis control. 08/19/25
     def calculate_roll(self):
 
         # set to zero if within margin
-        self.cur_x_error = self.target_positions[0] - self.position[0]
+        self.cur_x_error = self.target_position[0] - self.position[0]
         if -0.01 <= self.cur_x_error <= 0.01:
             self.cur_x_error = 0
 
@@ -464,7 +444,7 @@ class OptiTrackSubscriber2(Node):
         
         # return roll_cmd
 
-        return desired_roll_angle
+        return desired_roll_angle, [x_fp, x_fi, x_fd]
 
     def get_position(self):
         return self.position

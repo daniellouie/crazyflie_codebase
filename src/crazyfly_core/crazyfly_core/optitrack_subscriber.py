@@ -112,6 +112,9 @@ class OptiTrackSubscriber(Node):
         self.k_p_rot_sign = 1
 
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
+        self.pitch_feedforward = 0
+        self.roll_feedforward = 0
+
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
@@ -174,84 +177,6 @@ class OptiTrackSubscriber(Node):
         self.int_z_max = 3.0
         # --
         # ────────────────────────────────────────────────────────────────────────
-
-        # # CF2 GAINS
-
-        # # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
-
-        # # temp feedforward
-        # self.pitch_feedforward = -0.25
-        # self.roll_feedforward = -0.5 # -1.2 # -1.9
-
-        # # --
-        #         # ----------------------         Y constants         ---------------------- #
-        # # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        # self.hover       = 41600      # trim thrust to hold level hover
-        # self.max_thrust  = 56000
-        # self.min_thrust  = 42000
-
-        # self.k_p_y       = 30000 #+3800      # P-gain
-        # self.k_i_y       = 800             # I-gain
-        # self.k_d_y       = 12000           # D-gain
-        
-
-        # self.max_yawrate = 15
-        # self.min_yawrate = -15
-
-        # # NEVER CHANGES
-        # self.cur_y_error = 0.0
-        # self.prev_y_error = 0.0
-        # self.int_y_error = 0.0
-        # self.int_y_max = 5000 # maximum added thrust from integral component
-        
-
-        #         # ----------------------         X constants         ---------------------- #
-        # # X constants
-        # # values for horizontal X (roll) PID
-        # # self.k_p_x       = 2.0
-        # # self.k_i_x       = 0.6
-        # # self.k_d_x       = 4.1
-        
-        # # commented out 9/3
-        # # self.k_p_x       = 0.75    
-        # # self.k_i_x       = 0.5 
-        # # self.k_d_x       = 3.55
-
-        # self.k_p_x       = 0.75    
-        # self.k_i_x       = 0.25
-        # self.k_d_x       = 3.0 # 3.25, 3.75
-
-        # self.max_pitch   = 4.0
-        # self.min_pitch   = -4.0
-
-        # # NEVER CHANGES
-        # self.cur_x_error = 0.0
-        # self.prev_x_error = 0.0
-        # self.int_x_error = 0.0
-        # self.int_x_max = 3.0 # maximum added pitch from integral component
-        # # --
-
-       
-        #         # ----------------------         Z constants         ---------------------- #
-        # # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        # self.k_p_z       = -1.2 
-        # self.k_i_z       = -0.1
-        # self.k_d_z       = -2.6
-
-        # # self.k_p_z = 2
-        # # self.k_i_z = 0.6
-        # # self.k_d_z = 4.1
-
-        # self.max_roll = 3.0
-        # self.min_roll = -3.0 
-
-        # # NEVER CHANGES
-        # self.cur_z_error = 0.0
-        # self.prev_z_error = 0.0
-        # self.int_z_error = 0.0
-        # self.int_z_max = 4.0
-        # # --
-        # # ────────────────────────────────────────────────────────────────────────
 
         self.startTimer = False
         self.startTime = time.time()

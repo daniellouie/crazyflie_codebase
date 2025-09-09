@@ -3,14 +3,14 @@
 ''' This file tunes the individual drone, cf2'''
 
 
-## Last Update: Aug 22, 2025
+## Last Update: Sept 9, 2025
 
 ## What was changed:
-# Gains for CF2 were finalized.
-# We also moved 3 files to unused (PID)
+# Gains for CF2 got updated
+# Logic for multiple waypoints was updated
 
 ## Changes left to make:
-# Delete all unused comments to improve readability
+# clean up tuning on cf2
 
 # big comments blobs were deleted, need to continue renaming variables and cleaning up code
 
@@ -72,6 +72,8 @@ class OptiTrackSubscriber2(Node):
 
         # message to send flight commands to crazyflie program
         self.pub_commands = self.create_publisher(Float32MultiArray, '/cf1/commands', 10)
+        self.pub_controller_pid_details = self.create_publisher(Float32MultiArray, 'cf1/controller_pid_details', 10)
+
 
         # drone to drone communication for waypoint synchronization
         self.pub_threshold_met = self.create_publisher(Bool, '/threshold_met_cf2', 10)
@@ -82,7 +84,7 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [2.0, 1.0, 3.0] #set single position (x,y,z)
+        self.target_positions = [[2.0, 1.0, 3.0]] #set single position (x,y,z)
         #self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
@@ -106,7 +108,14 @@ class OptiTrackSubscriber2(Node):
         self.k_p_rot = 1.0
         self.k_p_rot_sign = 1
 
+        # CF2 GAINS
+
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
+
+        # temp feedforward
+        self.pitch_feedforward = -0.5
+        self.roll_feedforward = -0.4 # -1.2 # -1.9
+
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
@@ -136,9 +145,14 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.6
         # self.k_d_x       = 4.1
         
+        # commented out 9/3
+        # self.k_p_x       = 0.75    
+        # self.k_i_x       = 0.5 
+        # self.k_d_x       = 3.55
+
         self.k_p_x       = 0.75    
-        self.k_i_x       = 0.5 
-        self.k_d_x       = 3.55
+        self.k_i_x       = 0.25
+        self.k_d_x       = 3.0 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -154,7 +168,7 @@ class OptiTrackSubscriber2(Node):
                 # ----------------------         Z constants         ---------------------- #
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
         self.k_p_z       = -1.2 
-        self.k_i_z       = -0.4
+        self.k_i_z       = -0.1
         self.k_d_z       = -2.6
 
         # self.k_p_z = 2
@@ -242,70 +256,59 @@ class OptiTrackSubscriber2(Node):
             # Grab world orientation quaternion (for relative drone orientation)
             q_world = R.from_quat(self.orientation_quat)
 
-            # # if orientation not zero, set to zero
-            # if not self.drone_rel_zero_orient:
-            #     self.q0_identity = q_world.inv() 
-            #     self.drone_rel_zero_orient = True
-            
-            
-
             # calls rotational PID function (yawrate)
             yawrate_cmd = self.calculate_yawrate()
             # self.get_logger().info(f"yawrate_cmd = {yawrate_cmd:.2f}")
 
             # calls X axis PID function (pitch)
-            pitch_cmd = self.calculate_pitch()
+            pitch_cmd, pitch_pid_details = self.calculate_pitch()
 
             # calls Y axis PID function (thrust)
-            thrust = self.calculate_thrust()
+            thrust, thrust_pid_details = self.calculate_thrust()
 
             # Calls Z axis PID function (roll)
-            roll_cmd = self.calculate_roll()
+            roll_cmd, roll_pid_details = self.calculate_roll()
+
+            # pitch_x = optitrack frame roll
+            # yaw_y = optitrack frame pitch
+            # roll_z = opitrack frame yaw
+            r = R.from_quat(self.orientation_quat)
+            pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
 
             # create message of type Float Array (all values need to be floats)
 
             msg = Float32MultiArray()
             msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
-                        float(self.position[0]), float(self.position[1]), float(self.position[2])]
+                        float(self.position[0]), float(self.position[1]), float(self.position[2]),
+                        float(yaw_y), float(pitch_x), float(roll_z),
+                        float(self.target_position[0]-self.position[0]), float(self.target_position[1]-self.position[1]),
+                        float(self.target_position[2]-self.position[2])]
+
+            # msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
+            #             float(self.position[0]), float(self.position[1]), float(self.position[2]),
+            #             float(yaw_y), float(pitch_x), float(roll_z)]
+            
             # print(msg.data)
             self.pub_commands.publish(msg) #publish commands for drone controller
 
+            msg = Float32MultiArray()
+            msg.data = [float(pitch_pid_details[0]), float(pitch_pid_details[1]), float(pitch_pid_details[2]),
+                        float(roll_pid_details[0]), float(roll_pid_details[1]), float(roll_pid_details[2]),
+                        float(thrust_pid_details[0]), float(thrust_pid_details[1]), float(thrust_pid_details[2])]
+            self.pub_controller_pid_details.publish(msg)
 
-
-            """ if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
-                print(f"start time: {self.startTimer}")
-                if not self.startTimer: #if the timer for hovering has not started, start it
-                    print("cf1 timer started")
-                    self.startTimer = True
-                    self.startTime = time.time()
-                elif time.time() - self.startTime >= 4: #if the drone has been at the desired position for 3 seconds
-                    print("drone has been in threshold for 3 seconds")
-                    if not self.threshold_met:
-                        self.threshold_met = True
-                        self.publish_threshold_met()
-                        print("ISUDHFISDFHIUSDHFIUSDHFIUSDFHcf: Threshold met")
-                    if self.threshold_met:
-                        self.current_target_index += 1
-                        print("current index: ", self.current_target_index)
-                        print(f"LENGNGNGNTH OF TARGET_POSITIONS: {self.target_positions}")
-                        if self.current_target_index < len(self.target_positions):  #if there is another target position, move to it
-                            self.target_position = self.target_positions[self.current_target_index]
-                            self.get_logger().info(f"cf2:Moving to next target position {self.target_position}") 
-                            print(f"cf2: moving to next position: {self.target_position}")
-                    else:
-                        print("Waiting for cf1 to reach threshold.")"""
             #new threshold logic
             if self.is_within_threshold(self.position, self.target_position): #if drone is at desired position
                 if not self.startTimer: #if the timer for hovering has not started, start it
                     print("cf2 timer started")
                     self.startTimer = True
                     self.startTime = time.time()
-                elif time.time() - self.startTime >= 3: #if the drone has been at the desired position for 3 seconds
+                elif time.time() - self.startTime >= 4: #if the drone has been at the desired position for 3 seconds
                     if not self.threshold_met:
                         self.threshold_met = True
                         self.publish_threshold_met()
                         print("cf2: Threshold met")
-                    if self.cf1_threshold_met and self.cf1_threshold_met:
+                    if self.threshold_met:
                         self.current_target_index += 1
                         if self.current_target_index < len(self.target_positions):  #if these is another target position, move to it
                             self.target_position = self.target_positions[self.current_target_index]
@@ -360,7 +363,7 @@ class OptiTrackSubscriber2(Node):
     def calculate_pitch(self):
     
         # set to zero if within margin
-        self.cur_z_error = self.target_positions[2] - self.position[2]
+        self.cur_z_error = self.target_position[2] - self.position[2]
         if -0.01 <= self.cur_z_error <= 0.01:
             self.cur_z_error = 0
 
@@ -378,41 +381,15 @@ class OptiTrackSubscriber2(Node):
         z_fd = self.k_d_z * (z_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
         self.prev_z_error = self.cur_z_error # (deg*s/m)
         
-        desired_pitch_angle = 0 + z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
-        
-        # Desired orientation in quaternion 
-        half_angle = np.deg2rad(desired_pitch_angle) / 2.0
-        q_desired = R.from_quat([np.sin(half_angle), 0.0, 0.0, np.cos(half_angle)])  # (x,y,z,w)
-        # Current orientation in quaternion
-        q_current = R.from_quat(self.orientation_quat)
-        # orientation error quaternion
-        q_error = q_desired * q_current.inv()
-        
-        # Convert quaternion back to angle
-        pitch_error_quat = q_error.as_quat()  
-        x_component = pitch_error_quat[0]
-        w_component = pitch_error_quat[3]
-        pitch_error_angle = np.rad2deg(2.0 * np.arctan2(x_component, w_component))
-        pitch_error_angle = (pitch_error_angle + 180) % 360 - 180
-        
-        pitch_cmd = np.clip(pitch_error_angle, self.min_pitch, self.max_pitch)
-        
-        ##### current pitch for measurement #####
-        x_cur, w_cur = q_current.as_quat()[0], q_current.as_quat()[3]
-        norm = math.hypot(x_cur, w_cur)
-        if norm > 1e-9:
-            angle_x = x_cur / norm
-            angle_w = w_cur / norm
-            self.pitch_meas = math.degrees(2.0 * math.atan2(angle_x, angle_w))
-            self.pitch_meas = (self.pitch_meas + 180) % 360 - 180
-        #########################################
+        desired_pitch_angle = self.pitch_feedforward + z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
+ 
         # return pitch_cmd
-        return desired_pitch_angle
+        return desired_pitch_angle, [z_fp, z_fi, z_fd]
 
     # Y axis control 
     def calculate_thrust(self):
         # P term:
-        self.cur_y_error = self.target_positions[1]- self.position[1]
+        self.cur_y_error = self.target_position[1]- self.position[1]
 
         # I term:
         if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
@@ -438,13 +415,13 @@ class OptiTrackSubscriber2(Node):
         thrust = self.hover + y_fp + y_fi + y_fd
         # Clamp thrust to valid range 
         thrust = int(max(self.min_thrust, min(thrust, self.max_thrust)))
-        return thrust
+        return thrust, [y_fp, y_fi, y_fd]
     
     # FIXED X-axis control. 08/19/25
     def calculate_roll(self):
 
         # set to zero if within margin
-        self.cur_x_error = self.target_positions[0] - self.position[0]
+        self.cur_x_error = self.target_position[0] - self.position[0]
         if -0.01 <= self.cur_x_error <= 0.01:
             self.cur_x_error = 0
 
@@ -463,37 +440,11 @@ class OptiTrackSubscriber2(Node):
         x_fd = self.k_d_x * (x_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
         self.prev_x_error = self.cur_x_error # (deg*s/m)
         
-        desired_roll_angle = x_fp + x_fi + x_fd # desired roll angle in DEGREESSSS
-        
-        # Desired orientation in quaternion 
-        half_angle = np.deg2rad(desired_roll_angle) / 2.0
-        q_desired = R.from_quat([0.0, 0.0, np.sin(half_angle), np.cos(half_angle)])  # (x,y,z,w)
-        # Current orientation in quaternion
-        q_current = R.from_quat(self.orientation_quat)
-        # orientation error quaternion
-        q_error = q_desired * q_current.inv()
-        
-        # Convert quaternion back to angle
-        roll_error_quat = q_error.as_quat()  
-        z_component = roll_error_quat[2]
-        w_component = roll_error_quat[3]
-        roll_error_angle = np.rad2deg(2.0 * np.arctan2(z_component, w_component))
-        roll_error_angle = (roll_error_angle + 180) % 360 - 180
-        
-        roll_cmd = np.clip(roll_error_angle, self.min_roll, self.max_roll)
-        
-        ##### current roll for measurement #####
-        z_cur, w_cur = q_current.as_quat()[2], q_current.as_quat()[3]
-        norm = math.hypot(z_cur, w_cur)
-        if norm > 1e-9:
-            angle_z = z_cur / norm
-            angle_w = w_cur / norm
-            self.roll_meas = math.degrees(2.0 * math.atan2(angle_z, angle_w))
-            self.roll_meas = (self.roll_meas + 180) % 360 - 180
+        desired_roll_angle = self.roll_feedforward + x_fp + x_fi + x_fd # desired roll angle in DEGREESSSS
         
         # return roll_cmd
 
-        return desired_roll_angle
+        return desired_roll_angle, [x_fp, x_fi, x_fd]
 
     def get_position(self):
         return self.position

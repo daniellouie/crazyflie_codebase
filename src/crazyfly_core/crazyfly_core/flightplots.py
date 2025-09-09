@@ -37,7 +37,6 @@ def FILE_INITIATION(i):
     FILE_PATTERN2 = "cf2_tuning_*.csv"
     FILE_PATTERN3 = "cf1_tuning_*.csv"  
     FILE_PATTERN_CF1_CMD = "cf1_all_values_*.csv"
-    FILE_PATTERN_CF2_QUAT = "cf2_quat_values_*.csv"
 
 
     csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
@@ -45,7 +44,6 @@ def FILE_INITIATION(i):
     cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
     cf1_files = sorted(CF1_TUNING.glob(FILE_PATTERN3))
     cf1_cmd_files = sorted(CF1_COMMANDS.glob(FILE_PATTERN_CF1_CMD))
-    cf2_quat_files = sorted(CF2_QUAT.glob(FILE_PATTERN_CF2_QUAT))
 
     # ERROR STATEMENT
     if not csv_files:
@@ -58,22 +56,13 @@ def FILE_INITIATION(i):
         raise FileNotFoundError(f"No file matching {FILE_PATTERN3} in {CF1_TUNING}")
     if not cf1_cmd_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
-    if not cf2_quat_files:
-        raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF2_QUAT} in {CF2_QUAT}")
 
     file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
     cf1_path = cf1_files[-1]
-    cf1_cmd_path = cf1_cmd_files[-1]
-    cf2_quat_path = cf2_quat_files[-1]
+    cf1_cmd_path = cf1_cmd_files[-2]
 
-    # print(f"[flightplots] LATEST FLIGHT: {file_path}")
-    # print(f"[I_joc] LATEST INPUTS {I_joc_path}")
-    #temporary fix
-    #return cf2_path
-    #return file_path, I_joc_path, cf2_path
-    
     if i == "cf1_path":
         return cf1_path
     if i == "cf2_path":
@@ -84,8 +73,6 @@ def FILE_INITIATION(i):
         return file_path
     if i == "cf1_cmd_path":
         return cf1_cmd_path
-    if i == "cf2_quat_values":
-        return cf2_quat_path
     else:
         return cf2_path
 
@@ -679,50 +666,6 @@ def plot_pos_err_cmd():
     plt.subplots_adjust(hspace=0.18, wspace=0.235, left=0.044)
     plt.show()
     #print(f"Plotted: {os.path.basename(csv_path)}")
-
-# def plot_quaternion_data():
-#     # Get the CSV file path
-#     path = FILE_INITIATION("cf2_quat_values")
-#     data = pd.read_csv(path)
-    
-#     # Create time array with 0.01 second intervals
-#     # Since you only have one row of data, we'll create a single point plot
-#     # If you plan to have multiple rows over time, this will work for that too
-#     time_array = np.arange(0, len(data) * 0.01, 0.01)
-    
-#     # Create subplots
-#     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-#     fig.suptitle('Quaternion Components Over Time', fontsize=16)
-    
-#     # Plot quat_x vs time
-#     axes[0, 0].plot(time_array, data['quat_x'], 'b-o', linewidth=1, markersize=4)
-#     axes[0, 0].set_title('quat_x vs Time')
-#     axes[0, 0].set_ylabel('quat_x')
-#     axes[0, 0].grid(True, alpha=0.3)
-    
-#     # Plot quat_y vs time
-#     axes[0, 1].plot(time_array, data['quat_y'], 'r-o', linewidth=1, markersize=4)
-#     axes[0, 1].set_title('quat_y vs Time')
-#     axes[0, 1].set_ylabel('quat_y')
-#     axes[0, 1].grid(True, alpha=0.3)
-    
-#     # Plot quat_z vs time
-#     axes[1, 0].plot(time_array, data['quat_z'], 'g-o', linewidth=1, markersize=4)
-#     axes[1, 0].set_title('quat_z vs Time')
-#     axes[1, 0].set_xlabel('Time (seconds)')
-#     axes[1, 0].set_ylabel('quat_z')
-#     axes[1, 0].grid(True, alpha=0.3)
-    
-#     # Plot quat_w vs time
-#     axes[1, 1].plot(time_array, data['quat_w'], 'm-o', linewidth=1, markersize=4)
-#     axes[1, 1].set_title('quat_w vs Time')
-#     axes[1, 1].set_xlabel('Time (seconds)')
-#     axes[1, 1].set_ylabel('quat_w')
-#     axes[1, 1].grid(True, alpha=0.3)
-    
-#     # Adjust layout to prevent overlap
-#     plt.tight_layout()
-#     plt.show()
 
 def main():
     file_path = FILE_INITIATION("file_path")
