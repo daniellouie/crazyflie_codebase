@@ -111,89 +111,17 @@ class OptiTrackSubscriber(Node):
         self.k_p_rot = 0.25
         self.k_p_rot_sign = 1
 
-        # # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
-        # # --
-        #         # ----------------------         Y constants         ---------------------- #
-        # # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        # self.hover       = 44000      # trim thrust to hold level hover
-        # self.max_thrust  = 55000
-        # self.min_thrust  = 42000
-
-        # self.k_p_y       = 15000      # P-gain
-        # self.k_i_y       = 3250             # I-gain
-        # self.k_d_y       = 10000           # D-gain
-
-        # self.max_yawrate = 15
-        # self.min_yawrate = -15
-
-        # # NEVER CHANGES
-        # self.cur_y_error = 0.0
-        # self.prev_y_error = 0.0
-        # self.int_y_error = 0.0
-        # self.int_y_max = 5000 # maximum added thrust from integral component
-        
-
-        #         # ----------------------         X constants         ---------------------- #
-        # # X constants
-        # # # values for horizontal X (roll) PID
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.6
-        
-        # # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
-        # # self.k_p_x       = 1.55 # 2.5 oscillated by 1 m, 2.0 oscillated by <1m, 2.3 oscillated by >1m, 1.8 oscillated by 0.7m    
-        # # self.k_i_x       = 0.1
-        # # self.k_d_x       = 2.95   # 3.75
-
-        # # last semi-working values: p: 2.3, i: 0.6, d: 4.1
-
-        # self.max_pitch   = 3.0
-        # self.min_pitch   = -3.0
-
-        # # NEVER CHANGES
-        # self.cur_x_error = 0.0
-        # self.prev_x_error = 0.0
-        # self.int_x_error = 0.0
-        # self.int_x_max = 3.0 # maximum added pitch from integral component
-        # # --
-
-       
-        #         # ----------------------         Z constants         ---------------------- #
-        # # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        # self.k_p_z       = -2.0
-        # self.k_i_z       = -0.6
-        # self.k_d_z       = -3.5
-        
-        # self.max_roll = 3.0
-        # self.min_roll = -3.0 
-
-        # # NEVER CHANGES
-        # self.cur_z_error = 0.0
-        # self.prev_z_error = 0.0
-        # self.int_z_error = 0.0
-        # self.int_z_max = 3.0
-        # # --
-        # # ────────────────────────────────────────────────────────────────────────
-
-        # CF2 GAINS
-
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
-
-        # temp feedforward
-        self.pitch_feedforward = -0.25
-        self.roll_feedforward = -0.5 # -1.2 # -1.9
-
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 41600      # trim thrust to hold level hover
-        self.max_thrust  = 56000
+        self.hover       = 44000      # trim thrust to hold level hover
+        self.max_thrust  = 55000
         self.min_thrust  = 42000
 
-        self.k_p_y       = 30000 #+3800      # P-gain
-        self.k_i_y       = 800             # I-gain
-        self.k_d_y       = 12000           # D-gain
-        
+        self.k_p_y       = 15000      # P-gain
+        self.k_i_y       = 3250             # I-gain
+        self.k_d_y       = 10000           # D-gain
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -207,22 +135,20 @@ class OptiTrackSubscriber(Node):
 
                 # ----------------------         X constants         ---------------------- #
         # X constants
-        # values for horizontal X (roll) PID
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.1
+        # # values for horizontal X (roll) PID
+        self.k_p_x       = 2.0
+        self.k_i_x       = 0.6
+        self.k_d_x       = 4.6
         
-        # commented out 9/3
-        # self.k_p_x       = 0.75    
-        # self.k_i_x       = 0.5 
-        # self.k_d_x       = 3.55
+        # NOTE: try increasing kp more so than I. Mostly work with P and D then a little I. P too much = oscillation. I too much = also too much oscillations
+        # self.k_p_x       = 1.55 # 2.5 oscillated by 1 m, 2.0 oscillated by <1m, 2.3 oscillated by >1m, 1.8 oscillated by 0.7m    
+        # self.k_i_x       = 0.1
+        # self.k_d_x       = 2.95   # 3.75
 
-        self.k_p_x       = 0.75    
-        self.k_i_x       = 0.25
-        self.k_d_x       = 3.0 # 3.25, 3.75
+        # last semi-working values: p: 2.3, i: 0.6, d: 4.1
 
-        self.max_pitch   = 4.0
-        self.min_pitch   = -4.0
+        self.max_pitch   = 3.0
+        self.min_pitch   = -3.0
 
         # NEVER CHANGES
         self.cur_x_error = 0.0
@@ -234,14 +160,10 @@ class OptiTrackSubscriber(Node):
        
                 # ----------------------         Z constants         ---------------------- #
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        self.k_p_z       = -1.2 
-        self.k_i_z       = -0.1
-        self.k_d_z       = -2.6
-
-        # self.k_p_z = 2
-        # self.k_i_z = 0.6
-        # self.k_d_z = 4.1
-
+        self.k_p_z       = -2.0
+        self.k_i_z       = -0.6
+        self.k_d_z       = -3.5
+        
         self.max_roll = 3.0
         self.min_roll = -3.0 
 
@@ -249,9 +171,87 @@ class OptiTrackSubscriber(Node):
         self.cur_z_error = 0.0
         self.prev_z_error = 0.0
         self.int_z_error = 0.0
-        self.int_z_max = 4.0
+        self.int_z_max = 3.0
         # --
         # ────────────────────────────────────────────────────────────────────────
+
+        # # CF2 GAINS
+
+        # # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
+
+        # # temp feedforward
+        # self.pitch_feedforward = -0.25
+        # self.roll_feedforward = -0.5 # -1.2 # -1.9
+
+        # # --
+        #         # ----------------------         Y constants         ---------------------- #
+        # # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
+        # self.hover       = 41600      # trim thrust to hold level hover
+        # self.max_thrust  = 56000
+        # self.min_thrust  = 42000
+
+        # self.k_p_y       = 30000 #+3800      # P-gain
+        # self.k_i_y       = 800             # I-gain
+        # self.k_d_y       = 12000           # D-gain
+        
+
+        # self.max_yawrate = 15
+        # self.min_yawrate = -15
+
+        # # NEVER CHANGES
+        # self.cur_y_error = 0.0
+        # self.prev_y_error = 0.0
+        # self.int_y_error = 0.0
+        # self.int_y_max = 5000 # maximum added thrust from integral component
+        
+
+        #         # ----------------------         X constants         ---------------------- #
+        # # X constants
+        # # values for horizontal X (roll) PID
+        # # self.k_p_x       = 2.0
+        # # self.k_i_x       = 0.6
+        # # self.k_d_x       = 4.1
+        
+        # # commented out 9/3
+        # # self.k_p_x       = 0.75    
+        # # self.k_i_x       = 0.5 
+        # # self.k_d_x       = 3.55
+
+        # self.k_p_x       = 0.75    
+        # self.k_i_x       = 0.25
+        # self.k_d_x       = 3.0 # 3.25, 3.75
+
+        # self.max_pitch   = 4.0
+        # self.min_pitch   = -4.0
+
+        # # NEVER CHANGES
+        # self.cur_x_error = 0.0
+        # self.prev_x_error = 0.0
+        # self.int_x_error = 0.0
+        # self.int_x_max = 3.0 # maximum added pitch from integral component
+        # # --
+
+       
+        #         # ----------------------         Z constants         ---------------------- #
+        # # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
+        # self.k_p_z       = -1.2 
+        # self.k_i_z       = -0.1
+        # self.k_d_z       = -2.6
+
+        # # self.k_p_z = 2
+        # # self.k_i_z = 0.6
+        # # self.k_d_z = 4.1
+
+        # self.max_roll = 3.0
+        # self.min_roll = -3.0 
+
+        # # NEVER CHANGES
+        # self.cur_z_error = 0.0
+        # self.prev_z_error = 0.0
+        # self.int_z_error = 0.0
+        # self.int_z_max = 4.0
+        # # --
+        # # ────────────────────────────────────────────────────────────────────────
 
         self.startTimer = False
         self.startTime = time.time()
@@ -324,13 +324,6 @@ class OptiTrackSubscriber(Node):
             # Grab world orientation quaternion (for relative drone orientation)
             q_world = R.from_quat(self.orientation_quat)
 
-            # # if orientation not zero, set to zero
-            # if not self.drone_rel_zero_orient:
-            #     self.q0_identity = q_world.inv() 
-            #     self.drone_rel_zero_orient = True
-            
-            
-
             # calls rotational PID function (yawrate)
             yawrate_cmd = self.calculate_yawrate()
             # self.get_logger().info(f"yawrate_cmd = {yawrate_cmd:.2f}")
@@ -352,21 +345,6 @@ class OptiTrackSubscriber(Node):
             # yaw_y = optitrack frame pitch
             # roll_z = opitrack frame yaw
             pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
-            # r_temp = R.from_quat(self.orientation_quat)
-            # opti_to_global = R.from_matrix([[0, 0, 1],
-            #                                 [1, 0, 0],
-            #                                 [0, 1, 0]])
-            # opti_to_global = R.from_matrix([[1, 0, 0],
-            #                                 [0, 1, 0],
-            #                                 [0, 0, 1]])
-            # opti_to_global = R.from_matrix([[0, 0, -1],
-            #                                 [-1, 0, 0],
-            #                                 [0, 1, 0]])
-            # r = R.from_matrix(opti_to_global.apply(r_temp.as_matrix()))
-            # yaw_y, pitch_x, roll_z = r.as_euler('ZYX', degrees = True)
-            # yaw_transformed, pitch_transformed, roll_transformed = r.as_euler('ZYX', degrees = True)
-            # pitch_x, yaw_y, roll_z = r.as_euler('xyz', degrees = True)
-            # print("normal:", [yaw_y, pitch_x, roll_z], "transformed:", [yaw_transformed, pitch_transformed, roll_transformed])
 
             msg = Float32MultiArray()
             msg.data = [float(roll_cmd), float(pitch_cmd), float(yawrate_cmd), float(thrust),      # why is this roll pitch yaw??
@@ -556,7 +534,6 @@ def main(args=None):
     try:
         #optitrack_subscriber.save_pid()
         rclpy.spin(optitrack_subscriber)
-        # optitrack_subscriber.save_quat()
     except KeyboardInterrupt:
         print("Shutting down due to keyboard interrupt")
     finally:
