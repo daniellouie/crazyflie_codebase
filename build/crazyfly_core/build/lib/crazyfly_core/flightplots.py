@@ -61,7 +61,9 @@ def FILE_INITIATION(i):
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
     cf1_path = cf1_files[-1]
-    cf1_cmd_path = cf1_cmd_files[-1]
+    cf1_cmd_path = cf1_cmd_files[-2]
+
+    print(file_path)
 
     if i == "cf1_path":
         return cf1_path
@@ -245,12 +247,14 @@ def anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions
     padding = 0.05
     x_min, x_max = all_positions[:,0].min(), all_positions[:,0].max()
     x_range = x_max - x_min
-    ax.set_xlim(x_min - padding*x_range, x_max + padding*x_range)
-    ax.set_ylim(0,2)
-    ax.set_zlim(0,1)
+    #ax.set_xlim(x_min - padding*x_range, x_max + padding*x_range)
+    ax.set_xlim(0,6)
+    ax.set_ylim(0,6)
+    ax.set_zlim(0,3)
     ax.set_xlabel('X Position')
     ax.set_ylabel('Z Position')
     ax.set_zlabel('Y Position')
+    ax.set_box_aspect((1,1,1))
 
     # unknown variables resolved by parameter
     # datasets with their colors
@@ -675,12 +679,12 @@ def main():
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
     #static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    #anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    # static_inv_plot(I_joc_path)
+    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    #static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
     #cf2_tuning_static(cf2_path)
     #cluster_accuracy()
-    plot_pos_err_cmd()
+    #plot_pos_err_cmd()
     # plot_quaternion_data()
 
 if __name__ == "__main__":

@@ -66,23 +66,31 @@ class PIDControllerCF1(Node):
         self.t = 0.01 #average time between signals in seconds
 
         # Values for rotational (yaw) P controller
-        self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
+        #self.orientation_quat = [0.0, 0.0, 0.0, 0.0] #current orientation in quaternions
+        self.orientation_quat = [0.0, 0.0, 0.0, 0.1]
         self.current_orientation = 0.0
-        self.target_orientation_quat = [0.0, 0.7, 0.0, 0.7]
+        #self.target_orientation_quat = [0.0, 0.7, 0.0, 0.7]
+        self.target_orientation_quat = [0.0, 0.0, 0.0, 1.0]
         #temp fix: need to rotate drone to face right for rigid body then reorient
-        self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
+        #self.target_orientation = 90 #position the drone in desired orientation and this value should be the yaw from optitrack
+        self.target_orientation = 0.0
         self.k_p_rot = 0.25
         self.k_p_rot_sign = 1
         self.max_yawrate = 15
         self.min_yawrate = -15
 
+        self.roll_feedforward = 0
+        self.pitch_feedforward = 0
+
         # values for vertical Y (thrust) PID
         self.hover = 44000 #originally 46500     
         self.max_thrust = 55000 #origionall 50000
         self.min_thrust = 42000
-        self.k_p_y = 30000 #Origionally 15000 May 6 
+        #self.k_p_y = 30000 #Origionally 15000 May 6 
+        self.k_p_y = 15000
         self.k_i_y = 3250 #extra amount of thrust wanted (originally 2000)
-        self.k_d_y = 15000 #Origionally 10000
+        #self.k_d_y = 15000 #Origionally 10000
+        self.k_d_y = 10000
         #there used to be a threshold_met for thrust but was unused and now used for waypoint synchronization
 
         self.cur_y_error = 0.0
@@ -103,9 +111,11 @@ class PIDControllerCF1(Node):
         self.int_x_max = 3.0 # maximum added pitch from integral component
 
         # values for horizontal Z (roll) PID
-        self.k_p_z = 3.5 #origionally 2 May 6 
-        self.k_i_z = 0.6
-        self.k_d_z = 5.5 #previously 3.5 May 6 
+        #self.k_p_z = 3.5 #origionally 2 May 6 
+        self.k_p_z = -2
+        self.k_i_z = -0.6
+        #self.k_d_z = 5.5 #previously 3.5 May 6 
+        self.k_d_z = -3.5
         self.max_roll = 3.0
         self.min_roll = -3.0
 
@@ -151,18 +161,18 @@ class PIDControllerCF1(Node):
     def commanded_position_callback(self, msg):
         if msg.header.frame_id == "world":
             #X Options
-            # self.commanded_position[0] = msg.pose.position.x #use actual commanded position
-            self.commanded_position[0] = self.constant_position[0] # use constant value for testing
+            self.commanded_position[0] = msg.pose.position.x #use actual commanded position
+            # self.commanded_position[0] = self.constant_position[0] # use constant value for testing
 
             # Y options
             self.commanded_position[1] = msg.pose.position.y  #use actual commanded position
             # self.commanded_position[1] = self.constant_position[1] # use constant value for testing
 
             # Z Option
-            # self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
-            self.commanded_position[2] = self.constant_position[2] # use constant value for testing
+            self.commanded_position[2] = msg.pose.position.z  #use actual commanded position
+            # self.commanded_position[2] = self.constant_position[2] # use constant value for testing
 
-            # print(f"Commanded position callback: {self.commanded_position}")
+            #print(f"Commanded position callback: {self.commanded_position}")
         # error handling for unexpected pose message
         else:
             self.get_logger().warn(f"Received pose in unexpected frame: {msg.header.frame_id}")
@@ -196,7 +206,9 @@ class PIDControllerCF1(Node):
         r = R.from_quat(self.orientation_quat)
         pitch, yaw, roll = r.as_euler('xyz', degrees = True)
         self.current_orientation = yaw
-        rot_error = self.target_orientation - self.current_orientation
+        #rot_error = self.target_orientation - self.current_orientation
+        rot_error = (self.target_orientation - yaw + 180) % 360 - 180    # NOTE: logic is changed here 8/4/25
+        yawrate = np.clip(self.k_p_rot * rot_error, self.min_yawrate, self.max_yawrate)
 
         # workaround logic to determine direction of rotation (bc of quaternions)
         if abs(self.orientation_quat[1]) > 0.7: # this value is specific to a certain set up orientation
@@ -208,33 +220,60 @@ class PIDControllerCF1(Node):
         yawrate = max(self.min_yawrate, min(yawrate, self.max_yawrate))
         return yawrate
     
-    # X Axis control
-    def calculate_pitch(self):
-        # (P term)
+    # # X Axis control
+    # def calculate_pitch(self):
+    #     # (P term)
 
-        self.cur_x_error = self.commanded_position[0] - self.current_position[0]
-        if -0.01 <= self.cur_x_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
-            self.cur_x_error = 0
-        x_fp = self.k_p_x * self.cur_x_error
-        # print(f"x_fp: {x_fp}")
+    #     self.cur_x_error = self.commanded_position[2] - self.current_position[2]
+    #     if -0.01 <= self.cur_x_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
+    #         self.cur_x_error = 0
+    #     x_fp = self.k_p_x * self.cur_x_error
+    #     # print(f"x_fp: {x_fp}")
         
-        # I term
-        future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t
-        if abs(future_int_x_error * self.k_i_x) < self.int_x_max:
-            self.int_x_error = future_int_x_error
-        x_fi = self.k_i_x * self.int_x_error
-        # print(f"x_fi: {x_fi}")
+    #     # I term
+    #     future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t
+    #     if abs(future_int_x_error * self.k_i_x) < self.int_x_max:
+    #         self.int_x_error = future_int_x_error
+    #     x_fi = self.k_i_x * self.int_x_error
+    #     # print(f"x_fi: {x_fi}")
 
-        # D term
-        x_error_dif = self.cur_x_error - self.prev_x_error
-        x_fd = self.k_d_x * (x_error_dif) / self.t
-        # print(f"x_fd: {x_fd}")
-        self.prev_x_error = self.cur_x_error
+    #     # D term
+    #     x_error_dif = self.cur_x_error - self.prev_x_error
+    #     x_fd = self.k_d_x * (x_error_dif) / self.t
+    #     # print(f"x_fd: {x_fd}")
+    #     self.prev_x_error = self.cur_x_error
 
-        pitch = x_fp + x_fi + x_fd
-        pitch = max(self.min_pitch, min(pitch, self.max_pitch))
-        return pitch
+    #     pitch = x_fp + x_fi + x_fd
+    #     #pitch = max(self.min_pitch, min(pitch, self.max_pitch))
+    #     return pitch
     
+        # FIXED Z axis control 8/19/25
+    def calculate_pitch(self):
+    
+        # set to zero if within margin
+        self.cur_z_error = self.commanded_position[2] - self.current_position[2]
+        # if -0.01 <= self.cur_z_error <= 0.01:
+        #     self.cur_z_error = 0
+
+        # (P term)
+        z_fp = self.k_p_z * self.cur_z_error # (deg/m * m)
+
+        # (I term))
+        future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t #units of m*s 
+        if abs(future_int_z_error * self.k_i_z) < self.int_z_max:
+            self.int_z_error = future_int_z_error 
+        z_fi = self.k_i_z * self.int_z_error # (to be in degrees Ki_z must be in deg/m*s))
+        
+        # (D term)
+        z_error_dif = self.cur_z_error - self.prev_z_error #m
+        z_fd = self.k_d_z * (z_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
+        self.prev_z_error = self.cur_z_error # (deg*s/m)
+        
+        desired_pitch_angle = self.pitch_feedforward + z_fp + z_fi + z_fd # desired pitch angle in DEGREESSSS
+
+        # return pitch_cmd
+        return desired_pitch_angle
+
     # Y axis control 
     def calculate_thrust(self):
         # P term:
@@ -267,28 +306,56 @@ class PIDControllerCF1(Node):
         thrust = int(max(self.min_thrust, min(thrust, self.max_thrust)))
         return thrust
     
+    # def calculate_roll(self):
+    #     # P term
+    #     self.cur_z_error = self.commanded_position[0] - self.current_position[0]
+
+    #     z_fp = self.k_p_z * self.cur_z_error
+    #     #print(f"z_fp: {z_fp}")
+
+    #     # I term
+    #     future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t
+    #     if abs(future_int_z_error * self.k_i_z) < self.int_z_max:
+    #         self.int_z_error = future_int_z_error
+    #     z_fi = self.k_i_z * self.int_z_error
+    #     #print(f"z_fi: {z_fi}")
+
+    #     # D Term
+    #     z_error_dif = self.cur_z_error - self.prev_z_error
+    #     z_fd = self.k_d_z * (z_error_dif) / self.t
+    #     #print(f"z_fd: {z_fd}")
+    #     self.prev_z_error = self.cur_z_error
+
+    #     roll = z_fp + z_fi + z_fd
+    #     #roll = max(self.min_roll, min(roll, self.max_roll))
+    #     return roll
+
+        # FIXED X-axis control. 08/19/25
     def calculate_roll(self):
-        # P term
-        self.cur_z_error = self.commanded_position[2] - self.current_position[2]
-        z_fp = self.k_p_z * self.cur_z_error
-        #print(f"z_fp: {z_fp}")
 
-        # I term
-        future_int_z_error = self.int_z_error + 0.5 * (self.prev_z_error + self.cur_z_error) * self.t
-        if abs(future_int_z_error * self.k_i_z) < self.int_z_max:
-            self.int_z_error = future_int_z_error
-        z_fi = self.k_i_z * self.int_z_error
-        #print(f"z_fi: {z_fi}")
+        # set to zero if within margin
+        self.cur_x_error = self.commanded_position[0] - self.current_position[0]
+        # if -0.01 <= self.cur_x_error <= 0.01:
+        #     self.cur_x_error = 0
 
-        # D Term
-        z_error_dif = self.cur_z_error - self.prev_z_error
-        z_fd = self.k_d_z * (z_error_dif) / self.t
-        #print(f"z_fd: {z_fd}")
-        self.prev_z_error = self.cur_z_error
+        # (P term)
+        x_fp = self.k_p_x * self.cur_x_error # (deg/m) 
 
-        roll = z_fp + z_fi + z_fd
-        roll = max(self.min_roll, min(roll, self.max_roll))
-        return roll
+        # (I term))
+        future_int_x_error = self.int_x_error + 0.5 * (self.prev_x_error + self.cur_x_error) * self.t #units of m*s
+        # print(f"future_int_x_error: {future_int_x_error}")
+        if abs(future_int_x_error * self.k_i_x) < self.int_x_max:
+            self.int_x_error = future_int_x_error 
+        x_fi = self.k_i_x * self.int_x_error # (to be in degrees Ki_x must be in deg/m*s))
+        
+        # (D term)
+        x_error_dif = self.cur_x_error - self.prev_x_error #m
+        x_fd = self.k_d_x * (x_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
+        self.prev_x_error = self.cur_x_error # (deg*s/m)
+        
+        desired_roll_angle = self.roll_feedforward + x_fp + x_fi + x_fd # desired roll angle in DEGREESSSS
+
+        return desired_roll_angle
    
     def get_position(self):
         return self.current_position

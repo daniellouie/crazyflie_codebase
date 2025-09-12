@@ -113,7 +113,7 @@ class OptiTrackSubscriber2(Node):
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
 
         # temp feedforward
-        self.pitch_feedforward = -0.5
+        self.pitch_feedforward = -0.7 # -0.5
         self.roll_feedforward = -0.4 # -1.2 # -1.9
 
         # --
@@ -150,9 +150,9 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.5 
         # self.k_d_x       = 3.55
 
-        self.k_p_x       = 0.75    
-        self.k_i_x       = 0.25
-        self.k_d_x       = 3.0 # 3.25, 3.75
+        self.k_p_x       = 1.0    
+        self.k_i_x       = 0.15
+        self.k_d_x       = 3.2 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -364,8 +364,8 @@ class OptiTrackSubscriber2(Node):
     
         # set to zero if within margin
         self.cur_z_error = self.target_position[2] - self.position[2]
-        if -0.01 <= self.cur_z_error <= 0.01:
-            self.cur_z_error = 0
+        # if -0.01 <= self.cur_z_error <= 0.01:
+        #     self.cur_z_error = 0
 
         # (P term)
         z_fp = self.k_p_z * self.cur_z_error # (deg/m) 
@@ -392,8 +392,8 @@ class OptiTrackSubscriber2(Node):
         self.cur_y_error = self.target_position[1]- self.position[1]
 
         # I term:
-        if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
-            self.cur_y_error = 0
+        # if -0.01 <= self.cur_y_error <= 0.01: #if error is within margin, set to 0 (in meters; 0.01 = 1cm)
+        #     self.cur_y_error = 0
 
         y_fp = self.k_p_y * self.cur_y_error
 
@@ -422,8 +422,8 @@ class OptiTrackSubscriber2(Node):
 
         # set to zero if within margin
         self.cur_x_error = self.target_position[0] - self.position[0]
-        if -0.01 <= self.cur_x_error <= 0.01:
-            self.cur_x_error = 0
+        # if -0.01 <= self.cur_x_error <= 0.01:
+        #     self.cur_x_error = 0
 
         # (P term)
         x_fp = self.k_p_x * self.cur_x_error # (deg/m) 

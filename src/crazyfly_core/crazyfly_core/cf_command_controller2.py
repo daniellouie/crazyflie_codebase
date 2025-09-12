@@ -78,7 +78,7 @@ class MinimalSubscriber(Node):
 
         # ------ THESE CAN BE CHANGED FOR TESTING ------ 
         # limit flight time for testing
-        self.flight_duration = 15.0 #in seconds
+        self.flight_duration = 20.0 #in seconds
         # safety variable to prevent motors from running when testing
         # set to true to run motors
         self.run_motors_bool = True

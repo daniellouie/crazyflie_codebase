@@ -155,7 +155,7 @@ class Cluster_new:
         # --------------------------------------------------------------- ROWS OF J_INV --------------------------------------------------------------- #
         x1dot = [1, 0, 0, (-p/2)  * np.cos(alpha) * np.cos(beta), (p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (-1/2) * np.cos(beta) * np.sin(alpha)]
         y1dot = [0, 1, 0, 0, (-p/2) * np.cos(beta), 0, 0, (-1/2) * np.sin(beta)]
-        z1dot = [0, 0, 1, (p/2)*np.sin(alpha)*np.cos(beta), (p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (-p/2) * np.cos(alpha) * np.cos(beta)]
+        z1dot = [0, 0, 1, (p/2)*np.sin(alpha)*np.cos(beta), (p/2)*np.cos(alpha)*np.sin(beta), 0, 0, (-1/2) * np.cos(alpha) * np.cos(beta)]
         theta1dot = [0, 0, 0, 1, 0, -1, 0, 0]
         x2dot = [1, 0, 0, (p/2) * np.cos(alpha) * np.cos(beta), (-p/2) * np.sin(alpha) * np.sin(beta), 0, 0, (1/2) * np.cos(beta) * np.sin(alpha)]
         y2dot = [0, 1, 0, 0, (p/2) * np.cos(beta), 0, 0, (1/2) * np.sin(beta)]
@@ -177,8 +177,11 @@ class Cluster_new:
     def clusterToDrones(self):
         # Calculate the commanded velocities for each drone
         J_inv = self.calculateInverseJacobian()
-        self.R_dot = np.dot(J_inv, self.C_dot)
-        
+
+        # TODO verify this
+        # self.R_dot = np.dot(J_inv, self.C_dot)
+        self.R_dot = np.matmul(J_inv, self.C_dot)
+
         #-------------------------------------------- PLOTTING THE INVERSE JACOBIAN VALUES ------------------------------------------------------------ #
         self.cluster_dot.append([
             time.time(),  # wall-clock seconds
