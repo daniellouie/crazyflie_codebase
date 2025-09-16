@@ -1,3 +1,0 @@
-[console_scripts]
-get_data = optitrack_core.get_data:main
-
