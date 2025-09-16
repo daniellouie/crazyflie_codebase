@@ -84,15 +84,15 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [[2.0, 1.0, 3.0]] #set single position (x,y,z)
-        #self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
+        self.target_positions = [[1.0, 1.0, 3.0]] #set single position (x,y,z)
+        self.target_positions = [[1.0, 1.0, 2.0], [1.0, 1.0, 3.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
         # Controls variables
         self.current_target_index = 0 
         self.target_position = self.target_positions[self.current_target_index]
-        self.threshold = 0.15  # [m] Threshold for reaching the target
+        self.threshold = 0.30  # [m] Threshold for reaching the target
         
         # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
@@ -119,7 +119,7 @@ class OptiTrackSubscriber2(Node):
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 41600      # trim thrust to hold level hover
+        self.hover       = 48000      # trim thrust to hold level hover
         self.max_thrust  = 56000
         self.min_thrust  = 42000
 

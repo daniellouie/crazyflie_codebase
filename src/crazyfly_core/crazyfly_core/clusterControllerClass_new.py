@@ -30,12 +30,22 @@ class ClusterController_new(Node):
             [0.75, 1.0, 3.0, 0, 0, 0, 0, 4.5], # x, y, z, alpha, beta, phi1, phi2, p
             [1.0, 1.0, 3.0, 0, 0, 0, 0, 2.5]
         ]
+        self.waypoints = [
+            #[1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            #  [1.5, 1.0, 1, np.pi/2, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
+            [1.25, 1.0, 2.0, 0, 0, 0, 0, 1.5], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.25, 1.0, 2.0, np.pi/2, 0, 0, 0, 1.5]
+            [1.25, 1.0, 2.0, 2*np.pi/2, 0, 0, 0, 1.5]
+            [1.25, 1.0, 2.0, 3*np.pi/2, 0, 0, 0, 1.5]
+            [1.25, 1.0, 2.0, 0, 0, 0, 0, 1.5]
+        ]
+
         self.cur_waypoint_index = 0
         self.cluster.C_des = self.waypoints[self.cur_waypoint_index]  
         # initialize the time required to hold at each waypoint and the timer
         self.waypoint_hold_time = 3.0 #in seconds
         self.waypoint_start_time = None
-        self.waypoint_tolerance = 0.3 # in meters
+        self.waypoint_tolerance = 0.1 # in meters
         # bool updated to check if the cluster is within the tolerance, only print message if it changes
         self.within_tolerance = False
 

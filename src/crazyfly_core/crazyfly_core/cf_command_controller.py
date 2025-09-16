@@ -21,7 +21,7 @@ from rclpy.logging import get_logger
 import pandas as pd
 import statistics
 
-CF2_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf2_static_hover")
+CF2_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf2_multiple_waypoint")
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
 CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_multiple_waypoint")
 
@@ -88,7 +88,7 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 30 # 20.0 #in seconds
+        self.flight_duration = 25 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000

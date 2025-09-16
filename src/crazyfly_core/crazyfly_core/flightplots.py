@@ -23,7 +23,9 @@ def FILE_INITIATION(i):
     DATA_DIR      = WORKSPACE / "cluster_data"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
+    CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
+    CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_static_hover"
     CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf2_command_values"
     CF2_QUAT = WORKSPACE / "cf2_quat_values"
 
@@ -41,8 +43,10 @@ def FILE_INITIATION(i):
 
     csv_files   = sorted(DATA_DIR.glob(PATTERN))                #finds the file through glob and sorted
     I_Joc_files = sorted(INV_DATA_DIR.glob(FILE_PATTERN))
-    cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
-    cf1_files = sorted(CF1_TUNING.glob(FILE_PATTERN3))
+    # cf2_files = sorted(CF2_TUNING.glob(FILE_PATTERN2))
+    # cf1_files = sorted(CF1_TUNING.glob(FILE_PATTERN3))
+    cf2_files = sorted(CF2_RESULTS.glob(FILE_PATTERN2))
+    cf1_files = sorted(CF1_RESULTS.glob(FILE_PATTERN3))
     cf1_cmd_files = sorted(CF1_COMMANDS.glob(FILE_PATTERN_CF1_CMD))
 
     # ERROR STATEMENT
@@ -57,13 +61,13 @@ def FILE_INITIATION(i):
     if not cf1_cmd_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
 
-    file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
+    file_path   = csv_files[-3]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
-    cf2_path = cf2_files[-1]
-    cf1_path = cf1_files[-1]
+    cf2_path = cf2_files[-3]
+    cf1_path = cf1_files[-2]
     cf1_cmd_path = cf1_cmd_files[-2]
 
-    print(file_path)
+    print(cf1_path)
 
     if i == "cf1_path":
         return cf1_path
@@ -395,7 +399,7 @@ def anim_2d_plot(I_joc_path, file_path, timestamp_df):
 def cf2_tuning_static(cf2_path):
 
     #data = pd.read_csv(cf2_path)
-    cf2_path = FILE_INITIATION("cf2_path")
+    # cf2_path = FILE_INITIATION("cf2_path")
     data = pd.read_csv(cf2_path)
 
     # Convert the 'Timestamp' column to datetime
@@ -674,17 +678,18 @@ def plot_pos_err_cmd():
 def main():
     file_path = FILE_INITIATION("file_path")
     I_joc_path = FILE_INITIATION("I_joc_path")
+    cf1_path = FILE_INITIATION("cf1_path")
     cf2_path = FILE_INITIATION("cf2_path")
 
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
-    #static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    # static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     #static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    #cf2_tuning_static(cf2_path)
+    cf2_tuning_static(cf1_path)
     #cluster_accuracy()
-    #plot_pos_err_cmd()
+    # plot_pos_err_cmd()
     # plot_quaternion_data()
 
 if __name__ == "__main__":
