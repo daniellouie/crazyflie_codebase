@@ -19,11 +19,11 @@ def FILE_INITIATION(i):
     # WORKSPACE   = pathlib.Path(__file__).resolve().parents[3] #3rd parent up is just the crazyfly_ws where cluster_data is --> ~/crazyfly_ws
     # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
     # WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
-    WORKSPACE = pathlib.Path.home() / "crazyfly_ws"   # <— fixed
-    DATA_DIR      = WORKSPACE / "cluster_data"
+    WORKSPACE = pathlib.Path.home() / "Desktop" / "crazyflie_codebase"   # <— fixed
+    DATA_DIR      = WORKSPACE / "cluster_data/cluster_dynamic"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
-    CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover"
+    CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover1"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
     CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_static_hover"
     CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf2_command_values"
@@ -61,7 +61,7 @@ def FILE_INITIATION(i):
     if not cf1_cmd_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
 
-    file_path   = csv_files[-3]            # newest because the timestamp sorts lexicographically
+    file_path   = csv_files[0]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-3]
     cf1_path = cf1_files[-2]
@@ -252,9 +252,9 @@ def anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions
     x_min, x_max = all_positions[:,0].min(), all_positions[:,0].max()
     x_range = x_max - x_min
     #ax.set_xlim(x_min - padding*x_range, x_max + padding*x_range)
-    ax.set_xlim(0,6)
+    ax.set_xlim(0,2)
     ax.set_ylim(0,6)
-    ax.set_zlim(0,3)
+    ax.set_zlim(0,1.2)
     ax.set_xlabel('X Position')
     ax.set_ylabel('Z Position')
     ax.set_zlabel('Y Position')
@@ -478,7 +478,24 @@ def cluster_accuracy():
     print("x error: ", f"{rmse_x:.6f}", "m")
     print("y error: ", f"{rmse_y:.6f}", "m")
     print("z error: ", f"{rmse_z:.6f}", "m")
+    print("################")
+    print("max x Error: ", f"{max([abs(x) for x in err_values_x]):.6f}", "m")
+    print("max y Error: ", f"{max([abs(y) for y in err_values_y]):.6f}", "m")
+    print("max z Error: ", f"{max([abs(z) for z in err_values_z]):.6f}", "m")
+    print("min x Error: ", f"{min([abs(x) for x in err_values_x]):.6f}", "m ")
+    print("min y Error: ", f"{min([abs(y) for y in err_values_y]):.6f}", "m ")
+    print("min z Error: ", f"{min([abs(z) for z in err_values_z]):.6f}", "m ")
+    print("location of max error in z: ", df['Err_CF1_Z'].idxmax())
     print("-------")
+    abs_z = [abs(z) for z in err_values_z]
+    second_largest_z = sorted(abs_z, reverse=True)[1] if len(abs_z) > 1 else None
+    print("second largest z Error: ", f"{second_largest_z:.6f}" if second_largest_z is not None else "N/A", "m")
+        # Find the index (row) in the DataFrame where the second largest absolute z error occurs
+    if second_largest_z is not None:
+        # Get all indices where the absolute error matches the second largest value
+        indices = [i for i, val in enumerate(abs_z) if val == second_largest_z]
+        # Print the first such index (or all if you want)
+        print("Index of second largest z Error in DataFrame:", indices[0] if indices else "N/A")
 
     df['Err_CF2_X'] = df['Cur_CF2_X'] - df['Des_CF2_X']
     err_values_x2 = list(df['Err_CF2_X'])
@@ -506,11 +523,15 @@ def cluster_accuracy():
     squared_z2 = [z**2 for z in err_values_z2]
     sum_z2 = sum(squared_z2)
     rmse_z2 = math.sqrt(sum_z2/len(df))
-
+    print("-------")
     print("cf2 error: ", error, "m")
     print("x error: ", f"{rmse_x2:.6f}", "m")    
     print("y error: ", f"{rmse_y2:.6f}", "m")
     print("z error: ", f"{rmse_z2:.6f}", "m")
+    print("max x Error: ", f"{max(err_values_x2):.6f}", "m")
+    print("max y Error: ", f"{max(err_values_y2):.6f}", "m")
+    print("max z Error: ", f"{max(err_values_z2):.6f}", "m")
+    print("-------")
 
 def plot_pos_err_cmd():
     """
@@ -682,13 +703,13 @@ def main():
     cf2_path = FILE_INITIATION("cf2_path")
 
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
-
+    print(f"data loaded from {file_path}")
     # static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     #static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    cf2_tuning_static(cf1_path)
-    #cluster_accuracy()
+    # cf2_tuning_static(cf1_path)
+    # cluster_accuracy()
     # plot_pos_err_cmd()
     # plot_quaternion_data()
 
