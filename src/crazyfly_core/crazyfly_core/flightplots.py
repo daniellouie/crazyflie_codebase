@@ -25,7 +25,7 @@ def FILE_INITIATION(i):
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
-    CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_static_hover"
+    CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_dynamic_hover"
     CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf2_command_values"
     CF2_QUAT = WORKSPACE / "cf2_quat_values"
 
@@ -61,10 +61,10 @@ def FILE_INITIATION(i):
     if not cf1_cmd_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
 
-    file_path   = csv_files[-3]            # newest because the timestamp sorts lexicographically
+    file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-3]
-    cf1_path = cf1_files[-2]
+    cf1_path = cf1_files[-1]
     cf1_cmd_path = cf1_cmd_files[-2]
 
     print(cf1_path)
@@ -684,10 +684,10 @@ def main():
     df, cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions = load_position_data(file_path)
 
     # static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
+    anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     #static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    cf2_tuning_static(cf1_path)
+    # cf2_tuning_static(cf1_path)
     #cluster_accuracy()
     # plot_pos_err_cmd()
     # plot_quaternion_data()

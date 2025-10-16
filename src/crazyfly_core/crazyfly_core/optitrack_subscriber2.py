@@ -84,8 +84,8 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [[1.0, 1.0, 3.0]] #set single position (x,y,z)
-        self.target_positions = [[1.0, 1.0, 2.0], [1.0, 1.0, 3.0]] 
+        self.target_positions = [[1.6, 1.6, 1.6]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 1.0, 2.0], [1.0, 1.0, 3.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -113,19 +113,23 @@ class OptiTrackSubscriber2(Node):
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
 
         # temp feedforward
-        self.pitch_feedforward = -0.7 # -0.5
-        self.roll_feedforward = -0.4 # -1.2 # -1.9
+        # self.pitch_feedforward = -0.7 # -0.5
+        # self.roll_feedforward = -0.4 # -1.2 # -1.9
+        
+        self.pitch_feedforward = 0.0 # -0.5
+        self.roll_feedforward = 0.0 # -1.2 # -1.9
 
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 48000      # trim thrust to hold level hover
-        self.max_thrust  = 56000
-        self.min_thrust  = 42000
+        # self.hover       = 48000      # trim thrust to hold level hover
+        self.hover       = 40000      # trim thrust to hold level hover
+        self.max_thrust  = 45000
+        self.min_thrust  = 36000
 
-        self.k_p_y       = 30000 #+3800      # P-gain
-        self.k_i_y       = 800             # I-gain
-        self.k_d_y       = 12000           # D-gain
+        self.k_p_y       = 9000 #+3800      # P-gain
+        self.k_i_y       = 0        #800     # I-gain
+        self.k_d_y       = 6000         # D-gain
         
 
         self.max_yawrate = 15
@@ -139,20 +143,15 @@ class OptiTrackSubscriber2(Node):
         
 
                 # ----------------------         X constants         ---------------------- #
-        # X constants
-        # values for horizontal X (roll) PID
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.1
-        
-        # commented out 9/3
-        # self.k_p_x       = 0.75    
-        # self.k_i_x       = 0.5 
-        # self.k_d_x       = 3.55
+       
+        # self.k_p_x       = 1.0    
+        # self.k_i_x       = 0.15
+        # self.k_d_x       = 3.2 # 3.25, 3.75
+          
+        self.k_p_x       = 0.6 
+        self.k_i_x       = 0.1
+        self.k_d_x       = 1.5
 
-        self.k_p_x       = 1.0    
-        self.k_i_x       = 0.15
-        self.k_d_x       = 3.2 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -166,14 +165,11 @@ class OptiTrackSubscriber2(Node):
 
        
                 # ----------------------         Z constants         ---------------------- #
-        # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        self.k_p_z       = -1.2 
+       
+        #NOTE: CHANGING VALUES FOR NEW CF2 MARKER
+        self.k_p_z       = -1.5
         self.k_i_z       = -0.1
-        self.k_d_z       = -2.6
-
-        # self.k_p_z = 2
-        # self.k_i_z = 0.6
-        # self.k_d_z = 4.1
+        self.k_d_z       = -2.5
 
         self.max_roll = 3.0
         self.min_roll = -3.0 
@@ -365,7 +361,7 @@ class OptiTrackSubscriber2(Node):
         # set to zero if within margin
         self.cur_z_error = self.target_position[2] - self.position[2]
         # if -0.01 <= self.cur_z_error <= 0.01:
-        #     self.cur_z_error = 0
+        #     self.cur_z_error = 0 
 
         # (P term)
         z_fp = self.k_p_z * self.cur_z_error # (deg/m) 
