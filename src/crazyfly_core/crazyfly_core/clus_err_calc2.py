@@ -466,9 +466,9 @@ def plot_error_distributions(flight_data):
         'X_c': ('Cur_Cluster_X', 'Des_Cluster_X'),
         'Y_c': ('Cur_Cluster_Y', 'Des_Cluster_Y'),
         'Z_c': ('Cur_Cluster_Z', 'Des_Cluster_Z'),
+        'P': ('Cur_P', 'Des_P'),
         'α': ('Cur_Alpha', 'Des_Alpha'),
         'β': ('Cur_Beta', 'Des_Beta'),
-        'P': ('Cur_P', 'Des_P'),
         'φ₁': ('Cur_Phi1', 'Des_Phi1'),
         'φ₂': ('Cur_Phi2', 'Des_Phi2')
     }

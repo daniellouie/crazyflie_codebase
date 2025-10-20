@@ -5,6 +5,17 @@ import glob
 import os
 from pathlib import Path
 
+CLUSTER_ERROR_YLIMS = {
+    # 'X_c': [-1, 1],      
+    # 'Y_c': [-1, 1],     
+    # 'Z_c': [-1, 1],     
+    # 'P':   [-4, 4],        
+    # 'α':   [-5, 5], 
+    # 'β':   [-0.5, 0.5], 
+    # 'φ₁':  [-0.5, 0.5], 
+    # 'φ₂':  [-0.5, 0.5], 
+}
+
 
 
 def identify_hovering_period(df, y_col='Cur_Cluster_Y', threshold=0.02, min_duration=30):
@@ -182,7 +193,6 @@ def plot_all_flights_overview(flight_data):
     n_rows = (n_flights + n_cols - 1) // n_cols
     
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(5*n_cols, 4*n_rows))
-    
     if n_flights == 1:
         axes = [axes]
     elif n_rows == 1 or n_cols == 1:
@@ -231,28 +241,34 @@ def plot_all_flights_overview(flight_data):
     plt.tight_layout()
     return fig
 
-def plot_cluster_variables_and_errors(flight_data):
+def plot_cluster_variables_and_errors(flight_data, ylims = None):
     """
     Create comprehensive plots showing all cluster variables and their errors during hovering.
     """
+
+    if ylims is None:
+        ylims = CLUSTER_ERROR_YLIMS
     # Define variables to plot
     variables = [
-        ('Cluster_X', 'X Position (m) - Horizontal'),
-        ('Cluster_Y', 'Y Position (m) - Vertical'),
-        ('Cluster_Z', 'Z Position (m) - Horizontal'),
-        ('Alpha', 'α (rad)'),
-        ('Beta', 'β (rad)'),
-        ('P', 'P (m)'),
-        ('Phi1', 'φ₁ (rad)'),
-        ('Phi2', 'φ₂ (rad)')
+        ('Cluster_X', 'X Position (m) - Horizontal', 'X_c'),
+        ('Cluster_Y', 'Y Position (m) - Vertical', 'Y_c'),
+        ('Cluster_Z', 'Z Position (m) - Horizontal', 'Z_c'),
+        ('P', 'P (m)', 'P'),
+        ('Alpha', 'α (rad)', 'α'),
+        ('Beta', 'β (rad)', 'β'),
+        
     ]
+    position_map = [0,2,4,1,3,5]  # ordering plot so its: x,y,z,p,alpha,beta,phi1,phi2
     
     # Create figure with subplots for each variable
-    fig, axes = plt.subplots(4, 2, figsize=(15, 12))
+    fig, axes = plt.subplots(3, 2, figsize=(15, 12))
     axes = axes.flatten()
     
-    for idx, (var_base, label) in enumerate(variables):
+    for idx, (var_base, label, var_key) in enumerate(variables):
         ax = axes[idx]
+        
+        pos = position_map[idx]
+        ax = axes[pos]
         
         # Plot data from all flights
         for flight_idx, (filepath, data) in enumerate(flight_data.items()):
@@ -279,12 +295,78 @@ def plot_cluster_variables_and_errors(flight_data):
         ax.grid(True, alpha=0.3)
         ax.axhline(y=0, color='k', linestyle='-', alpha=0.3)
         
+        if ylims and var_key in ylims:
+            ax.set_ylim(ylims[var_key])
+
         if idx == 0:  # Only show legend on first plot
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
     
     plt.suptitle('Cluster Variable Errors During Hovering (All Flights)', fontsize=14)
     plt.tight_layout()
     return fig
+
+def plot_cluster_variables_positions(flight_data, ylims=None):
+    """
+    Plot current vs desired cluster variables (positions/angles) during hovering,
+    across all flights. Similar to error plot, but shows actual values.
+    """
+    if ylims is None:
+        ylims = CLUSTER_ERROR_YLIMS
+
+    # Variables to plot
+    variables = [
+        ('Cluster_X', 'X Position (m) - Horizontal', 'X_c'),
+        ('Cluster_Y', 'Y Position (m) - Vertical', 'Y_c'),
+        ('Cluster_Z', 'Z Position (m) - Horizontal', 'Z_c'),
+        ('P', 'P (m)', 'P'),
+        ('Alpha', 'α (rad)', 'α'),
+        ('Beta', 'β (rad)', 'β'),
+     
+    ]
+    position_map = [0,2,4,1,3,5]  # same style as error plots
+
+    # Create subplots
+    fig, axes = plt.subplots(3, 2, figsize=(16, 12))
+    axes = axes.flatten()
+
+    for idx, (var_base, label, var_key) in enumerate(variables):
+        ax = axes[position_map[idx]]
+
+        # Plot all flights
+        for flight_idx, (filepath, data) in enumerate(flight_data.items()):
+            df = data['df']
+            hover_start = data['hover_start']
+            hover_end = data['hover_end']
+            hover_df = df.loc[hover_start:hover_end]
+
+            cur_col = f'Cur_{var_base}'
+            des_col = f'Des_{var_base}'
+
+            if cur_col in hover_df.columns and des_col in hover_df.columns:
+                time = np.arange(len(hover_df))
+                flight_name = os.path.basename(filepath).replace('.csv', '')
+
+                # Plot current and desired
+                ax.plot(time, hover_df[cur_col].values, alpha=0.8, linewidth=1.2,
+                        label=f'{flight_name} Cur' if idx == 0 else "")
+                # ax.plot(time, hover_df[des_col].values, alpha=0.8, linewidth=1.2, linestyle='--',
+                        # label=f'{flight_name} Des' if idx == 0 else "")
+
+        ax.set_title(f'{label} Postion During Hovering')
+        ax.set_xlabel('Time (samples)')
+        ax.set_ylabel('Value')
+        ax.grid(True, alpha=0.3)
+
+        if ylims and var_key in ylims:
+            ax.set_ylim(ylims[var_key])
+
+    # Add legend only once
+    axes[0].legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
+
+    plt.suptitle('Cluster position during p manuever', fontsize=14)
+    plt.tight_layout()
+    return fig
+    
 
 def plot_error_distributions(flight_data):
     """
@@ -295,9 +377,9 @@ def plot_error_distributions(flight_data):
         'X_c': ('Cur_Cluster_X', 'Des_Cluster_X'),
         'Y_c': ('Cur_Cluster_Y', 'Des_Cluster_Y'),
         'Z_c': ('Cur_Cluster_Z', 'Des_Cluster_Z'),
+        'P': ('Cur_P', 'Des_P'),
         'α': ('Cur_Alpha', 'Des_Alpha'),
         'β': ('Cur_Beta', 'Des_Beta'),
-        'P': ('Cur_P', 'Des_P'),
         'φ₁': ('Cur_Phi1', 'Des_Phi1'),
         'φ₂': ('Cur_Phi2', 'Des_Phi2')
     }
@@ -338,8 +420,8 @@ def plot_error_distributions(flight_data):
                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
                        fontsize=8)
     
-    plt.suptitle('Error Distributions for Cluster Variables (All Flights Combined)', fontsize=14)
-    plt.tight_layout()
+    # plt.suptitle('Error Distributions for Cluster Variables (All Flights Combined)', fontsize=14)
+    # plt.tight_layout()
     return fig
 
 def process_multiple_flights(file_pattern='cluster_data*.csv', directory='.', debug=False):
@@ -374,9 +456,9 @@ def process_multiple_flights(file_pattern='cluster_data*.csv', directory='.', de
         'X_c (m)': [],  # Horizontal
         'Y_c (m)': [],  # Vertical  
         'Z_c (m)': [],  # Horizontal
+        'P (m)': [],
         'α (rad)': [],
         'β (rad)': [],
-        'P (m)': [],
         'φ₁ (rad)': [],
         'φ₂ (rad)': []
     }
@@ -440,6 +522,36 @@ def process_multiple_flights(file_pattern='cluster_data*.csv', directory='.', de
     error_stats = calculate_aggregate_statistics(all_errors)
     
     return error_stats, flight_data
+def rotating_manuever_top_down(flight_data, ylims= None):
+    fig, ax = plt.subplots(figsize=(8, 8))
+    for flight_idx, (filepath, data) in enumerate(flight_data.items()):
+        df = pd.read_csv(filepath)
+
+        #cf1 Plot
+        ax.plot(df['Cur_CF1_X'], df['Cur_CF1_Z'], 'b-', alpha=0.3, label='CF1', linewidth=1)
+        ax.plot(df['Des_CF1_X'], df['Des_CF1_Z'], 'r--', alpha=0.3, label='CF1 Desired', linewidth=1)
+        
+        #cf2 plot
+        ax.plot(df['Cur_CF2_X'], df['Cur_CF2_Z'], 'g-', alpha=0.3, label='CF2', linewidth=1)
+        ax.plot(df['Des_CF2_X'], df['Des_CF2_Z'], 'm--', alpha=0.3, label='CF2 Desired', linewidth=1)
+
+        ax.scatter(df['Cur_CF1_X'].iloc[0], df['Cur_CF1_Z'].iloc[0], c='blue', marker='o', label="CF1 Start") 
+        ax.scatter(df['Cur_CF1_X'].iloc[-1], df['Cur_CF1_Z'].iloc[-1], c='blue', marker='x', label="CF1 End") 
+        ax.scatter(df['Cur_CF2_X'].iloc[0], df['Cur_CF2_Z'].iloc[0], c='orange', marker='o', label="CF2 Start") 
+        ax.scatter(df['Cur_CF2_X'].iloc[-1], df['Cur_CF2_Z'].iloc[-1], c='orange', marker='x', label="CF2 End")
+
+
+        
+        ax.set_title(f'Top-Down View of CF1 and CF2 During Hovering (X,Z Plane)')
+        ax.set_xlabel('X Position (m)')
+        ax.set_ylabel('Z Position (m)')
+        if ylims:
+            ax.set_lim(ylims)
+        ax.grid(True, alpha=0.3)
+        ax.set_aspect('equal', 'box')
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
+        plt.tight_layout()
+    return fig
 
 def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
     """
@@ -476,13 +588,19 @@ def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
     print("\nGenerating visualizations...")
     
     # 1. Hovering period identification
-    fig1 = plot_all_flights_overview(flight_data)
+    # fig1 = plot_all_flights_overview(flight_data)
     
     # 2. Error time series for all variables
-    fig2 = plot_cluster_variables_and_errors(flight_data)
+    # fig2 = plot_cluster_variables_and_errors(flight_data)
     
     # 3. Error distributions
-    fig3 = plot_error_distributions(flight_data)
+    # fig3 = plot_error_distributions(flight_data)
+    
+    # 4. Positions plotting
+    # fig4 = plot_cluster_variables_positions(flight_data)    
+
+    # 5. Top-down view of rotating manuever
+    fig5 = rotating_manuever_top_down(flight_data)
     
     plt.show()
     
@@ -532,12 +650,17 @@ if __name__ == "__main__":
     # Example usage:
     # Process all files matching 'cluster_data*.csv' in current directory
     # error_stats, flight_data = main('cluster_data*.csv', '.', debug=False)
-    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_hover')
+    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_p_rot')
     # Or with debug mode to see more details:
-    # error_stats, flight_data = main('cluster_data*.csv', '.', debug=True)
-    
+    # error_stats, flight_data = main('cluster_data*.csv', '.', debug=True
+    error_stats, flight_data = main('cluster_data_*.csv', directory, debug=True)
     # Or process files in a specific directory:
-    error_stats, flight_data = main('cluster_data*.csv', directory)
+    # error_stats, flight_data = process_multiple_flights('cluster_data*.csv', directory)
+    # if flight_data:
+    #     fig2 = plot_cluster_variables_and_errors(flight_data)
+    #     fig1 = plot_all_flights_overview(flight_data)
+    #     fig3 = plot_error_distributions(flight_data)
+    #     plt.show()
     
     # Or process files with a different pattern:
     # error_stats, flight_data = main('flight_*.csv', '.')

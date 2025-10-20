@@ -20,7 +20,7 @@ def FILE_INITIATION(i):
     # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
     # WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
     WORKSPACE = pathlib.Path.home() / "Desktop" / "crazyflie_codebase"   # <— fixed
-    DATA_DIR      = WORKSPACE / "cluster_data/cluster_dynamic"
+    DATA_DIR      = WORKSPACE / "cluster_data/cluster_p_rot"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover1"
@@ -61,9 +61,9 @@ def FILE_INITIATION(i):
     if not cf1_cmd_files:
         raise FileNotFoundError(f"No file matching {FILE_PATTERN_CF1_CMD} in {CF1_COMMANDS}")
 
-    file_path   = csv_files[0]            # newest because the timestamp sorts lexicographically
+    file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
-    cf2_path = cf2_files[-3]
+    cf2_path = cf2_files[4]
     cf1_path = cf1_files[-2]
     cf1_cmd_path = cf1_cmd_files[-2]
 
@@ -708,7 +708,7 @@ def main():
     anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     #static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    # cf2_tuning_static(cf1_path)
+    # cf2_tuning_static(cf2_path)
     # cluster_accuracy()
     # plot_pos_err_cmd()
     # plot_quaternion_data()

@@ -5,6 +5,40 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import glob
 
+
+YLIM_CONFIG = {
+    'cf1_static_hover': {
+        'x': [0, 2.0],
+        'y': [0.0, 2.0],
+        'z': [1.5, 3.5]
+    },
+    'cf2_dynamic_hover1': {
+        'x': [0, 2.0],
+        'y': [0.0, 2.0],
+        'z': [1.5, 4.0]
+    },
+    'cf2_dynamic_hover2': {
+        'x': [0, 2.0],
+        'y': [0.0, 2.0],
+        'z': [1.5, 4.0] 
+    },
+    'cf2_multiple_waypoint': {
+        'x': [0.0, 3.0],
+        'y': [0.0, 2.0],
+        'z': [0.0, 4.0]
+    },
+    'cf1_dynamic_hover1': {
+        'x': [0, 2.0],
+        'y': [0.0, 2.0],
+        'z': [1.5, 3.5]
+    },
+    'cf1_multiple_waypoint1': {
+        'x': [0, 2.0],
+        'y': [0.0, 2.0],
+        'z': [0, 3]
+    },
+}
+
 class FlightDataPlotter:
     def __init__(self, directory_path):
         """
@@ -16,6 +50,14 @@ class FlightDataPlotter:
         self.directory_path = Path(directory_path)
         self.flight_data = []
         self.processed_data = {}
+
+        dir_name = self.directory_path.name
+        self.ylims = YLIM_CONFIG.get(dir_name, None)
+
+        if self.ylims:
+            print(f"loaded custom y-axis limits for '{dir_name}': {self.ylims}")
+        else:
+            print(f"No custom y-axis limits found for '{dir_name}', using auto-scaling")
         
     def file_log_reader(self, file_pattern="*.csv", sampling_rate=100.0):
         """
@@ -133,7 +175,7 @@ class FlightDataPlotter:
         
         return self.processed_data[axis]
     
-    def plot_flight_data(self, axes=['y'], figsize=(12, 8), main_title=None, title_pad=15, subplot_spacing=3.0):
+    def plot_flight_data(self, axes=['y'], figsize=(12, 8), main_title=None, title_pad=15, subplot_spacing=3.0, ylims=None):
         """
         Create subplot plots for specified axes.
         
@@ -144,6 +186,9 @@ class FlightDataPlotter:
             title_pad (int): Padding above subplot titles (default: 15)
             subplot_spacing (float): Vertical spacing between subplots (default: 3.0)
         """
+        if ylims is None:
+            ylims = self.ylims
+        
         n_plots = len(axes)
         
         # Create subplots
@@ -199,9 +244,14 @@ class FlightDataPlotter:
             # Customize subplot
             axs[i].set_ylabel(f'{axis.upper()}-axis Value')
             axs[i].grid(True, alpha=0.3)
-            axs[i].legend(loc='upper right')
+            axs[i].legend(loc='lower right', fontsize='small', framealpha=0.9, )              
             # Clean subplot title with customizable positioning
+
+            #axs[i] sets title for current subplot
+            #
             axs[i].set_title(f'{axis.upper()}-axis', fontsize=12, pad=title_pad)
+            if ylims and axis in ylims:
+                axs[i].set_ylim(ylims[axis])
         
         # Set x-label only for bottom subplot
         axs[-1].set_xlabel('Time (seconds)')
@@ -501,6 +551,255 @@ class FlightDataPlotter:
         print(f"Could not detect steady state for {axis}-axis, using default t = {default_time}s")
         return default_time
     
+    def analyze_time_to_peak(self, axis='y', start_time=0.0, end_time=None, 
+                         plot_results=True, peak_type='max'):
+        """
+        Calculate time to peak for a specified axis within a time window.
+    
+        Args:
+        axis (str): Axis to analyze ('x', 'y', or 'z')
+        start_time (float): Start time of the window (seconds)
+        end_time (float): End time of the window (None = use all data after start)
+        plot_results (bool): Whether to plot the analysis
+        peak_type (str): 'max' for maximum value, 'min' for minimum, 'abs' for absolute maximum
+    
+        Returns:
+        dict: Analysis results including time to peak, peak value, etc.
+        """
+    
+    # Process data if not already done
+        if axis not in self.processed_data:
+            self.process_flight_data(axis)
+        
+        data = self.processed_data[axis]
+        time = data['time']
+        mean_vals = data['mean']
+        
+        # Find indices for the window
+        start_idx = np.argmin(np.abs(time - start_time))
+        
+        if end_time is not None:
+            end_idx = np.argmin(np.abs(time - end_time))
+        else:
+            end_idx = len(time)
+        
+        # Extract window data
+        window_time = time[start_idx:end_idx]
+        window_vals = mean_vals[start_idx:end_idx]
+        
+        if len(window_vals) == 0:
+            raise ValueError(f"No data in specified time window ({start_time} to {end_time})")
+        
+        # Find peak based on type
+        if peak_type == 'max':
+            peak_idx = np.argmax(window_vals)
+            peak_value = window_vals[peak_idx]
+        elif peak_type == 'min':
+            peak_idx = np.argmin(window_vals)
+            peak_value = window_vals[peak_idx]
+        elif peak_type == 'abs':
+            abs_vals = np.abs(window_vals - window_vals[0])  # Relative to start
+            peak_idx = np.argmax(abs_vals)
+            peak_value = window_vals[peak_idx]
+        else:
+            raise ValueError(f"Unknown peak_type: {peak_type}. Use 'max', 'min', or 'abs'")
+        
+        # Calculate time to peak
+        peak_time = window_time[peak_idx]
+        time_to_peak = peak_time - start_time
+        
+        # Calculate rise metrics
+        start_value = window_vals[0]
+        value_change = peak_value - start_value
+        
+        # Find 10-90% rise time (common metric)
+        ten_percent_val = start_value + 0.1 * value_change
+        ninety_percent_val = start_value + 0.9 * value_change
+        
+        # Find when these thresholds are crossed
+        ten_percent_idx = None
+        ninety_percent_idx = None
+        
+        if value_change > 0:  # Rising
+            for i, val in enumerate(window_vals):
+                if ten_percent_idx is None and val >= ten_percent_val:
+                    ten_percent_idx = i
+                if ninety_percent_idx is None and val >= ninety_percent_val:
+                    ninety_percent_idx = i
+                    break
+        else:  # Falling
+            for i, val in enumerate(window_vals):
+                if ten_percent_idx is None and val <= ten_percent_val:
+                    ten_percent_idx = i
+                if ninety_percent_idx is None and val <= ninety_percent_val:
+                    ninety_percent_idx = i
+                    break
+        
+        rise_time_10_90 = None
+        if ten_percent_idx is not None and ninety_percent_idx is not None:
+            rise_time_10_90 = window_time[ninety_percent_idx] - window_time[ten_percent_idx]
+        
+        # Calculate overshoot if there's a settling value
+        if end_time is not None and (end_idx - start_idx) > 50:
+            # Use last 20% of window as settling region
+            settling_start = int(0.8 * len(window_vals))
+            settling_value = np.mean(window_vals[settling_start:])
+            overshoot_percent = 100 * (peak_value - settling_value) / abs(settling_value - start_value) if settling_value != start_value else 0
+        else:
+            settling_value = None
+            overshoot_percent = None
+        
+        # Store results
+        results = {
+            'axis': axis,
+            'time_window': (start_time, end_time if end_time else time[-1]),
+            'peak_type': peak_type,
+            'time_to_peak': time_to_peak,
+            'peak_time': peak_time,
+            'peak_value': peak_value,
+            'start_value': start_value,
+            'value_change': value_change,
+            'rise_time_10_90': rise_time_10_90,
+            'settling_value': settling_value,
+            'overshoot_percent': overshoot_percent
+        }
+        
+        # Print results
+        print(f"\n{'='*60}")
+        print(f"TIME TO PEAK ANALYSIS - {axis.upper()}-AXIS")
+        print(f"{'='*60}")
+        print(f"Time Window: {start_time:.2f}s to {end_time if end_time else 'end':.2f}s")
+        print(f"Peak Type: {peak_type}")
+        print(f"Time to Peak: {time_to_peak:.3f} seconds")
+        print(f"Peak Time: {peak_time:.3f}s")
+        print(f"Peak Value: {peak_value:.4f}")
+        print(f"Start Value: {start_value:.4f}")
+        print(f"Value Change: {value_change:+.4f}")
+        if rise_time_10_90:
+            print(f"10-90% Rise Time: {rise_time_10_90:.3f} seconds")
+        if overshoot_percent is not None:
+            print(f"Overshoot: {overshoot_percent:.1f}%")
+        
+        # Plot if requested
+        if plot_results:
+            self._plot_time_to_peak_analysis(results, data, start_idx, end_idx)
+        
+        return results
+
+    def _plot_time_to_peak_analysis(self, results, data, start_idx, end_idx):
+        """
+        Create visualization for time to peak analysis.
+        """
+        fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+        
+        time = data['time']
+        mean_vals = data['mean']
+        std_vals = data['std']
+        
+        # Plot full trajectory with transparency
+        ax.plot(time, mean_vals, 'b-', alpha=0.3, linewidth=1, label='Full Trajectory')
+        
+        # Highlight analysis window
+        window_time = time[start_idx:end_idx]
+        window_vals = mean_vals[start_idx:end_idx]
+        ax.plot(window_time, window_vals, 'b-', linewidth=2, label='Analysis Window')
+        
+        # Mark the peak
+        ax.plot(results['peak_time'], results['peak_value'], 'ro', 
+            markersize=10, label=f'Peak ({results["peak_time"]:.2f}s, {results["peak_value"]:.3f})')
+        
+        # Mark the start
+        ax.plot(results['time_window'][0], results['start_value'], 'go', 
+            markersize=8, label=f'Start ({results["time_window"][0]:.2f}s, {results["start_value"]:.3f})')
+        
+        # Add vertical line for time to peak
+        ax.vlines(results['peak_time'], results['start_value'], results['peak_value'],
+                colors='r', linestyles='--', alpha=0.5)
+        
+        # Add horizontal line from start
+        ax.hlines(results['start_value'], results['time_window'][0], results['peak_time'],
+                colors='g', linestyles='--', alpha=0.5)
+        
+        # Annotate time to peak
+        mid_time = results['time_window'][0] + results['time_to_peak']/2
+        mid_value = (results['start_value'] + results['peak_value'])/2
+        ax.annotate(f'Time to Peak:\n{results["time_to_peak"]:.3f}s', 
+                xy=(mid_time, mid_value),
+                xytext=(10, 10), textcoords='offset points',
+                bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.7),
+                fontsize=10)
+        
+        # If settling value exists, show it
+        if results['settling_value'] is not None:
+            ax.axhline(y=results['settling_value'], color='purple', linestyle=':', 
+                    linewidth=1.5, label=f'Settling Value: {results["settling_value"]:.3f}')
+        
+        # Add standard deviation
+        ax.fill_between(time[start_idx:end_idx], 
+                        mean_vals[start_idx:end_idx] - std_vals[start_idx:end_idx],
+                        mean_vals[start_idx:end_idx] + std_vals[start_idx:end_idx],
+                        color='blue', alpha=0.1)
+        
+        ax.set_xlabel('Time (seconds)')
+        ax.set_ylabel(f'{results["axis"].upper()}-axis Value')
+        ax.set_title(f'Time to Peak Analysis - {results["axis"].upper()}-axis\n'
+                    f'Time to Peak: {results["time_to_peak"]:.3f}s | '
+                    f'Peak Value: {results["peak_value"]:.3f}')
+        ax.legend(loc='best')
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.show()
+        
+        return fig, ax
+
+    def analyze_waypoint_transitions(self, waypoint_times, axes=['x', 'y', 'z'], 
+                                    margin=0.5, plot_summary=True):
+        """
+        Analyze time to peak for multiple waypoint transitions.
+        
+        Args:
+            waypoint_times (list): List of tuples (start_time, end_time) for each waypoint transition
+            axes (list): List of axes to analyze
+            margin (float): Time margin before/after transition (seconds)
+            plot_summary (bool): Whether to create summary plot
+        
+        Returns:
+            dict: Results for each waypoint and axis
+        """
+        
+        all_results = {}
+        
+        for wp_idx, (start, end) in enumerate(waypoint_times):
+            wp_results = {}
+            
+            # Add margin to capture full transition
+            analysis_start = max(0, start - margin)
+            analysis_end = end + margin if end is not None else None
+            
+            print(f"\n{'='*60}")
+            print(f"WAYPOINT {wp_idx + 1} TRANSITION ANALYSIS")
+            print(f"Transition: {start:.1f}s to {end if end else 'end':.1f}s")
+            print(f"{'='*60}")
+            
+            for axis in axes:
+                results = self.analyze_time_to_peak(
+                    axis=axis,
+                    start_time=analysis_start,
+                    end_time=analysis_end,
+                    plot_results=False,  # We'll create a summary plot instead
+                    peak_type='abs'  # Use absolute for waypoint changes
+                )
+                wp_results[axis] = results
+            
+            all_results[f'waypoint_{wp_idx+1}'] = wp_results
+        
+        # Create summary statistics
+        if plot_summary:
+            self._plot_waypoint_summary(all_results, waypoint_times)
+        
+        return all_results
+        
 
 
 
@@ -508,7 +807,7 @@ def analyze_static_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=1
     """
     Analyze static hover flight data with steady-state error analysis
     """
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2statichover"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_dynamic_hover1"
     
     print("=== Static Hover Flight Analysis with Steady-State Error ===")
     plotter = FlightDataPlotter(directory_path)
@@ -556,7 +855,7 @@ def analyze_dynamic_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=
         # Example: if you hover at different waypoints at different times
         waypoint_1_results = plotter.analyze_steady_state_error(
             axes=axes,
-            steady_state_start_time=20.0,
+            steady_state_start_time=12.5,
             steady_state_end_time= None,
             target_position={'x': 1.0, 'y': 1.0, 'z': 3.0},  # First waypoint
             plot_results=False
@@ -592,17 +891,17 @@ def analyze_static_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
 
 def analyze_dynamic_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
     """Analyze dynamic hover flight data"""
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_multiple_waypoint"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf1_dynamic_hover1"
     
     print("=== Dynamic Hover Flight Analysis ===")
     plotter = FlightDataPlotter(directory_path)
     
     # Read and process data
-    flight_data = plotter.file_log_reader("cf2_tuning_*.csv", sampling_rate=sampling_rate)
+    flight_data = plotter.file_log_reader("cf1_tuning_*.csv", sampling_rate=sampling_rate)
     
     if flight_data:
         # Create plots with main title
-        fig, axs = plotter.plot_flight_data(axes=axes, main_title="multiple waypoint From  With CF2")
+        fig, axs = plotter.plot_flight_data(axes=axes, main_title="dynamic waypoint From  With CF1")
         
         # Print statistics
         for axis in axes:
@@ -632,23 +931,68 @@ def analyze_custom_path(directory_path, axes=['x', 'y', 'z'], file_pattern="cf1_
     
     return plotter
 
-
+# Example usage for analyzing waypoint transitions
+def analyze_waypoint_flight_with_timing():
+    """
+    Analyze waypoint navigation with time to peak calculations
+    """
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_multiple_waypoint"
+    
+    plotter = FlightDataPlotter(directory_path)
+    flight_data = plotter.file_log_reader("cf2_tuning_*.csv", sampling_rate=100.0)
+    
+    if flight_data:
+        # First, plot the full trajectory to identify waypoint transitions
+        fig, axs = plotter.plot_flight_data(axes=['x', 'y', 'z'], 
+                                           main_title="Waypoint Navigation Analysis")
+        
+        # Analyze specific waypoint transitions
+        # Example: First waypoint transition from t=5s to t=15s
+        results_y = plotter.analyze_time_to_peak(
+            axis='y',
+            start_time=0.0,   # Start of maneuver
+            end_time=10,    # End of maneuver
+            plot_results=True,
+            peak_type='max'   # or 'min' or 'abs'
+        )
+        
+        # Analyze multiple waypoints
+        waypoint_transitions = [
+            (5.0, 15.0),   # First waypoint
+            (15.0, 25.0),  # Second waypoint
+            (25.0, 35.0),  # Third waypoint
+        ]
+        
+        all_results = plotter.analyze_waypoint_transitions(
+            waypoint_times=waypoint_transitions,
+            axes=['x', 'y', 'z'],
+            margin=0.5,
+            plot_summary=True
+        )
+        
+        # Print summary
+        for wp, wp_results in all_results.items():
+            print(f"\n{wp.upper()} Summary:")
+            for axis, results in wp_results.items():
+                print(f"  {axis}-axis: Time to Peak = {results['time_to_peak']:.3f}s")
+    
+    return plotter
 
 
 
 # Main execution
 if __name__ == "__main__":
     # Choose which analysis to run by commenting/uncommenting:
+
+    #NOTE: TIME TO PEAK HERE
+    # analyze_waypoint_flight_with_timing()
     
-    #NOTE: Call Here
-
-
-
+    #NOTE: PLOTSSS Call Here
     # Analyze static hover data (all axes) - will show "Static Hold" as main title
     # analyze_static_hover()
     
     # Analyze dynamic hover data (all axes) - will show "Dynamic Hold" as main title
-    analyze_dynamic_hover()
+    # analyze_dynamic_hover()
     
     # Analyze just Y-axis for dynamic hover
     # analyze_dynamic_hover(axes=['y'])
