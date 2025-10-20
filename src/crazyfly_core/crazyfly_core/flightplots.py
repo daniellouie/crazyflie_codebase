@@ -25,7 +25,7 @@ def FILE_INITIATION(i):
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
-    CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_dynamic_hover"
+    CF1_RESULTS = WORKSPACE / "cf_tuning_data/cf1_new_config_tuning_flight"
     CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf1_command_values"
     CF2_QUAT = WORKSPACE / "cf2_quat_values"
 
@@ -64,7 +64,7 @@ def FILE_INITIATION(i):
     file_path   = csv_files[-1]            # newest because the timestamp sorts lexicographically
     I_joc_path = I_Joc_files[-1]
     cf2_path = cf2_files[-1]
-    cf1_path = cf1_files[-1]
+    cf1_path = cf1_files[-2]
     cf1_cmd_path = cf1_cmd_files[-2]
 
     print(cf1_path)
@@ -685,9 +685,9 @@ def main():
 
     # static_threeD_position(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
     # anim_threeD_Plot(cur_cf1_positions, cur_cf2_positions, cur_cluster_positions, des_cluster_positions, des_cf1_positions, des_cf2_positions)
-    #static_inv_plot(I_joc_path)
+    # static_inv_plot(I_joc_path)
     # anim_2d_plot(I_joc_path, file_path, df)
-    # cf2_tuning_static(cf1_path)
+    cf2_tuning_static(cf1_path)
     #cluster_accuracy()
     plot_pos_err_cmd()
     # plot_quaternion_data()

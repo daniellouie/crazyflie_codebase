@@ -1,0 +1,2 @@
+time,hover,max_thrust,min_thrust,k_p_x,k_i_x,k_d_x,k_p_y,k_i_y,k_d_y,k_p_z,k_i_z,k_d_z
+2025-10-19_18:00:38,39000,45000,36000,2.5,0.0,2.0,10000,0,9700,-2.5,-0.0,-2.0

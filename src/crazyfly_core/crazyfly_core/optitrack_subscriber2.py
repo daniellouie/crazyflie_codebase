@@ -124,8 +124,8 @@ class OptiTrackSubscriber2(Node):
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
       
         
-        self.hover       = 42000      # trim thrust to hold level hover
-        self.max_thrust  = 45000
+        self.hover       = 41500      # trim thrust to hold level hover
+        self.max_thrust  = 44000
         self.min_thrust  = 36000
         
         
@@ -133,9 +133,9 @@ class OptiTrackSubscriber2(Node):
         # self.max_thrust  = 45000
         # self.min_thrust  = 36000
 
-        self.k_p_y       = 10000     #7450 
-        self.k_i_y       = 0        #0    
-        self.k_d_y       = 9700     #9700 
+        self.k_p_y       = 22000     #7450 
+        self.k_i_y       = 1000     #0    
+        self.k_d_y       = 16000     #9700 
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -153,9 +153,9 @@ class OptiTrackSubscriber2(Node):
         # self.k_i_x       = 0.15
         # self.k_d_x       = 3.2 # 3.25, 3.75
           
-        self.k_p_x       = 1.0 
+        self.k_p_x       = 4.5
         self.k_i_x       = 0.0
-        self.k_d_x       = 1.0
+        self.k_d_x       = 4.0
 
 
         self.max_pitch   = 4.0
@@ -172,9 +172,9 @@ class OptiTrackSubscriber2(Node):
                 # ----------------------         Z constants         ---------------------- #
        
         #NOTE: CHANGING VALUES FOR NEW CF2 MARKER
-        self.k_p_z       = -1.0
+        self.k_p_z       = -4.5
         self.k_i_z       = -0.0
-        self.k_d_z       = -2.0
+        self.k_d_z       = -4.0
 
         self.max_roll = 3.0
         self.min_roll = -3.0 
