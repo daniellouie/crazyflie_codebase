@@ -23,7 +23,7 @@ import statistics
 
 CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
-CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf1_new_config_tuning_flight")
+CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_waypoint_new")
 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 #      ----------     NOTE: CHANGE "address" last value to:          ----------
@@ -88,7 +88,7 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 20 # 20.0 #in seconds
+        self.flight_duration = 30 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
         self.const_thrust = 44000
@@ -140,7 +140,7 @@ class MinimalSubscriber(Node):
         self.y_fi_data = []
 
         self.start_time = time.time()
-
+        self.shared_timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     # this function is called each time a 'command' message is received
     def listener_callback(self, msg):
         # ensure commands for all axis are recieved
@@ -284,7 +284,7 @@ class MinimalSubscriber(Node):
 
 
     def save_data(self):
-        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        time_s = self.shared_timestamp
         if address[-1] == '8':
             fname = f"cf1_tuning_{time_s}.csv" #name of csv
         else:
@@ -306,7 +306,7 @@ class MinimalSubscriber(Node):
 
     #----- Saving Command Values & Thrust Values to Optimize Tuning -----#
     def save_all_values(self):
-        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        time_s = self.shared_timestamp
         fname = f"cf1_all_values_{time_s}.csv" #name of csv
         if address[-1] == '8':
             CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf1_command_values")  # if radio signal ends in 7 (cf2)
