@@ -21,7 +21,9 @@ from rclpy.logging import get_logger
 import pandas as pd
 import statistics
 
-CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
+CF2_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf2_multiple_waypoint_new")
+# CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
+
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
 CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_waypoint_new")
 
@@ -30,7 +32,7 @@ CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_wayp
 #      ----------                                       cf1: 8       ----------
 #      ----------                                       cf2: 7       ----------
 # address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
-address = 'radio://0/80/2M/E7E7E7E7E8'  # cf2
+address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
 if address[-1] == '8':
     CF_PATH = CF1_PATH
 else:
@@ -288,7 +290,7 @@ class MinimalSubscriber(Node):
         if address[-1] == '8':
             fname = f"cf1_tuning_{time_s}.csv" #name of csv
         else:
-            fname = f"cf2_tuning_{time_s}.csv" #name of csv    
+            fname = f"cf2_tuning_new{time_s}.csv" #name of csv    
         #fname = f"optitrack_test_{time_s}.csv"
         path = os.path.join(CF_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f"), self.x_log, self.y_log, self.z_log])

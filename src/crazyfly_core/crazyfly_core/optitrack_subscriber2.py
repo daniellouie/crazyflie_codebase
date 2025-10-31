@@ -43,7 +43,7 @@ from scipy.spatial.transform import Rotation as R
 # 1) Pointing CF2 towards relevant path
 
 
-CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf1_new_config_pid_values") 
+CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_pid_values") 
 
 
 # 2) Creates the class of OptiTrackSubsciber
@@ -124,18 +124,19 @@ class OptiTrackSubscriber2(Node):
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
       
         
-        self.hover       = 41500      # trim thrust to hold level hover
+        self.hover       = 38000    #41500  # trim thrust to hold level hover
         self.max_thrust  = 44000
         self.min_thrust  = 36000
         
-        
-        # self.hover       = 39000      # trim thrust to hold level hover
-        # self.max_thrust  = 45000
-        # self.min_thrust  = 36000
+        #NOTE: THESE ARE CF1 VALUES
+        # self.hover       = 26000      # trim thrust to hold level hover
+        # self.max_thrust  = 1000
+        # self.min_thrust  = 16000
 
-        self.k_p_y       = 26000     #7450 
-        self.k_i_y       = 1000     #0    
-        self.k_d_y       = 16000     #9700 
+        #NOTE: THESE ARE FOR CF2 
+        self.k_p_y       = 23500     #26000
+        self.k_i_y       = 1000     #1000
+        self.k_d_y       = 16000     #16000
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -148,14 +149,15 @@ class OptiTrackSubscriber2(Node):
         
 
                 # ----------------------         X constants         ---------------------- #
-       
-        # self.k_p_x       = 1.0    
-        # self.k_i_x       = 0.15
-        # self.k_d_x       = 3.2 # 3.25, 3.75
-          
-        self.k_p_x       = 6.5
-        self.k_i_x       = 1.3
-        self.k_d_x       = 6.6
+        #NOTE: THESE ARE CF1 PID Values
+        # self.k_p_x       =  6.5   
+        # self.k_i_x       = 1.3
+        # self.k_d_x       =  6.6
+        
+        #NOTE: THESE ARE FOR CF2
+        self.k_p_x       = 7.05 #7.0     
+        self.k_i_x       = 1.1
+        self.k_d_x       = 6.55 #6.7
 
 
         self.max_pitch   = 4.0
@@ -171,10 +173,16 @@ class OptiTrackSubscriber2(Node):
        
                 # ----------------------         Z constants         ---------------------- #
        
+        #NOTE: CHANGING VALUES FOR NEW CF1 MARKER
+        # self.k_p_z       = -6.5
+        # self.k_i_z       = -1.2
+        # self.k_d_z       = -6.5
+
+
         #NOTE: CHANGING VALUES FOR NEW CF2 MARKER
-        self.k_p_z       = -6.5
-        self.k_i_z       = -1.2
-        self.k_d_z       = -6.5
+        self.k_p_z       = -7.05 #was 6.7 10/29/25 2:09
+        self.k_i_z       = -1.1
+        self.k_d_z       = -6.6
 
         self.max_roll = 3.0
         self.min_roll = -3.0 
@@ -208,7 +216,7 @@ class OptiTrackSubscriber2(Node):
         cf2_path = FILE_INITIATION("cf2_path")
         cf2_tuning_name = os.path.basename(cf2_path)
         #fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
-        fname = f"cf1_pid_{time_s}.csv"
+        fname = f"cf2_pid_new{time_s}.csv"
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         # logger = get_logger("cf_pid_logger")
         # logger.info(f"---------------------------------PID WRITE TO {path}")
