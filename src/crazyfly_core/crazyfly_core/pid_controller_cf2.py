@@ -124,13 +124,13 @@ class PIDControllerCF2(Node):
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 48000  #41600      # trim thrust to hold level hover
-        self.max_thrust  = 56000
-        self.min_thrust  = 42000
+        self.hover       = 38000  #41600      # trim thrust to hold level hover
+        self.max_thrust  = 44000
+        self.min_thrust  = 36000
 
-        self.k_p_y       = 30000 #+3800      # P-gain
-        self.k_i_y       = 800             # I-gain
-        self.k_d_y       = 12000           # D-gain
+        self.k_p_y       = 23500 #+3800      # P-gain
+        self.k_i_y       = 1000             # I-gain
+        self.k_d_y       = 16000           # D-gain
         
 
         self.max_yawrate = 15
@@ -145,9 +145,9 @@ class PIDControllerCF2(Node):
 
                 # ----------------------         X constants         ---------------------- #
 
-        self.k_p_x       = 1.0    
-        self.k_i_x       = 0.15
-        self.k_d_x       = 3.2 # 3.25, 3.75
+        self.k_p_x       = 7.05    
+        self.k_i_x       = 1.1
+        self.k_d_x       = 6.55 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -162,9 +162,9 @@ class PIDControllerCF2(Node):
        
                 # ----------------------         Z constants         ---------------------- #
         # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        self.k_p_z       = -1.2 
-        self.k_i_z       = -0.1
-        self.k_d_z       = -2.6
+        self.k_p_z       = -7.05 
+        self.k_i_z       = -1.1
+        self.k_d_z       = -6.6
 
         # self.k_p_z = 2
         # self.k_i_z = 0.6

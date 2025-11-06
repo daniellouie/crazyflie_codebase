@@ -83,14 +83,14 @@ class PIDControllerCF1(Node):
         self.pitch_feedforward = 0
 
         # values for vertical Y (thrust) PID
-        self.hover = 44000 #originally 46500     
-        self.max_thrust = 55000 #origionall 50000
-        self.min_thrust = 42000
+        self.hover = 42500 #originally 46500     
+        self.max_thrust = 46000 #origionall 50000
+        self.min_thrust = 36000
         #self.k_p_y = 30000 #Origionally 15000 May 6 
-        self.k_p_y = 15000
-        self.k_i_y = 3250 #extra amount of thrust wanted (originally 2000)
+        self.k_p_y = 23600
+        self.k_i_y = 1000 #extra amount of thrust wanted (originally 2000)
         #self.k_d_y = 15000 #Origionally 10000
-        self.k_d_y = 10000
+        self.k_d_y = 16000
         #there used to be a threshold_met for thrust but was unused and now used for waypoint synchronization
 
         self.cur_y_error = 0.0
@@ -99,9 +99,9 @@ class PIDControllerCF1(Node):
         self.int_y_max = 5000 # maximum added thrust from integral component
 
         # values for horizontal X (pitch) PID
-        self.k_p_x = 2
-        self.k_i_x = 0.6
-        self.k_d_x = 4.6  #originally 4.0 (feb 12)
+        self.k_p_x = 6.5
+        self.k_i_x = 1.3
+        self.k_d_x = 6.6  #originally 4.0 (feb 12)
         self.max_pitch = 3.0
         self.min_pitch = -3.0
 
@@ -112,10 +112,10 @@ class PIDControllerCF1(Node):
 
         # values for horizontal Z (roll) PID
         #self.k_p_z = 3.5 #origionally 2 May 6 
-        self.k_p_z = -2
-        self.k_i_z = -0.6
+        self.k_p_z = -6.5
+        self.k_i_z = -1.2
         #self.k_d_z = 5.5 #previously 3.5 May 6 
-        self.k_d_z = -3.5
+        self.k_d_z = -6.5
         self.max_roll = 3.0
         self.min_roll = -3.0
 

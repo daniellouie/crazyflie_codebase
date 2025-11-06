@@ -32,11 +32,11 @@ class ClusterController_new(Node):
         # ]
         self.waypoints = [
             
-            [1.0, 1.0, 3.0, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            [1.0, 1.0, 3.0, np.pi/2, 0, np.pi/2, np.pi/2, 1],
-            [1.0, 1.0, 3.0, np.pi, 0, np.pi, np.pi, 1],
-            [1.0, 1.0, 3.0, -np.pi/2, 0, -np.pi/2, -np.pi/2, 1],
-            [1.0, 1.0, 3.0, 0 , 0, 0, 0, 1]
+            # [1.0, 1.0, 3.0, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.5, 1.0, 1.0, np.pi/2, 0, np.pi/2, np.pi/2, 1],
+            # [1.0, 1.0, 3.0, np.pi, 0, np.pi, np.pi, 1],
+            # [1.0, 1.0, 3.0, -np.pi/2, 0, -np.pi/2, -np.pi/2, 1],
+            # [1.0, 1.0, 3.0, 0 , 0, 0, 0, 1]
         ]
 
         self.cur_waypoint_index = 0
@@ -248,6 +248,7 @@ class ClusterController_new(Node):
                     *self.des_cf2_positions[i],
                     *self.safe_cf2_positions[i]
                 ])
+        rclpy.shutdown()
 
     def plot_data(self):
         # Plot 3D position data
@@ -304,7 +305,7 @@ class ClusterController_new(Node):
            
         finally:
             self.save_data_to_csv()
-            self.cluster.dump_cluster_dot()
+            # self.cluster.dump_cluster_dot()
             executor.shutdown()
             self.destroy_node()
             rclpy.shutdown()

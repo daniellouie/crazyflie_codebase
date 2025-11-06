@@ -84,8 +84,8 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        # self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
-        self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
@@ -151,7 +151,7 @@ class OptiTrackSubscriber2(Node):
                 # ----------------------         X constants         ---------------------- #
         #NOTE: THESE ARE CF1 PID Values
         # self.k_p_x       =  6.5   
-        # self.k_i_x       = 1.3
+        # self.k_i_x       =  1.3
         # self.k_d_x       =  6.6
         
         #NOTE: THESE ARE FOR CF2

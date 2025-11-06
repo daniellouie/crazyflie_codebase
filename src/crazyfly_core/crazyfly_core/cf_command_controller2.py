@@ -78,7 +78,13 @@ class MinimalSubscriber(Node):
 
         # ------ THESE CAN BE CHANGED FOR TESTING ------ 
         # limit flight time for testing
+
+
+        """"" TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""""
         self.flight_duration = 20.0 #in seconds
+        """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
+
+
         # safety variable to prevent motors from running when testing
         # set to true to run motors
         self.run_motors_bool = True
@@ -242,10 +248,10 @@ class MinimalSubscriber(Node):
             rclpy.shutdown()  # Shutdown ROS 2 before ramping down to prevent override
 
             # ramp down thrust until reaching threshold to cut power, ideally on the ground
-            while rampdown_thrust1 > 42500 or rampdown_thrust2 > 42500:
-                if rampdown_thrust1 > 42500:
+            while rampdown_thrust1 > 33000 or rampdown_thrust2 > 42500:
+                if rampdown_thrust1 > 33000:
                     rampdown_thrust1 -= 250
-                if rampdown_thrust2 > 42500:
+                if rampdown_thrust2 > 33000:
                     rampdown_thrust2 -= 250
 
                 print(f"running ramp down: {rampdown_thrust1}")

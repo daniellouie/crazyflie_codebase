@@ -21,8 +21,8 @@ from rclpy.logging import get_logger
 import pandas as pd
 import statistics
 
-CF2_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf2_multiple_waypoint_new")
-# CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
+# CF2_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf2_multiple_waypoint_new")
+CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
 
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
 CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_waypoint_new")
@@ -32,7 +32,7 @@ CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_wayp
 #      ----------                                       cf1: 8       ----------
 #      ----------                                       cf2: 7       ----------
 # address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
-address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
+address = 'radio://0/80/2M/E7E7E7E7E8'  # cf2
 if address[-1] == '8':
     CF_PATH = CF1_PATH
 else:
@@ -90,10 +90,10 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 30 # 20.0 #in seconds
+        self.flight_duration = 15 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
-        self.const_thrust = 44000
+        self.const_thrust = 38000
         self.const_roll = 0 #-3,3 range
         self.const_pitch = 0 #-3,3 range
         self.const_yawrate = 0 #-15,15 range
@@ -244,8 +244,8 @@ class MinimalSubscriber(Node):
 
 
         # ramp down thrust until reaching threshold to cut power, ideally on the ground
-        while rampdown_thrust1 > 42000:
-            if rampdown_thrust1 > 42000:
+        while rampdown_thrust1 > 33000:
+            if rampdown_thrust1 > 33000:
                 rampdown_thrust1 -= 150
             print(f"running ramp down: {rampdown_thrust1}")
             self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, rampdown_thrust1)
