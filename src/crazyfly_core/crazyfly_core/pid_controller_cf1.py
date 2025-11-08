@@ -83,8 +83,8 @@ class PIDControllerCF1(Node):
         self.pitch_feedforward = 0
 
         # values for vertical Y (thrust) PID
-        self.hover = 42500 #originally 46500     
-        self.max_thrust = 46000 #origionall 50000
+        self.hover = 43500 #originally 46500     
+        self.max_thrust = 47000 #origionall 50000
         self.min_thrust = 36000
         #self.k_p_y = 30000 #Origionally 15000 May 6 
         self.k_p_y = 23600

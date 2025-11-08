@@ -103,6 +103,8 @@ class Cluster_new:
         #NOTE: This now in the OUR New local variables
         gamma = 0 # not used in this implementation
         alpha = np.arctan2((x2-x1), (z2-z1))
+        if alpha < 0:
+            alpha = alpha + 2*np.pi()
         beta = np.arctan2((y2-y1), np.sqrt((z2-z1)**2 + (x2-x1)**2))
         phi1 = alpha - theta1
         phi2 = alpha - theta2
