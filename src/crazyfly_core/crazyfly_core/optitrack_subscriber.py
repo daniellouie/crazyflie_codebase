@@ -118,7 +118,7 @@ class OptiTrackSubscriber(Node):
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 41500      # trim thrust to hold level hover
+        self.hover       = 38000      # trim thrust to hold level hover
         self.max_thrust  = 44000
         self.min_thrust  = 36000
 

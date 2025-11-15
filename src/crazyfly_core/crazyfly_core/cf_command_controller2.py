@@ -81,7 +81,7 @@ class MinimalSubscriber(Node):
 
 
         """"" TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""""
-        self.flight_duration = 40.0 #in seconds
+        self.flight_duration = 25.0 #in seconds
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
 
 
