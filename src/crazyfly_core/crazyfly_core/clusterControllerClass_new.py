@@ -24,32 +24,21 @@ class ClusterController_new(Node):
         self.cluster = Cluster_new()
 
         # define waypoints for the cluster this goes in order of waypoints it wants to reach
-        self.waypoints = self.generate_interpolated_waypoint()
+        # self.waypoints = self.generate_interpolated_waypoint()
         
-        # self.waypoints = [
+        self.waypoints = [
             # x,   y,   z,   alpha, beta, phi1,  phi2,     p
-            # [1.0, 1.0, 3.0, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            # [1.5, 1.0, 1.0, np.pi/2, 0, np.pi/2, np.pi/2, .75],
-            # [1.5, 1.0, 1.0, np.pi, 0, np.pi, np.pi, .75],
-            # [1.5, 1.0, 1.0, -np.pi/2, 0, -np.pi/2, -np.pi/2, .75],
-            # [1.5, 0.0, 1.0, -np.pi/2, 0, -np.pi/2, -np.pi/2, 1],
-            # [1.5, 1.0, 1.0, 0 , 0, 0, 0, .75],  #NOTE: THIS MIGHT WANT 2PI
-            # [1.5, 1.0, 1.0, np.pi/2, 0, np.pi/2, np.pi/2, .75]
-        # ]
-        # self.waypoints = []
-
-    
-
-        #NOTE: for loop. self waypoint inside. Set way point with i changing variable, when 
-        # position criteria is met, update i++ and move to new position 
-
-
+            [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+            
+        ]
+     
         self.cur_waypoint_index = 0
         self.cluster.C_des = self.waypoints[self.cur_waypoint_index]  
         
 
 
-        self.waypoint_hold_time = 0.1 #in seconds
+        self.waypoint_hold_time = 3 #in seconds
         self.waypoint_start_time = None
         self.waypoint_tolerance = 0.1 # in meters
         # bool updated to check if the cluster is within the tolerance, only print message if it changes
@@ -85,14 +74,20 @@ class ClusterController_new(Node):
         waypoints = []
 
         # Define your waypoints for a full rotation
-        main_waypoint = [
-            # x,   y,   z,   alpha,    beta, phi1,     phi2,      p
-            [1.5, 1.0, 0.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.6],  # 0°
-            [1.5, 1.0, 0.75, np.pi,     0,    np.pi,    np.pi,     0.6],  # 90°
-            [1.5, 1.0, 1.0, -np.pi/2,  0,    -np.pi/2, -np.pi/2,  0.6],  # 180°
-            [1.5, 1.0, 1.25, 0,         0,    0,        0,         0.6],  # 270°
-            [1.5, 1.0, 1.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.6]  # 0°
-        ]
+        #NOTE: this is for frisbee test 
+        # main_waypoint = [
+        #     # x,   y,   z,   alpha,    beta, phi1,     phi2,      p
+        #     [1.0, 1.0, 0.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.75],  # 0°
+        #     [1.0, 1.0, 0.75, np.pi,     0,    np.pi,    np.pi,     0.75],  # 90°
+        #     [1.0, 1.0, 1.0, -np.pi/2,  0,    -np.pi/2, -np.pi/2,  0.75],  # 180°
+        #     [1.0, 1.0, 1.25, 0,         0,    0,        0,         0.75],  # 270°
+        #     [1.0, 1.0, 1.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.75]  # 0°
+        # ]
+
+        # main_waypoint = [
+        #     [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+        #     [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+        # ]
 
         # Convert to numpy array and unwrap the angular values
         waypoints_array = np.array(main_waypoint)

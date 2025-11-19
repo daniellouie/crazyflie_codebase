@@ -20,7 +20,8 @@ def FILE_INITIATION(i):
     # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
     # WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
     WORKSPACE = pathlib.Path.home() / "crazyfly_ws"   # <— fixed
-    DATA_DIR      = WORKSPACE / "cluster_data"
+    # DATA_DIR      = WORKSPACE / "cluster_data"
+    DATA_DIR      = WORKSPACE / "final_flight_data/frisbee"
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover"
