@@ -25,8 +25,8 @@ def FILE_INITIATION(i):
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover1"
     CF1_TUNING = WORKSPACE / "flight_navigation_precision/cf1_multiple_waypoint"
-    CF1_RESULTS = WORKSPACE / "flight_navigation_precision/cf1_static_hover"
-    CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf2_command_values"
+    CF1_RESULTS = WORKSPACE / "cf_tuning_data/cf1_new_config_tuning_flight"
+    CF1_COMMANDS = WORKSPACE / "flight_navigation_precision/command_values_for_stability/cf1_command_values"
     CF2_QUAT = WORKSPACE / "cf2_quat_values"
 
 

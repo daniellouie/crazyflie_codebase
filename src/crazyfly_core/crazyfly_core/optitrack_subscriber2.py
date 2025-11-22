@@ -43,7 +43,7 @@ from scipy.spatial.transform import Rotation as R
 # 1) Pointing CF2 towards relevant path
 
 
-CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf2_pid_tuning_values") 
+CF2_PID =  os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_pid_values") 
 
 
 # 2) Creates the class of OptiTrackSubsciber
@@ -84,15 +84,15 @@ class OptiTrackSubscriber2(Node):
         #INITIAL SET UP 
         self.position = [0.0, 0.0, 0.0] #current position of drone, automatically updated
 
-        self.target_positions = [[1.0, 1.0, 3.0]] #set single position (x,y,z)
-        self.target_positions = [[1.0, 1.0, 2.0], [1.0, 1.0, 3.0]] 
+        self.target_positions = [[1.0, 1.0, 1.0]] #set single position (x,y,z)
+        # self.target_positions = [[1.0, 1.0, 1.0], [1.0, 1.0, 2.0]] 
         self.target_pitch_deg = 0.0
         self.target_roll_deg = 0.0
         
         # Controls variables
         self.current_target_index = 0 
         self.target_position = self.target_positions[self.current_target_index]
-        self.threshold = 0.30  # [m] Threshold for reaching the target
+        self.threshold = 0.05  # [m] Threshold for reaching the target
         
         # Changing self.t so that I and D, when going on delta T, go on accurate delta T and not a fixed constant
         self.t = 0.01 #average time between signals in seconds
@@ -113,20 +113,30 @@ class OptiTrackSubscriber2(Node):
         # ───────────────────────────  PID GAIN & CONSTANTS BLOCK  ────────────────────────────
 
         # temp feedforward
-        self.pitch_feedforward = -0.7 # -0.5
-        self.roll_feedforward = -0.4 # -1.2 # -1.9
+        # self.pitch_feedforward = -0.7 # -0.5
+        # self.roll_feedforward = -0.4 # -1.2 # -1.9
+        
+        self.pitch_feedforward = 0.0 # -0.5
+        self.roll_feedforward = 0.0 # -1.2 # -1.9
 
         # --
                 # ----------------------         Y constants         ---------------------- #
         # values for vertical Y (thrust) PID  ── ALTITUDE LOOP (tuned 2025-07-14)
-        self.hover       = 48000      # trim thrust to hold level hover
-        self.max_thrust  = 56000
-        self.min_thrust  = 42000
-
-        self.k_p_y       = 30000 #+3800      # P-gain
-        self.k_i_y       = 800             # I-gain
-        self.k_d_y       = 12000           # D-gain
+      
         
+        self.hover       = 38000    #41500  # trim thrust to hold level hover
+        self.max_thrust  = 44000
+        self.min_thrust  = 36000
+        
+        #NOTE: THESE ARE CF1 VALUES
+        # self.hover       = 26000      # trim thrust to hold level hover
+        # self.max_thrust  = 1000
+        # self.min_thrust  = 16000
+
+        #NOTE: THESE ARE FOR CF2 
+        self.k_p_y       = 23500     #26000
+        self.k_i_y       = 1000     #1000
+        self.k_d_y       = 16000     #16000
 
         self.max_yawrate = 15
         self.min_yawrate = -15
@@ -139,20 +149,16 @@ class OptiTrackSubscriber2(Node):
         
 
                 # ----------------------         X constants         ---------------------- #
-        # X constants
-        # values for horizontal X (roll) PID
-        # self.k_p_x       = 2.0
-        # self.k_i_x       = 0.6
-        # self.k_d_x       = 4.1
+        #NOTE: THESE ARE CF1 PID Values
+        # self.k_p_x       =  6.5   
+        # self.k_i_x       =  1.3
+        # self.k_d_x       =  6.6
         
-        # commented out 9/3
-        # self.k_p_x       = 0.75    
-        # self.k_i_x       = 0.5 
-        # self.k_d_x       = 3.55
+        #NOTE: THESE ARE FOR CF2
+        self.k_p_x       = 7.05 #7.0     
+        self.k_i_x       = 1.1
+        self.k_d_x       = 6.55 #6.7
 
-        self.k_p_x       = 1.0    
-        self.k_i_x       = 0.15
-        self.k_d_x       = 3.2 # 3.25, 3.75
 
         self.max_pitch   = 4.0
         self.min_pitch   = -4.0
@@ -166,14 +172,17 @@ class OptiTrackSubscriber2(Node):
 
        
                 # ----------------------         Z constants         ---------------------- #
-        # NOTE: values for horizontal Z (pitch) PID (negative values because 180 rotation)
-        self.k_p_z       = -1.2 
-        self.k_i_z       = -0.1
-        self.k_d_z       = -2.6
+       
+        #NOTE: CHANGING VALUES FOR NEW CF1 MARKER
+        # self.k_p_z       = -6.5
+        # self.k_i_z       = -1.2
+        # self.k_d_z       = -6.5
 
-        # self.k_p_z = 2
-        # self.k_i_z = 0.6
-        # self.k_d_z = 4.1
+
+        #NOTE: CHANGING VALUES FOR NEW CF2 MARKER
+        self.k_p_z       = -7.05 #was 6.7 10/29/25 2:09
+        self.k_i_z       = -1.1
+        self.k_d_z       = -6.6
 
         self.max_roll = 3.0
         self.min_roll = -3.0 
@@ -188,6 +197,7 @@ class OptiTrackSubscriber2(Node):
 
         self.startTimer = False
         self.startTime = time.time()
+        self.shared_timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
 
     def normalize_quat(self, q):
@@ -202,11 +212,11 @@ class OptiTrackSubscriber2(Node):
 
     # Saves all PID gain values to csv in another directory
     def save_pid(self):
-        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        time_s = self.shared_timestamp #creates timestamp for every file
         cf2_path = FILE_INITIATION("cf2_path")
         cf2_tuning_name = os.path.basename(cf2_path)
         #fname = f"cf2_pid_{cf2_tuning_name[11:30]}.csv" #name of csv
-        fname = f"cf2_pid_{time_s}.csv"
+        fname = f"cf2_pid_new{time_s}.csv"
         path = os.path.join(CF2_PID, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         # logger = get_logger("cf_pid_logger")
         # logger.info(f"---------------------------------PID WRITE TO {path}")
@@ -365,7 +375,7 @@ class OptiTrackSubscriber2(Node):
         # set to zero if within margin
         self.cur_z_error = self.target_position[2] - self.position[2]
         # if -0.01 <= self.cur_z_error <= 0.01:
-        #     self.cur_z_error = 0
+        #     self.cur_z_error = 0 
 
         # (P term)
         z_fp = self.k_p_z * self.cur_z_error # (deg/m) 
@@ -435,7 +445,7 @@ class OptiTrackSubscriber2(Node):
             self.int_x_error = future_int_x_error 
         x_fi = self.k_i_x * self.int_x_error # (to be in degrees Ki_x must be in deg/m*s))
         
-        # (D term)
+        # (D term)final_flight_data/cf1_multiple_waypoint_new
         x_error_dif = self.cur_x_error - self.prev_x_error #m
         x_fd = self.k_d_x * (x_error_dif) / self.t # gain * m/s -> gain= deg/m/s or deg*s/m
         self.prev_x_error = self.cur_x_error # (deg*s/m)

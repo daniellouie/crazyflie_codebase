@@ -5,7 +5,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='crazyfly_core',
-            executable='optitrack_subscriber2',     #Change to optitrack_subscriber2 for cf2
+            executable='optitrack_subscriber', 
+            #executable='optitrack_subscriber2',   #Change to optitrack_subscriber2 for cf2
             name='optitrack_subscriber_node',
             output='screen'
         ),

@@ -102,7 +102,13 @@ class Cluster_new:
         # ---------------- NEW ---------------- #
         #NOTE: This now in the OUR New local variables
         gamma = 0 # not used in this implementation
+
+        def wrap_to_pi(angle):
+            return ((angle+np.pi)) % (2*np.pi) - np.pi
+
+
         alpha = np.arctan2((x2-x1), (z2-z1))
+        alpha = wrap_to_pi(alpha)      #ensures -pi to pi range
         beta = np.arctan2((y2-y1), np.sqrt((z2-z1)**2 + (x2-x1)**2))
         phi1 = alpha - theta1
         phi2 = alpha - theta2
@@ -127,8 +133,20 @@ class Cluster_new:
     # Input: C_des, C_cur
     # Output: C_err
     # NOTE : needs to use all 8 variables for inverseJacobian
+
+    def wrap_angle_error(self, error):
+        while error > np.pi:
+            error -= 2 * np.pi
+        while error < -np.pi:
+            error += 2 * np.pi
+        return error
+
     def getClusterError(self):
         self.C_err = np.array(self.C_des) - np.array(self.C_cur)
+        # Wrap angular errors (alpha, beta, phi1, phi2)
+        for i in [3, 4, 5, 6]:  # Indices for angular values
+            self.C_err[i] = self.wrap_angle_error(self.C_err[i])
+            
         return self.C_err
 
     # This function calculates Cluster velocity (C_dot) using a P Controller

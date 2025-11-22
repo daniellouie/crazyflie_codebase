@@ -21,16 +21,18 @@ from rclpy.logging import get_logger
 import pandas as pd
 import statistics
 
-CF2_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf2_multiple_waypoint")
+# CF2_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf2_multiple_waypoint_new")
+CF2_PATH = os.path.expanduser("~/crazyfly_ws/cf_tuning_data/cf2_new_config_tuning_flight")
+
 #CF1_PATH = os.path.expanduser("~/crazyfly_ws/cf1_tuning_flight_data")
-CF1_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/cf1_multiple_waypoint")
+CF1_PATH = os.path.expanduser("~/crazyfly_ws/final_flight_data/cf1_multiple_waypoint_new")
 
 # the last digit of the radio address specifies which drone its connected (currently either 7 or 8)
 #      ----------     NOTE: CHANGE "address" last value to:          ----------
 #      ----------                                       cf1: 8       ----------
 #      ----------                                       cf2: 7       ----------
 # address = 'radio://0/80/2M/E7E7E7E7E8'  # cf1
-address = 'radio://0/80/2M/E7E7E7E7E7'  # cf2
+address = 'radio://0/80/2M/E7E7E7E7E8'  # cf2
 if address[-1] == '8':
     CF_PATH = CF1_PATH
 else:
@@ -88,10 +90,10 @@ class MinimalSubscriber(Node):
        
         """ TTTTTTTTTTTTTTTTTTTTTTTTIMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEEEE"""
         # limit flight time for testing
-        self.flight_duration = 25 # 20.0 #in seconds
+        self.flight_duration = 15 # 20.0 #in seconds
         """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
         # constant command values for testing
-        self.const_thrust = 44000
+        self.const_thrust = 38000
         self.const_roll = 0 #-3,3 range
         self.const_pitch = 0 #-3,3 range
         self.const_yawrate = 0 #-15,15 range
@@ -140,7 +142,7 @@ class MinimalSubscriber(Node):
         self.y_fi_data = []
 
         self.start_time = time.time()
-
+        self.shared_timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     # this function is called each time a 'command' message is received
     def listener_callback(self, msg):
         # ensure commands for all axis are recieved
@@ -242,8 +244,8 @@ class MinimalSubscriber(Node):
 
 
         # ramp down thrust until reaching threshold to cut power, ideally on the ground
-        while rampdown_thrust1 > 42000:
-            if rampdown_thrust1 > 42000:
+        while rampdown_thrust1 > 33000:
+            if rampdown_thrust1 > 33000:
                 rampdown_thrust1 -= 150
             print(f"running ramp down: {rampdown_thrust1}")
             self._cf1.commander.send_setpoint(self.roll1, self.pitch1, self.yawrate1, rampdown_thrust1)
@@ -284,11 +286,11 @@ class MinimalSubscriber(Node):
 
 
     def save_data(self):
-        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        time_s = self.shared_timestamp
         if address[-1] == '8':
             fname = f"cf1_tuning_{time_s}.csv" #name of csv
         else:
-            fname = f"cf2_tuning_{time_s}.csv" #name of csv    
+            fname = f"cf2_tuning_new{time_s}.csv" #name of csv    
         #fname = f"optitrack_test_{time_s}.csv"
         path = os.path.join(CF_PATH, fname)             # file ends up here where LOG_DIR is the I_Joc_values folder or directory
         self.cf1_position.append([datetime.now().strftime("%Y-%m-%d_%H:%M:%S.%f"), self.x_log, self.y_log, self.z_log])
@@ -306,7 +308,7 @@ class MinimalSubscriber(Node):
 
     #----- Saving Command Values & Thrust Values to Optimize Tuning -----#
     def save_all_values(self):
-        time_s = datetime.now().strftime("%Y-%m-%d_%H:%M:%S") #creates timestamp for every file
+        time_s = self.shared_timestamp
         fname = f"cf1_all_values_{time_s}.csv" #name of csv
         if address[-1] == '8':
             CF_COMMAND_PATH = os.path.expanduser("~/crazyfly_ws/flight_navigation_precision/command_values_for_stability/cf1_command_values")  # if radio signal ends in 7 (cf2)

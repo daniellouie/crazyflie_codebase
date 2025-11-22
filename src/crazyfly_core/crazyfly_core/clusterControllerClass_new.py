@@ -24,26 +24,21 @@ class ClusterController_new(Node):
         self.cluster = Cluster_new()
 
         # define waypoints for the cluster this goes in order of waypoints it wants to reach
+        # self.waypoints = self.generate_interpolated_waypoint()
+        
         self.waypoints = [
-            #[1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            #  [1.5, 1.0, 1, np.pi/2, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
-            [0.75, 1.0, 3.0, 0, 0, 0, 0, 4.5], # x, y, z, alpha, beta, phi1, phi2, p
-            [1.0, 1.0, 3.0, 0, 0, 0, 0, 2.5]
+            # x,   y,   z,   alpha, beta, phi1,  phi2,     p
+            [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+            
         ]
-        self.waypoints = [
-            #[1.5, 1, 1, 0, 0, 0, 0, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            #  [1.5, 1.0, 1, np.pi/2, 0, 0, 0, 1] # x, y, z, alpha, beta, phi1, phi2, p
-            [1.25, 1.0, 2.0, 0, 0, 0, 0, 1.5], # x, y, z, alpha, beta, phi1, phi2, p
-            [1.25, 1.0, 2.0, np.pi/2, 0, 0, 0, 1.5]
-            [1.25, 1.0, 2.0, 2*np.pi/2, 0, 0, 0, 1.5]
-            [1.25, 1.0, 2.0, 3*np.pi/2, 0, 0, 0, 1.5]
-            [1.25, 1.0, 2.0, 0, 0, 0, 0, 1.5]
-        ]
-
+     
         self.cur_waypoint_index = 0
         self.cluster.C_des = self.waypoints[self.cur_waypoint_index]  
-        # initialize the time required to hold at each waypoint and the timer
-        self.waypoint_hold_time = 3.0 #in seconds
+        
+
+
+        self.waypoint_hold_time = 3 #in seconds
         self.waypoint_start_time = None
         self.waypoint_tolerance = 0.1 # in meters
         # bool updated to check if the cluster is within the tolerance, only print message if it changes
@@ -74,6 +69,70 @@ class ClusterController_new(Node):
         # Frame capture interval (how often data should be collected for graphing)
         self.frame_capture_interval = 0.1  # frequency in seconds
         self.last_capture_time = datetime.now()
+    
+    def generate_interpolated_waypoint(self):
+        waypoints = []
+
+        # Define your waypoints for a full rotation
+        #NOTE: this is for frisbee test 
+        # main_waypoint = [
+        #     # x,   y,   z,   alpha,    beta, phi1,     phi2,      p
+        #     [1.0, 1.0, 0.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.75],  # 0°
+        #     [1.0, 1.0, 0.75, np.pi,     0,    np.pi,    np.pi,     0.75],  # 90°
+        #     [1.0, 1.0, 1.0, -np.pi/2,  0,    -np.pi/2, -np.pi/2,  0.75],  # 180°
+        #     [1.0, 1.0, 1.25, 0,         0,    0,        0,         0.75],  # 270°
+        #     [1.0, 1.0, 1.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.75]  # 0°
+        # ]
+
+        # main_waypoint = [
+        #     [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+        #     [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+        # ]
+
+        # Convert to numpy array and unwrap the angular values
+        waypoints_array = np.array(main_waypoint)
+        
+        # Unwrap angles at indices 3 (alpha), 5 (phi1), and 6 (phi2)
+        # This makes them continuously increase instead of wrapping
+        for angle_idx in [3, 5, 6]:
+            waypoints_array[:, angle_idx] = np.unwrap(waypoints_array[:, angle_idx])
+        
+        # Now waypoints_array looks like:
+        # [1.5, 1.0, 1.0, π/2,  0, π/2,  π/2,  0.75]
+        # [1.5, 1.0, 1.0, π,    0, π,    π,    0.75]
+        # [1.5, 1.0, 1.0, 3π/2, 0, 3π/2, 3π/2, 0.75]  <- unwrapped from -π/2
+        # [1.5, 1.0, 1.0, 2π,   0, 2π,   2π,   0.75]  <- unwrapped from 0
+
+        total_transition_time = 15  # seconds for entire rotation
+        update_rate = 0.1
+        num_segments = len(main_waypoint) - 1
+        steps_per_segment = int((total_transition_time / num_segments) / update_rate)
+
+        for i in range(num_segments):
+            start = waypoints_array[i]
+            end = waypoints_array[i+1]
+
+            for step in range(steps_per_segment):
+                t = step / steps_per_segment
+                interpolated = start + t * (end - start)
+                
+                # Wrap angles back to [-π, π] range
+                interpolated_wrapped = interpolated.copy()
+                for angle_idx in [3, 5, 6]:  # alpha, phi1, phi2
+                    interpolated_wrapped[angle_idx] = np.arctan2(
+                        np.sin(interpolated[angle_idx]), 
+                        np.cos(interpolated[angle_idx])
+                    )
+                
+                waypoints.append(interpolated_wrapped.tolist())
+        
+        # Add final waypoint (wrapped)
+        final = waypoints_array[-1].copy()
+        for angle_idx in [3, 5, 6]:
+            final[angle_idx] = np.arctan2(np.sin(final[angle_idx]), np.cos(final[angle_idx]))
+        waypoints.append(final.tolist())
+        
+        return waypoints
 
     def update_positions(self):
         # Get current positions from OptiTrack
@@ -249,6 +308,7 @@ class ClusterController_new(Node):
                     *self.des_cf2_positions[i],
                     *self.safe_cf2_positions[i]
                 ])
+        rclpy.shutdown()
 
     def plot_data(self):
         # Plot 3D position data
@@ -305,7 +365,7 @@ class ClusterController_new(Node):
            
         finally:
             self.save_data_to_csv()
-            self.cluster.dump_cluster_dot()
+            # self.cluster.dump_cluster_dot()
             executor.shutdown()
             self.destroy_node()
             rclpy.shutdown()
