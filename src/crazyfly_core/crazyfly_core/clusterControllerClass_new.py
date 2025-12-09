@@ -28,8 +28,8 @@ class ClusterController_new(Node):
         
         self.waypoints = [
             # x,   y,   z,   alpha, beta, phi1,  phi2,     p
-            [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
-            [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+            [1.5, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.5, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
             
         ]
      
@@ -84,10 +84,10 @@ class ClusterController_new(Node):
         #     [1.0, 1.0, 1.5, np.pi/2,   0,    np.pi/2,  np.pi/2,   0.75]  # 0°
         # ]
 
-        # main_waypoint = [
-        #     [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
-        #     [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
-        # ]
+        main_waypoint = [
+            [1.0, 1.0, 0.5, np.pi/2, 0, np.pi/2, np.pi/2, 1], # x, y, z, alpha, beta, phi1, phi2, p
+            [1.0, 1.0, 1.5, np.pi/2, 0, np.pi/2, np.pi/2, 1]
+        ]
 
         # Convert to numpy array and unwrap the angular values
         waypoints_array = np.array(main_waypoint)
@@ -103,7 +103,7 @@ class ClusterController_new(Node):
         # [1.5, 1.0, 1.0, 3π/2, 0, 3π/2, 3π/2, 0.75]  <- unwrapped from -π/2
         # [1.5, 1.0, 1.0, 2π,   0, 2π,   2π,   0.75]  <- unwrapped from 0
 
-        total_transition_time = 15  # seconds for entire rotation
+        total_transition_time = 3  # seconds for entire rotation
         update_rate = 0.1
         num_segments = len(main_waypoint) - 1
         steps_per_segment = int((total_transition_time / num_segments) / update_rate)
