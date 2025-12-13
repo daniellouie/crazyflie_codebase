@@ -9,7 +9,7 @@ CLUSTER_ERROR_YLIMS = {
     'X_c': [-1, 1],      
     'Y_c': [-1, 1],     
     'Z_c': [-1, 1],     
-    'P':   [-4, 4],        
+    'P':   [-1, 1],        
     'α':   [-5, 5], 
     'β':   [-0.5, 0.5], 
     'φ₁':  [-0.5, 0.5], 
@@ -612,10 +612,10 @@ def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
     print("\nGenerating visualizations...")
     
     # 1. Hovering period identification
-    # fig1 = plot_all_flights_overview(flight_data)
+    fig1 = plot_all_flights_overview(flight_data)
     
     # 2. Error time series for all variables
-    # fig2 = plot_cluster_variables_and_errors(flight_data)
+    fig2 = plot_cluster_variables_and_errors(flight_data)
     
     # 3. Error distributions
     # fig3 = plot_error_distributions(flight_data)
@@ -624,7 +624,7 @@ def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
     # fig4 = plot_cluster_variables_positions(flight_data)    
 
     # 5. Top-down view of rotating manuever
-    fig5 = rotating_manuever_top_down(flight_data)
+    # fig5 = rotating_manuever_top_down(flight_data)
     
     plt.show()
     
@@ -674,7 +674,13 @@ if __name__ == "__main__":
     # Example usage:
     # Process all files matching 'cluster_data*.csv' in current directory
     # error_stats, flight_data = main('cluster_data*.csv', '.', debug=False)
-    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/frisbee1')
+
+                                    ###### DIRECTORY #####
+    # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/cluster_multi_new') 
+    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/dynamic_hover_new')
+    # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/cluster_static_hover_new')
+
+
     # Or with debug mode to see more details:
     # error_stats, flight_data = main('cluster_data*.csv', '.', debug=True
     error_stats, flight_data = main('cluster_data_*.csv', directory, debug=True)
