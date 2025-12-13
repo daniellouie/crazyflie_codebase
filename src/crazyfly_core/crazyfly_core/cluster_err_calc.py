@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 
 CLUSTER_ERROR_YLIMS = {
-    # 'X_c': [-1, 1],      
-    # 'Y_c': [-1, 1],     
-    # 'Z_c': [-1, 1],     
-    # 'P':   [-4, 4],        
-    # 'α':   [-5, 5], 
-    # 'β':   [-0.5, 0.5], 
-    # 'φ₁':  [-0.5, 0.5], 
-    # 'φ₂':  [-0.5, 0.5], 
+    'X_c': [-1, 1],      
+    'Y_c': [-1, 1],     
+    'Z_c': [-1, 1],     
+    'P':   [-4, 4],        
+    'α':   [-5, 5], 
+    'β':   [-0.5, 0.5], 
+    'φ₁':  [-0.5, 0.5], 
+    'φ₂':  [-0.5, 0.5], 
 }
 
 
@@ -522,35 +522,59 @@ def process_multiple_flights(file_pattern='cluster_data*.csv', directory='.', de
     error_stats = calculate_aggregate_statistics(all_errors)
     
     return error_stats, flight_data
-def rotating_manuever_top_down(flight_data, ylims= None):
-    fig, ax = plt.subplots(figsize=(8, 8))
+
+def rotating_manuever_top_down(flight_data, ylims=None):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    
     for flight_idx, (filepath, data) in enumerate(flight_data.items()):
         df = pd.read_csv(filepath)
-
-        #cf1 Plot
-        ax.plot(df['Cur_CF1_X'], df['Cur_CF1_Z'], 'b-', alpha=0.3, label='CF1', linewidth=1)
-        ax.plot(df['Des_CF1_X'], df['Des_CF1_Z'], 'r--', alpha=0.3, label='CF1 Desired', linewidth=1)
         
-        #cf2 plot
-        ax.plot(df['Cur_CF2_X'], df['Cur_CF2_Z'], 'g-', alpha=0.3, label='CF2', linewidth=1)
-        ax.plot(df['Des_CF2_X'], df['Des_CF2_Z'], 'm--', alpha=0.3, label='CF2 Desired', linewidth=1)
-
-        ax.scatter(df['Cur_CF1_X'].iloc[0], df['Cur_CF1_Z'].iloc[0], c='blue', marker='o', label="CF1 Start") 
-        ax.scatter(df['Cur_CF1_X'].iloc[-1], df['Cur_CF1_Z'].iloc[-1], c='blue', marker='x', label="CF1 End") 
-        ax.scatter(df['Cur_CF2_X'].iloc[0], df['Cur_CF2_Z'].iloc[0], c='orange', marker='o', label="CF2 Start") 
-        ax.scatter(df['Cur_CF2_X'].iloc[-1], df['Cur_CF2_Z'].iloc[-1], c='orange', marker='x', label="CF2 End")
-
-
+        # Plot CF1 and CF2 actual paths
+        ax.plot(df['Cur_CF1_X'], df['Cur_CF1_Z'], 
+                'b-', linewidth=2, label='CF1' if flight_idx == 0 else "")
+        ax.plot(df['Cur_CF2_X'], df['Cur_CF2_Z'], 
+                'g-', linewidth=2, label='CF2' if flight_idx == 0 else "")
         
-        ax.set_title(f'Top-Down View of CF1 and CF2 During Hovering (X,Z Plane)')
-        ax.set_xlabel('X Position (m)')
-        ax.set_ylabel('Z Position (m)')
-        if ylims:
-            ax.set_lim(ylims)
-        ax.grid(True, alpha=0.3)
-        ax.set_aspect('equal', 'box')
-        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
-        plt.tight_layout()
+        # Plot cluster center position
+        ax.plot(df['Cur_Cluster_X'], df['Cur_Cluster_Z'], 
+                'r-', linewidth=2, linestyle='--', 
+                label='Cluster Center' if flight_idx == 0 else "")
+        
+        # Mark start and end
+        if flight_idx == 0:
+            ax.scatter(df['Cur_CF1_X'].iloc[0], df['Cur_CF1_Z'].iloc[0], 
+                      c='blue', marker='o', s=150, edgecolor='black', linewidth=2,
+                      label="CF1 Start", zorder=10)
+            ax.scatter(df['Cur_CF1_X'].iloc[-1], df['Cur_CF1_Z'].iloc[-1], 
+                      c='blue', marker='X', s=150, edgecolor='black', linewidth=2,
+                      label="CF1 End", zorder=10)
+            ax.scatter(df['Cur_CF2_X'].iloc[0], df['Cur_CF2_Z'].iloc[0], 
+                      c='green', marker='o', s=150, edgecolor='black', linewidth=2,
+                      label="CF1 Start", zorder=10)
+            ax.scatter(df['Cur_CF2_X'].iloc[-1], df['Cur_CF2_Z'].iloc[-1], 
+                      c='green', marker='X', s=150, edgecolor='black', linewidth=2,
+                      label="CF1 End", zorder=10)
+            ax.scatter(df['Cur_Cluster_X'].iloc[0], df['Cur_Cluster_Z'].iloc[0], 
+                      c='red', marker='o', s=150, edgecolor='black', linewidth=2,
+                      label="Cluster Start", zorder=10)
+            ax.scatter(df['Cur_Cluster_X'].iloc[-1], df['Cur_Cluster_Z'].iloc[-1], 
+                      c='red', marker='X', s=150, edgecolor='black', linewidth=2,
+                      label="Cluster End", zorder=10)
+    
+    ax.set_title('Top-Down View: Frisbee Rotating Maneuver (X-Z Plane)', fontsize=14)
+    ax.set_xlabel('X Position (m)', fontsize=12)
+    ax.set_ylabel('Z Position (m)', fontsize=12)
+    
+    if ylims:
+        if isinstance(ylims, dict):
+            ax.set_xlim(ylims.get('x', None))
+            ax.set_ylim(ylims.get('z', None))
+    
+    ax.grid(True, alpha=0.3)
+    ax.set_aspect('equal', 'box')
+    # ax.legend(fontsize=5)
+    plt.tight_layout()
+    
     return fig
 
 def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
@@ -650,12 +674,12 @@ if __name__ == "__main__":
     # Example usage:
     # Process all files matching 'cluster_data*.csv' in current directory
     # error_stats, flight_data = main('cluster_data*.csv', '.', debug=False)
-    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_p_rot')
+    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/frisbee1')
     # Or with debug mode to see more details:
     # error_stats, flight_data = main('cluster_data*.csv', '.', debug=True
     error_stats, flight_data = main('cluster_data_*.csv', directory, debug=True)
     # Or process files in a specific directory:
-    # error_stats, flight_data = process_multiple_flights('cluster_data*.csv', directory)
+    error_stats, flight_data = process_multiple_flights('cluster_data*.csv', directory)
     # if flight_data:
     #     fig2 = plot_cluster_variables_and_errors(flight_data)
     #     fig1 = plot_all_flights_overview(flight_data)

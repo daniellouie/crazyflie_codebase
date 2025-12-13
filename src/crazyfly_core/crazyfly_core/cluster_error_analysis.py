@@ -525,12 +525,12 @@ if __name__ == "__main__":
     # ========================================
     # OPTION 1: HOVERING FLIGHTS
     # ========================================
-    # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_hover')
-    # error_stats, flight_data = main(
-    #     directory=directory,
-    #     flight_type='hover',
-    #     debug=True
-    # )
+    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_hover')
+    error_stats, flight_data = main(
+        directory=directory,
+        flight_type='hover',
+        debug=True
+    )
     
     # ========================================
     # OPTION 2: DYNAMIC TRAJECTORY FLIGHTS
@@ -545,12 +545,12 @@ if __name__ == "__main__":
     # ========================================
     # OPTION 3: P-CHANGING FLIGHTS
     # ========================================
-    directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_shrink')
-    error_stats, flight_data = main(
-        directory=directory,
-        flight_type='p_change',  # <-- For your P-changing flights
-        debug=True
-    )
+    # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/cluster_data/cluster_shrink')
+    # error_stats, flight_data = main(
+    #     directory=directory,
+    #     flight_type='p_change',  # <-- For your P-changing flights
+    #     debug=True
+    # )
     
     # ========================================
     # COMPARE DIFFERENT ANALYSES

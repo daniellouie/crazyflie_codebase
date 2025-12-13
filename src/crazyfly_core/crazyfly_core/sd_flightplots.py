@@ -7,35 +7,45 @@ import glob
 
 
 YLIM_CONFIG = {
-    'cf1_static_hover': {
-        'x': [0, 2.0],
+    'cf1_static_hover_new': {
+        'x': [0.0, 2.0],
         'y': [0.0, 2.0],
-        'z': [1.5, 3.5]
+        'z': [0.0, 2.0]
     },
-    'cf2_dynamic_hover1': {
-        'x': [0, 2.0],
+    'cf2_static_hover_new': {
+        'x': [0.0, 2.0],
         'y': [0.0, 2.0],
-        'z': [1.5, 4.0]
+        'z': [0.0, 2.0]
     },
-    'cf2_dynamic_hover2': {
-        'x': [0, 2.0],
-        'y': [0.0, 2.0],
-        'z': [1.5, 4.0] 
-    },
-    'cf2_multiple_waypoint': {
+     'cf1_dynamic_hover_new': {
         'x': [0.0, 3.0],
-        'y': [0.0, 2.0],
-        'z': [0.0, 4.0]
+        'y':  [0.0, 3.0],
+        'z':  [0.0, 3.0]
     },
-    'cf1_dynamic_hover1': {
-        'x': [0, 2.0],
-        'y': [0.0, 2.0],
-        'z': [1.5, 3.5]
+    'cf1_dynamic_hover_new2': {
+        'x':  [0.0, 3.0],
+        'y':  [0.0, 3.0],
+        'z':  [0.0, 3.0]
     },
-    'cf1_multiple_waypoint1': {
-        'x': [0, 2.0],
-        'y': [0.0, 2.0],
-        'z': [0, 3]
+    'cf2_dynamic_hover_new': {
+        'x': [0.0, 3.0],
+        'y': [0.0, 3.0],
+        'z': [0.0, 3.0]
+    },
+    'cf2_dynamic_hover_new2': {
+        'x': [0.0, 3.0],
+        'y': [0.0, 3.0],
+        'z': [0.0, 3.0]
+    },
+    'cf1_multiple_waypoint_new': {
+        'x': [0.0, 3.0],
+        'y': [0.0, 3.0],
+        'z': [0.0, 3]
+    },
+    'cf2_multiple_waypoint_new': {
+        'x': [0.0, 3.0],
+        'y': [0.0, 3.0],
+        'z': [0.0, 3.0]
     },
 }
 
@@ -244,7 +254,7 @@ class FlightDataPlotter:
             # Customize subplot
             axs[i].set_ylabel(f'{axis.upper()}-axis Value')
             axs[i].grid(True, alpha=0.3)
-            axs[i].legend(loc='lower right', fontsize='small', framealpha=0.9, )              
+            # axs[i].legend(loc='lower right', fontsize='small', framealpha=0.9, )              
             # Clean subplot title with customizable positioning
 
             #axs[i] sets title for current subplot
@@ -670,13 +680,13 @@ class FlightDataPlotter:
         print(f"{'='*60}")
         print(f"Time Window: {start_time:.2f}s to {end_time if end_time else 'end':.2f}s")
         print(f"Peak Type: {peak_type}")
-        print(f"Time to Peak: {time_to_peak:.3f} seconds")
-        print(f"Peak Time: {peak_time:.3f}s")
+        print(f"Time to Peak: {time_to_peak:.4f} seconds")
+        print(f"Peak Time: {peak_time:.4f}s")
         print(f"Peak Value: {peak_value:.4f}")
         print(f"Start Value: {start_value:.4f}")
         print(f"Value Change: {value_change:+.4f}")
         if rise_time_10_90:
-            print(f"10-90% Rise Time: {rise_time_10_90:.3f} seconds")
+            print(f"10-90% Rise Time: {rise_time_10_90:.4f} seconds")
         if overshoot_percent is not None:
             print(f"Overshoot: {overshoot_percent:.1f}%")
         
@@ -799,6 +809,50 @@ class FlightDataPlotter:
             self._plot_waypoint_summary(all_results, waypoint_times)
         
         return all_results
+    def detect_waypoint_transitions(self, axis='z', threshold=0.3, min_separation=5.0):
+        """
+        Automatically detect waypoint transitions by finding sudden changes in commanded position.
+        
+        Args:
+            axis (str): Axis to analyze for waypoint detection
+            threshold (float): Minimum position change to consider a waypoint (meters)
+            min_separation (float): Minimum time between waypoints (seconds)
+        
+        Returns:
+            list: List of detected waypoint times
+        """
+        if axis not in self.processed_data:
+            self.process_flight_data(axis)
+        
+        data = self.processed_data[axis]
+        time = data['time']
+        mean_vals = data['mean']
+        
+        # Calculate derivative (rate of change)
+        dt = time[1] - time[0]
+        derivative = np.gradient(mean_vals, dt)
+        
+        # Find peaks in absolute derivative (sudden changes)
+        abs_derivative = np.abs(derivative)
+        
+        # Threshold for detecting significant changes
+        derivative_threshold = threshold / 1.0  # threshold per second
+        
+        waypoint_times = []
+        last_waypoint_time = -min_separation
+        
+        for i in range(len(time)):
+            if abs_derivative[i] > derivative_threshold:
+                # Check if enough time has passed since last waypoint
+                if time[i] - last_waypoint_time >= min_separation:
+                    waypoint_times.append(time[i])
+                    last_waypoint_time = time[i]
+        
+        print(f"\nDetected {len(waypoint_times)} waypoint transitions on {axis}-axis:")
+        for i, t in enumerate(waypoint_times):
+            print(f"  Waypoint {i+1}: t = {t:.2f}s")
+        
+        return waypoint_times
         
 
 
@@ -807,8 +861,10 @@ def analyze_static_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=1
     """
     Analyze static hover flight data with steady-state error analysis
     """
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_dynamic_hover1"
-    
+    # directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf2_static_hover_new"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf2_dynamic_hover_new2"
+    # directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf2_multiple_waypoint_new_ind"
+
     print("=== Static Hover Flight Analysis with Steady-State Error ===")
     plotter = FlightDataPlotter(directory_path)
     
@@ -817,15 +873,23 @@ def analyze_static_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=1
     
     if flight_data:
         # Create standard plots first
-        fig, axs = plotter.plot_flight_data(axes=axes, main_title="Static Hold at With CF2 SSSS")
+        #NOTE: THIS IS THE PLOT
+        # fig, axs = plotter.plot_flight_data(axes=axes, main_title="Static Hold at With CF2 SSSS")
         
         # Analyze steady-state error (from 10 seconds onward based on your plot)
-        ss_results = plotter.analyze_steady_state_error(
+        ss_resultsx = plotter.analyze_steady_state_error(
             axes=axes,
-            steady_state_start_time=10.0,  # Adjust based on when your system settles
+            steady_state_start_time=15,  # Adjust based on when your system settles
             steady_state_end_time=None,     # None means go to end of data
-            target_position={'x': 2.0, 'y': 1.0, 'z': 3.0},  # Your setpoint NOTE: CHANGE HEREEEEE
-            plot_results=True  # This will create additional analysis plots
+            target_position={'x': 1.0, 'y': 1.0, 'z': 1.0},  # Your setpoint NOTE: CHANGE HEREEEEE
+            plot_results= True  # This will create additional analysis plots
+        )
+        ss_resultsz = plotter.analyze_steady_state_error(
+            axes=axes,
+            steady_state_start_time=15,  # Adjust based on when your system settles
+            steady_state_end_time=None,     # None means go to end of data
+            target_position={'x': 1.0, 'y': 1.0, 'z': 1.0},  # Your setpoint NOTE: CHANGE HEREEEEE
+            plot_results= False  # This will create additional analysis plots
         )
         
         # Print statistics
@@ -839,7 +903,7 @@ def analyze_dynamic_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=
     """
     Analyze dynamic hover flight data with steady-state error analysis
     """
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_multiple_waypoint"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf2_multiple_waypoint"
     
     print("=== Dynamic Hover Flight Analysis with Steady-State Error ===")
     plotter = FlightDataPlotter(directory_path)
@@ -870,7 +934,7 @@ def analyze_dynamic_hover_with_steady_state(axes=['x', 'y', 'z'], sampling_rate=
 # Analysis Functions - Choose which one to call
 def analyze_static_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
     """Analyze static hover flight data"""
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf1_static_hover"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf1_static_hover_new"
     
     print("=== Static Hover Flight Analysis ===")
     plotter = FlightDataPlotter(directory_path)
@@ -880,7 +944,7 @@ def analyze_static_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
     
     if flight_data:
         # Create plots with main title
-        fig, axs = plotter.plot_flight_data(axes=axes, main_title="Static Hold at () With CF1")
+        fig, axs = plotter.plot_flight_data(axes=axes, main_title="Static Hold at () With CF111")
         
         # Print statistics
         for axis in axes:
@@ -891,7 +955,9 @@ def analyze_static_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
 
 def analyze_dynamic_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
     """Analyze dynamic hover flight data"""
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf1_dynamic_hover1"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf1_dynamic_hover_new"
+    # directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf1_multiple_waypoint_new"
+
     
     print("=== Dynamic Hover Flight Analysis ===")
     plotter = FlightDataPlotter(directory_path)
@@ -901,7 +967,7 @@ def analyze_dynamic_hover(axes=['x', 'y', 'z'], sampling_rate=100.0):
     
     if flight_data:
         # Create plots with main title
-        fig, axs = plotter.plot_flight_data(axes=axes, main_title="dynamic waypoint From  With CF1")
+        fig, axs = plotter.plot_flight_data(axes=axes, main_title="dynamic waypoint From fasdfadsfa With CF11111")
         
         # Print statistics
         for axis in axes:
@@ -936,7 +1002,7 @@ def analyze_waypoint_flight_with_timing():
     """
     Analyze waypoint navigation with time to peak calculations
     """
-    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/flight_navigation_precision/cf2_multiple_waypoint"
+    directory_path = "/Users/connorbishop/Desktop/crazyflie_codebase/final_flight_data/cf2_multiple_waypoint_new_ind"
     
     plotter = FlightDataPlotter(directory_path)
     flight_data = plotter.file_log_reader("cf2_tuning_*.csv", sampling_rate=100.0)
@@ -946,27 +1012,47 @@ def analyze_waypoint_flight_with_timing():
         fig, axs = plotter.plot_flight_data(axes=['x', 'y', 'z'], 
                                            main_title="Waypoint Navigation Analysis")
         
+          # AUTOMATIC DETECTION - detect waypoints on z-axis
+        # waypoint_times_z = plotter.detect_waypoint_transitions(
+        #     axis='z', 
+        #     threshold=0.5,  # Detect changes > 0.5m
+        #     min_separation=5.0  # At least 5s apart
+        # )
+        
+        # # Create waypoint windows (start at detected time, end 5s later)
+        # waypoint_transitions = []
+        # for wp_time in waypoint_times_z:
+        #     waypoint_transitions.append((wp_time, wp_time + 5.0))
+        
         # Analyze specific waypoint transitions
         # Example: First waypoint transition from t=5s to t=15s
-        results_y = plotter.analyze_time_to_peak(
-            axis='y',
+        results_x = plotter.analyze_time_to_peak(
+            axis='x',
             start_time=0.0,   # Start of maneuver
-            end_time=10,    # End of maneuver
+            end_time=10.0,    # End of maneuver
             plot_results=True,
-            peak_type='max'   # or 'min' or 'abs'
+            peak_type='abs'   # or 'min' or 'abs'
+        )
+        results_z = plotter.analyze_time_to_peak(
+            axis='z',
+
+            start_time=15.1,   # Start of maneuver
+            end_time=20.0,    # End of maneuver
+            plot_results=True,
+            peak_type='abs'   # or 'min' or 'abs'
         )
         
         # Analyze multiple waypoints
         waypoint_transitions = [
-            (5.0, 15.0),   # First waypoint
-            (15.0, 25.0),  # Second waypoint
-            (25.0, 35.0),  # Third waypoint
+            (0.0, 5.0),   # First waypoint
+            (15.1, 20.0),  # Second waypoint
+            # (25.0, 35.0),  # Third waypoint
         ]
         
         all_results = plotter.analyze_waypoint_transitions(
             waypoint_times=waypoint_transitions,
             axes=['x', 'y', 'z'],
-            margin=0.5,
+            margin=0.0,
             plot_summary=True
         )
         
@@ -990,6 +1076,7 @@ if __name__ == "__main__":
     #NOTE: PLOTSSS Call Here
     # Analyze static hover data (all axes) - will show "Static Hold" as main title
     # analyze_static_hover()
+    #
     
     # Analyze dynamic hover data (all axes) - will show "Dynamic Hold" as main title
     # analyze_dynamic_hover()
@@ -1044,7 +1131,7 @@ if __name__ == "__main__":
     # analyze_static_hover()
 
     # Option 2: Use the new analysis with steady-state error calculation
-    # analyze_static_hover_with_steady_state()
+    analyze_static_hover_with_steady_state()
 
     # Option 3: Analyze dynamic hover with steady-state
     # analyze_dynamic_hover_with_steady_state()
