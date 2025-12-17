@@ -20,7 +20,10 @@ def FILE_INITIATION(i):
     # WORKSPACE2 = pathlib.Path(__file__).resolve().parents[3]
     # WORKSPACE3  = pathlib.Path(__file__).resolve().parents[3]
     WORKSPACE = pathlib.Path.home() / "Desktop" / "crazyflie_codebase"   # <— fixed
-    DATA_DIR      = WORKSPACE / "final_flight_data/cluster_flight_new/dynamic_hover_new" # THIS IS FOR THE ANIMATEDDDDDDDDDD
+    #### ANIMATED DATA PATH ####
+    # DATA_DIR      = WORKSPACE / "final_flight_data/cluster_flight_new/dynamic_hover_new" 
+    DATA_DIR      = WORKSPACE / "final_flight_data/cluster_flight_new/cluster_multi_new"
+    ############################
     INV_DATA_DIR  = WORKSPACE / "I_Joc_values"
     CF2_TUNING    = WORKSPACE / "cf2_tuning_flight_data"
     CF2_RESULTS = WORKSPACE / "flight_navigation_precision/cf2_dynamic_hover1"

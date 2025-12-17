@@ -10,8 +10,8 @@ CLUSTER_ERROR_YLIMS = {
     'Y_c': [-1, 1],     
     'Z_c': [-1, 1],     
     'P':   [-1, 1],        
-    'α':   [-5, 5], 
-    'β':   [-0.5, 0.5], 
+    'α':   [-1, 1], 
+    'β':   [-1, 1], 
     'φ₁':  [-0.5, 0.5], 
     'φ₂':  [-0.5, 0.5], 
 }
@@ -301,7 +301,7 @@ def plot_cluster_variables_and_errors(flight_data, ylims = None):
         if idx == 0:  # Only show legend on first plot
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
     
-    plt.suptitle('Cluster Variable Errors During Hovering (All Flights)', fontsize=14)
+    # plt.suptitle('Cluster Variable Errors During Hovering (All Flights)', fontsize=14)
     plt.tight_layout()
     return fig
 
@@ -561,7 +561,7 @@ def rotating_manuever_top_down(flight_data, ylims=None):
                       c='red', marker='X', s=150, edgecolor='black', linewidth=2,
                       label="Cluster End", zorder=10)
     
-    ax.set_title('Top-Down View: Frisbee Rotating Maneuver (X-Z Plane)', fontsize=14)
+    # ax.set_title('Top-Down View: Frisbee Rotating Maneuver (X-Z Plane)', fontsize=14)
     ax.set_xlabel('X Position (m)', fontsize=12)
     ax.set_ylabel('Z Position (m)', fontsize=12)
     
@@ -572,7 +572,7 @@ def rotating_manuever_top_down(flight_data, ylims=None):
     
     ax.grid(True, alpha=0.3)
     ax.set_aspect('equal', 'box')
-    # ax.legend(fontsize=5)
+    ax.legend(fontsize=10,bbox_to_anchor = (1.05,0.635))
     plt.tight_layout()
     
     return fig
@@ -612,7 +612,7 @@ def main(file_pattern='cluster_data*.csv', directory='.', debug=False):
     print("\nGenerating visualizations...")
     
     # 1. Hovering period identification
-    fig1 = plot_all_flights_overview(flight_data)
+    # fig1 = plot_all_flights_overview(flight_data)
     
     # 2. Error time series for all variables
     fig2 = plot_cluster_variables_and_errors(flight_data)
@@ -679,6 +679,8 @@ if __name__ == "__main__":
     # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/cluster_multi_new') 
     directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/dynamic_hover_new')
     # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/cluster_static_hover_new')
+    # directory = os.path.expanduser('~/Desktop/crazyflie_codebase/final_flight_data/cluster_flight_new/frisbee1')
+
 
 
     # Or with debug mode to see more details:
